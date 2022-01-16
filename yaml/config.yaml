@@ -1,0 +1,6 @@
+
+#I/O
+output_dir: "output"
+
+# pulse finding algorthim
+threshold: 10
