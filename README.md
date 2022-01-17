@@ -10,24 +10,52 @@ The access to this gitlab repoistory is grant to the WbLS group, or individual i
 
 ### Prerequisites
 
-- Python3 packages:
-  - uproot4
-  - numpy, matplotlib
+- Minimal Python3 Dependence:
+  - uproot 4.1.0+
+  - numpy 1.20.0+
+  - pyYAML 5.1+
+  - scipy, matplotlib (?+)
 
-### Installation
+The full dependence is specified in requirememts.txt. 
 
-To download the repo, do
+### Installation and Setup
 
+Download this repoistory:
 ```bash
 git clone git@gitlab.com:WbLS/drop.git
 ```
+You need to be added to WbLS gitlab group to download this repo. If you do not know how to use git, check out [here] (https://realpython.com/python-git-github-intro/).
+
+Upgrade your pip (optional):
+```bash
+pip install --upgrade pip
+```
+
+Create a virtual environment and activate it (optional but recommended):
+```bash
+python3 -m venv env
+source env/bin/activate
+```
+If everything goes right, you are now in a virutial environment named `env`. If you do not know how to use virtial enironment, check out [here](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/). The same page also includes instruction on how to use `pip`. Both `venv` and `pip` are common tools for python users. 
+
+Install the exact package dependence from requirement within your virtual env (optional).
+```bash
+pip install -r requirements.txt
+```
+Alternative, you can pip install package one by one.
 
 ### Usage
 
-The code is simple enough. No setup at the moment. Check out the help manual. 
+In your virtual env (recommended), check out the help manual. 
 
 ```bash
 python run_drop.py --help
+```
+
+When you're done, do the following to exit the virtual env:
+
+```
+deactivate
 ```
 
 ### Development

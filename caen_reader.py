@@ -8,7 +8,7 @@ import matplotlib.pylab as plt
 # =============================================
 
 
-class DataFile:
+class RawDataFile:
     def __init__(self, fileName, DAQ='WaveDump'):
         """
         Initializes the dataFile instance to include the fileName, access time,
@@ -96,7 +96,7 @@ class DataFile:
         for ind, k in enumerate(whichChan):
             if k == 1:
                 # create a name for each channel according to the board and channel numbers
-                traceName = "b" + str(boardId) + "ch" + str(ind)
+                traceName = "b" + str(boardId) + "_ch" + str(ind)
 
                 # If the data are not zero-length encoded (default)
                 if not zLE:
