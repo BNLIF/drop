@@ -180,7 +180,7 @@ class RawTrigger:
         :param trName: string or list, name of trace to be displayed
         """
 
-        fig = plt.figure(figsize=[12,5])
+        fig = plt.figure(figsize=[11,5])
         ax = fig.add_subplot(111)
 
         if trName is None:

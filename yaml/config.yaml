@@ -1,13 +1,26 @@
 # DAQ config
 n_boards: 2
-daq_length: 640
+daq_length: 630
+post_trigger: 0.5
 
 #I/O
 data_path: "data/test_12CH_paddlesTrigger_water_220110T2041"
 output_dir: "output"
 
-# pulse finding algorthim
+
+# classic pulse finding algorthim
 rolling_length: 30
-sigma_above_baseline: 5.0
+sigma_above_baseline: 3.0
 pre_pulse: 5
 post_pulse: 5
+
+# scipy peak finding
+scipy_find_peaks:
+  distance: 8
+  threshold: 3
+  height: 3 # None
+
+# ROI integral, pre-ROI used to compute baseline, sample
+roi_start: [280]
+roi_end: [300]
+pre_roi_length: 20

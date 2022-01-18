@@ -9,5 +9,3 @@ class YamlReader():
                 self.data = yaml.safe_load(f)
             except yaml.YAMLError as exc:
                 print(exc)
-
-CONFIG = None # global variable, later filled with YamlReader::data type
