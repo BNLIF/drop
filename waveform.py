@@ -144,7 +144,7 @@ class Waveform(RawTrigger):
             roi={}
             roi_sum = 0.
             for ch, val in self.amplitude.items():
-                base = np.mean(val[pre_roi:start]) # not to confused with built-in mean()
+                base = np.median(val[pre_roi:start]) # not to confused with built-in mean()
                 roi[ch]=np.sum(-(val[start:end]-base))*(end-start)
                 roi_sum += roi[ch]
             roi['sum']=roi_sum

@@ -23,3 +23,4 @@ scipy_find_peaks:
 # ROI integral, pre-ROI used to compute baseline, sample
 roi_start: [290, 410]
 roi_end: [320, 450]
+pre_roi_length: 100
