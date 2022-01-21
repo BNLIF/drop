@@ -1,5 +1,6 @@
 
 from numpy import nan, zeros, fromfile, dtype
+import numpy as np
 from os import path
 import matplotlib.pylab as plt
 
@@ -79,7 +80,7 @@ class RawDataFile:
         if i3 < self.oldTimeTag:
             self.timeTagRollover += 1
             self.oldTimeTag = float(i3)
-            print('Trigger Time Rollover')
+            # print('Trigger Time Rollover')
         else:
             self.oldTimeTag = float(i3)
 
@@ -101,7 +102,7 @@ class RawDataFile:
                 # If the data are not zero-length encoded (default)
                 if not zLE:
                     # create a data-type of unsigned 16bit integers with the correct ordering
-                    dt = dtype('<H')
+                    dt = dtype('>H') # > Xin: > is the correct order for us.
 
                     # Use numpy's fromfile to read binary data and convert into a numpy array all at once
                     trace = fromfile(self.file, dtype=dt, count=size//(2*numChannels))
@@ -208,4 +209,4 @@ class RawTrigger:
         plt.xlabel('Samples')
         plt.ylabel('Channel')
         plt.grid()
-        plt.show()
+        # plt.show()

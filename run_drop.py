@@ -9,7 +9,9 @@ from caen_reader import RawDataFile
 
 
 class RunDROP():
-
+    """
+    Main Class. Once per run. Manage all operations.
+    """
     def __init__(self, args):
         self.args = args # save a copy
         self.n_events = args.n_events
@@ -20,7 +22,6 @@ class RunDROP():
         self.wfm = Waveform(self.config)
 
         self.t_idx=0 # trigger index
-
 
     def sanity_check(self):
         '''
@@ -33,8 +34,6 @@ class RunDROP():
             sys.exit('Different list length between roi_start and roi_end.')
         if np.any(roi_end<=roi_start):
             sys.exit('roi_end must be strictly larger than roi_start')
-        if np.any(roi_start-self.config['pre_roi_length']<0):
-            sys.exit('poi_start - pre_roi_length is negative')
 
         # Check a few triggers first
         raw_data_file = RawDataFile(self.args.raw_path)
@@ -84,6 +83,7 @@ class RunDROP():
         self.wfm.display(ch)
 
     def display_ch_hits(self):
+        """here or a separate toolbox class??? """
         pass
 
 def main(argv):

@@ -4,7 +4,7 @@ Outline
 - pulse finding
 - sum channels
 '''
-from numpy import zeros, argwhere, trapz, diff, sign, concatenate
+from numpy import zeros, argwhere, trapz, diff, sign, concatenate, quantile
 import numpy as np
 import matplotlib.pylab as plt
 from scipy.signal import find_peaks
@@ -21,7 +21,9 @@ class Pulses:
     area = []
 
 class Waveform(RawTrigger):
-
+    """
+    Waveform class is derived from RawTrigger class
+    """
     def __init__(self, config):
         super(RawTrigger, self).__init__()
         self.roll_len = int(config['rolling_length'])
@@ -36,27 +38,42 @@ class Waveform(RawTrigger):
         self.roi_start = config['roi_start']
         self.roi_end = config['roi_end']
         self.pre_roi_length = config['pre_roi_length']
+        self.trigger_position() # art of finding trigger position
 
-    def def_flat_baseline(self, val):
+        # calc in do_baseline_subtraction
+        self.base_mean = {} # baseline mean
+        self.base_std = {} # baseline std
+        self.amplitude={} # amplitude is baseline subtracted trace
+        return None
+
+    def trigger_position(self):
+        """
+        finding trigger position (t0)
+        """
+        tmp = int(self.daq_len*(1.0-self.post_tri)) # trigger position
+        self.tri_pos  = tmp - 20 # Daisy chain trigger delay
+        return None
+
+    def get_flat_baseline(self, val):
         """
         define a flat baseline away from trigger
+        Input:
+            - val: array
         """
-        t0 = int(self.daq_len*(1.0-self.post_tri)) # trigger position
-        pre = val[:t0-50]
+        t0=self.tri_pos
+        pre = val[:t0-20]
         post= val[t0+50:]
         base = concatenate([pre, post])
-        return np.mean(base), np.std(base)
+        qx = quantile(base, [0.15865, 0.84135]) #central 68%
+        return np.median(base), abs(qx[1]-qx[0])
 
     def do_baseline_subtraction(self):
         """
         Very basic
         Baseline is avg over all excluding trigger regions
         """
-        self.base_mean = {} # baseline mean
-        self.base_std = {} # baseline std
-        self.amplitude={} # amplitude is baseline subtracted trace
         for ch, val in self.traces.items():
-            mean, std = self.def_flat_baseline(val)
+            mean, std = self.get_flat_baseline(val)
             self.base_mean[ch], self.base_std[ch] = mean, std
             self.amplitude[ch] = -(val-self.base_mean[ch])
             # todo: convert ADC to to mV/ns
@@ -72,7 +89,7 @@ class Waveform(RawTrigger):
         self.amplitude['sum'] = tot
 
         # def baseline for sum channel
-        mean, std = self.def_flat_baseline(tot)
+        mean, std = self.get_flat_baseline(tot)
         self.base_mean['sum'], self.base_std['sum'] = mean, std
         return None
 
@@ -93,33 +110,32 @@ class Waveform(RawTrigger):
             height=self.sfp_heig*std
             )
             self.peaks[ch] = peaks #peak position
-
         return None
 
+    def rolling_baseline(self):
+        """work in progress"""
+        med = zeros(self.daq_len-10)
+        std =zeros(self.daq_len)
+        for ch, val in self.traces.items():
+            v = sliding_window_view(val, self.roll_len)
+            roll_start = self.roll_len-1
+            med[roll_start:] = v.median(axis=-1)
+            qx = quantile(v, [0.15865, 0.84135], axis=-1)
+            std[roll_start:] = abs(qx[1]-qx[0])
+            self.roll_base_med[ch]=med.copy()
+            self.roll_base_std[ch]=std.copy()
 
-
-    # def do_rolling_baseline_subtraction(self):
-    #     self.find_baseline()
-    #
-    #     self.pulse_start={}
-    #     self.thre={}
-    #     avg=zeros(self.daq_len)
-    #     std =zeros(self.daq_len)
-    #     for ch, val in self.traces.items():
-    #         v = sliding_window_view(val, self.roll_len)
-    #         roll_start = self.roll_len-1
-    #         avg[roll_start:] = v.mean(axis=-1)
-    #         std[roll_start:] = v.std(axis=-1)
-    #         in_mask = val<=avg-std*self.sigma_thr
-    #         idx = argwhere(diff(sign(val - std*self.sigma_thr))).flatten()
-    #         self.baseline[ch]=avg.copy()
-    #         self.pulse_start[ch]=idx.copy()
-    #         self.thre[ch]=avg-std*self.sigma_thr
-    #     return None
-
-
+    def do_rolling_baseline_subtraction(self):
+        """work in progress"""
+        pass
 
     def integrate_roi(self):
+
+        # do baseline subtraction if haven't done so
+        if bool(self.amplitude)==False:
+            self.do_baseline_subtraction()
+            self.sum_channels()
+
         self.roi_list=[]
         for i in range(len(self.roi_start)):
             start=self.roi_start[i]
@@ -127,7 +143,7 @@ class Waveform(RawTrigger):
             pre_roi = start-self.pre_roi_length
             roi={}
             roi_sum = 0.
-            for ch, val in self.traces.items():
+            for ch, val in self.amplitude.items():
                 base = np.mean(val[pre_roi:start]) # not to confused with built-in mean()
                 roi[ch]=np.sum(-(val[start:end]-base))*(end-start)
                 roi_sum += roi[ch]
@@ -139,7 +155,7 @@ class Waveform(RawTrigger):
         '''
         ch: string, ex. b1_ch0, sum. Default: None
         '''
-        fig = plt.figure(figsize=[11,5])
+        fig = plt.figure(figsize=[9,4])
         ax = fig.add_subplot(111)
         if ch is None or ch=='all':
             for trace in sorted(self.traces.items()):
@@ -167,6 +183,6 @@ class Waveform(RawTrigger):
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
         plt.xlabel('Samples')
-        plt.ylabel('Channel')
+        plt.ylabel('ADC')
         plt.grid()
-        plt.show()
+        #plt.show()
