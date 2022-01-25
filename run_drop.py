@@ -15,13 +15,14 @@ class RunDROP():
     def __init__(self, args):
         self.args = args # save a copy
         self.n_events = args.n_events
-        self.event_id = args.event_id
+        self.start_id = args.start_id
         self.raw_data_file = RawDataFile(args.raw)
         self.config  = YamlReader(args.yaml).data
         self.n_boards = int(self.config['n_boards'])
         self.wfm = Waveform(self.config)
 
         self.t_idx=0 # trigger index
+        # self.prev_board_id = 0
 
     def sanity_check(self):
         '''
@@ -59,24 +60,36 @@ class RunDROP():
             self.raw_data_file.close()
             return False
 
-        # process a specific event_id if event_id>0 (defalt: -1)
-        if self.event_id>0:
-            if trigger.eventCounter!=self.event_id:
-                return True
+        # process specific events
+        if self.start_id>0 and self.n_events>0:
+            start = self.start_id
+            end = start + self.n_events
+            if trigger.eventCounter<start or trigger.eventCounter>=end:
+                return self.next()
+
+        # if trigger.boardId in board_id_list:
+        #     return False
+        # board_id_list.append(trigger.boardId)
 
         new_event_flag = self.t_idx % self.n_boards==0
         if new_event_flag:
             wfm.traces = trigger.traces.copy() # new copy
             wfm.triggerTimeTag = trigger.triggerTimeTag
             wfm.triggerTime = trigger.triggerTime
-            wfm.eventCounter=trigger.eventCounter
+            wfm.event_id=trigger.eventCounter
             wfm.filePos=trigger.filePos
             self.t_idx+=1
         for i in range(self.n_boards-1):
+            prev_board_id = trigger.boardId
             trigger = self.raw_data_file.getNextTrigger()
+            if prev_board_id==trigger.boardId:
+                print('ERROR: repeated boardId')
+                return False
             wfm.traces.update(trigger.traces)
             self.t_idx+=1
         self.wfm = wfm # save a copy
+
+        # self.prev_board_id=trigger.boardId
         return True
 
     def display_wfm(self, ch=None):
@@ -90,7 +103,7 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
     parser.add_argument('--raw', type=str, help='path to the raw data file')
     parser.add_argument('--yaml', type=str, help='path to the yaml config file')
-    parser.add_argument('--event_id', type=int, default=-1, help='process a single event a specified event_id (default: -1)')
+    parser.add_argument('--start_id', type=int, default=-1, help='process start with start_id (default: -1)')
     parser.add_argument('--n_events', type=int, default=-1, help='the number of events to process (defalt: -1)')
     args = parser.parse_args()
 

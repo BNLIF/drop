@@ -21,6 +21,6 @@ scipy_find_peaks:
   height: 3 # None
 
 # ROI integral, pre-ROI used to compute baseline, sample
-roi_start: [290, 410]
+roi_start: [290, 380]
 roi_end: [320, 450]
 pre_roi_length: 100
