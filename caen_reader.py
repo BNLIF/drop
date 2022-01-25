@@ -53,6 +53,7 @@ class RawDataFile:
 
         # extract the board ID and channel map from the second header long-word
         boardId = (i1 & 0xf8000000) >> 27
+        trigger.boardId = boardId #Xin
 
         # For 16ch boards, the channelMask is split over two header words, ref: Tab. 8.2 in V1730 manual
         # To get the second half of the channelMask to line up properly with the first, we only shift it by
@@ -173,6 +174,9 @@ class RawTrigger:
         self.triggerTimeTag = 0.
         self.triggerTime = 0.
         self.eventCounter = 0
+
+        #Xin added
+        self.boardId = 0
 
     def display(self, trName=None):
 
