@@ -7,11 +7,15 @@ Outline
 from numpy import zeros, argwhere, trapz, diff, sign, concatenate, quantile
 import numpy as np
 import matplotlib.pylab as plt
+from matplotlib import cm
 from scipy.signal import find_peaks
 
 from caen_reader import RawDataFile
 from caen_reader import RawTrigger
 from numpy.lib.stride_tricks import sliding_window_view
+
+from utilities import *
+import re
 
 EPS=1e-6
 
@@ -19,6 +23,7 @@ class Pulses:
     pulses_start = []
     pulses_end = []
     area = []
+    heights = []
 
 class Waveform(RawTrigger):
     """
@@ -39,6 +44,8 @@ class Waveform(RawTrigger):
         self.roi_end = config['roi_end']
         self.pre_roi_length = config['pre_roi_length']
         self.trigger_position() # art of finding trigger position
+
+        self.event_id=-1
 
         # calc in do_baseline_subtraction
         self.base_mean = {} # baseline mean
@@ -112,6 +119,20 @@ class Waveform(RawTrigger):
             self.peaks[ch] = peaks #peak position
         return None
 
+    def get_spe(self, ch='sum'):
+        """ Work in Progress """
+        if self.peaks[ch].size == 0:
+            return []
+
+        pls=Pulses()
+        pls.start = self.peaks[ch]-4
+        pls.end = pls.start+4
+        for i in range(len(self.peaks[ch])):
+            pls.height.append( np.max(self.amplitude[ch][start:end]) )
+            pls.area.append( np.sum(self.amplitude[ch][start:end]) )
+            pulses.append(pls)
+        return pulses
+
     def rolling_baseline(self):
         """work in progress"""
         med = zeros(self.daq_len-10)
@@ -130,7 +151,6 @@ class Waveform(RawTrigger):
         pass
 
     def integrate_roi(self):
-
         # do baseline subtraction if haven't done so
         if bool(self.amplitude)==False:
             self.do_baseline_subtraction()
@@ -151,16 +171,51 @@ class Waveform(RawTrigger):
             self.roi_list.append(roi)
         return None
 
+    def roi_max_height(self):
+        """Work in Progress"""
+        # do baseline subtraction if haven't done so
+        if bool(self.amplitude)==False:
+            self.do_baseline_subtraction()
+            self.sum_channels()
+
+        self.roi_height=[]
+        for i in range(len(self.roi_start)):
+            start=self.roi_start[i]
+            end=self.roi_end[i]
+            height={}
+            for ch, val in self.amplitude.items():
+                height[ch] = np.max(val[start:end])
+            self.roi_height.append(height)
+        return None
+
     def display(self, ch=None):
         '''
-        ch: string, ex. b1_ch0, sum. Default: None
+        ch: string, ex. b1_ch0, sum. Default: None (all)
         '''
-        fig = plt.figure(figsize=[9,4])
-        ax = fig.add_subplot(111)
+        # plotting style
+        plt.rcParams['axes.grid'] = True
+
         if ch is None or ch=='all':
+            fig = plt.figure(figsize=[9,8])
+            cmap = generate_colormap(16)
+            ax1 = plt.subplot(211)
+            ax2 = plt.subplot(212)
             for trace in sorted(self.traces.items()):
-                plt.plot(trace[1], label=trace[0])
+                key=trace[0] # key ex: b1_ch0
+                # get end digits, which is ch number on a board
+                ch_id = int(re.match('.*?([0-9]+)$', key).group(1))
+                if 'b1_' in trace[0]:
+                    label='ch%d' % ch_id
+                    ax1.plot(trace[1], label=label, color=cmap.colors[ch_id])
+                    ax1.set_title('event_id=%d, Board 1' % self.event_id)
+                if 'b2_' in trace[0]:
+                    label='ch%d' % ch_id
+                    ax2.plot(trace[1], label=label, color=cmap.colors[ch_id])
+                    ax2.set_title('event_id=%d, Board 2' % self.event_id)
+            ax1.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
         else:
+            fig = plt.figure(figsize=[9,4])
+            plt.subplot(111)
             if isinstance(ch, str):
                 a = self.amplitude[ch]
                 p = self.peaks[ch]
@@ -171,14 +226,7 @@ class Waveform(RawTrigger):
             elif isinstance(ch, list):
                 for t in ch:
                     plt.plot(self.traces[t], label=t)
-        ax.legend(loc=0)
-
-        # place a text box in upper left in axes coords with details of event
-        textstr = 'File Position: {}\nTrigger Time (us): {}\nEvent Counter: {}'\
-            .format(self.filePos, self.triggerTime, self.eventCounter)
-
-        ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=10,
-                verticalalignment='top', bbox=dict(facecolor='white', alpha=0.7))
+            plt.legend(loc=0)
 
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
