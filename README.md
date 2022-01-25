@@ -42,7 +42,7 @@ Install the exact package dependence from requirement within your virtual env (o
 ```bash
 pip install -r requirements.txt
 ```
-Alternative, you can pip install package one by one.
+Alternatively, you can pip install package one by one.
 
 ### Usage
 
@@ -51,6 +51,8 @@ In your virtual env (recommended), check out the help manual.
 ```bash
 python run_drop.py --help
 ```
+
+**Note: the pipeline is still under-development. Ideally, the code should output a RQ in root file (or other format), but it does not have this functionality right now. You may have to call class methods individually. Sorry.**
 
 When you're done, do the following to exit the virtual env:
 
