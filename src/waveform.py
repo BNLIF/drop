@@ -13,7 +13,7 @@ from caen_reader import RawDataFile
 from caen_reader import RawTrigger
 from numpy.lib.stride_tricks import sliding_window_view
 
-from utilities import *
+from utilities import generate_colormap, digitial_butter_highpass_filter
 import re
 
 EPS=1e-6
@@ -25,6 +25,8 @@ class Waveform(RawTrigger):
     """
     def __init__(self, config: dict):
         super(RawTrigger, self).__init__()
+        self.apply_high_pass_filter = bool(config['apply_high_pass_filter'])
+        self.high_pass_cutoff_Hz = float(config['high_pass_cutoff_Hz'])
         self.roll_len = int(config['rolling_length'])
         self.sigma_thr = float(config['sigma_above_baseline'])
         self.daq_len = int(config['daq_length'])
@@ -71,8 +73,11 @@ class Waveform(RawTrigger):
         for ch, val in self.traces.items():
             mean, std = self.get_flat_baseline(val)
             self.base_mean[ch], self.base_std[ch] = mean, std
-            self.amplitude[ch] = -(val-self.base_mean[ch])
-            # todo: convert ADC to to mV/ns
+            amp = -(val-self.base_mean[ch])
+            if self.apply_high_pass_filter:
+                cutoff_Hz = self.high_pass_cutoff_Hz
+                amp = digitial_butter_highpass_filter(amp, cutoff_Hz)
+            self.amplitude[ch] = amp
         return None
 
     def sum_channels(self):

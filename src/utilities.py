@@ -1,8 +1,10 @@
 import math
 
 import numpy as np
+from scipy import signal
 from matplotlib.colors import ListedColormap
 from matplotlib.cm import hsv
+
 
 def generate_colormap(n_colors=32):
     """
@@ -36,3 +38,18 @@ def generate_colormap(n_colors=32):
             initial_cm[lower_half + j * n_shades: lower_half + (j + 1) * n_shades, i] += modifier
 
     return ListedColormap(initial_cm)
+
+
+
+def digitial_butter_highpass_filter(data, cutoff_Hz=3e6):
+    """
+    data: 1d ndarray
+    cutoff_Hz: cut off digitizer sampling freq in hz
+    Source: https://scipy-cookbook.readthedocs.io/items/ButterworthBandpass.html
+    """
+    order=5
+    fs_Hz = 500e6 # 500 Mhz
+    nyq = fs_Hz * 0.5
+    Wn = cutoff_Hz/nyq
+    b, a = signal.butter(order, Wn, btype='high', analog=False)
+    return signal.filtfilt(b, a, data)

@@ -68,6 +68,7 @@ class PulseFinder():
             to show multiple channels.")
             return None
         elif isinstance(ch, str):
+            plt.rcParams['axes.grid'] = True
             fig = plt.figure(figsize=[8,4])
             a = self.wfm.amplitude[ch]
             plt.plot(a, label=ch)
@@ -79,7 +80,6 @@ class PulseFinder():
             plt.ylim(ymax=ymax + (ymax-ymin)*.15)
             plt.xlabel('Samples')
             plt.ylabel('ADC')
-            plt.grid()
         else:
             print("ERROR: ch type is wrong")
             return None
