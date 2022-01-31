@@ -19,11 +19,6 @@ import re
 
 EPS=1e-6
 
-class Pulses:
-    pulses_start = []
-    pulses_end = []
-    area = []
-    heights = []
 
 class Waveform(RawTrigger):
     """

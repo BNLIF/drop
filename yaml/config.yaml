@@ -2,6 +2,7 @@
 n_boards: 2
 daq_length: 640 # Xin: daq_length set on labVIEW. Not the recorded num. of samples.
 post_trigger: 0.5
+boardId_order: [1,2] # Order of board recorded in file. Usually master board is the first. 
 
 #I/O
 data_dir: "data"

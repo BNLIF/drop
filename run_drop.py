@@ -2,27 +2,33 @@ import argparse
 import sys
 from numpy import array
 import numpy as np
+from enum import Enum
+
 from yaml_reader import YamlReader
 from waveform import Waveform
 from caen_reader import RawDataFile
 
+MAX_N_EVENT = 999999999
 
+class RunStatus(Enum):
+    NORMAL = 0 # all good, keep going
+    STOP = 1 # stop the run
+    SKIP = 2 # bad, better skip to next
 
 class RunDROP():
     """
     Main Class. Once per run. Manage all operations.
     """
     def __init__(self, args):
+        # args
         self.args = args # save a copy
-        self.n_events = args.n_events
-        self.start_id = args.start_id
+        self.start_id = int(args.start_id)
+        self.end_id = int(args.end_id)
         self.raw_data_file = RawDataFile(args.raw)
+        # config
         self.config  = YamlReader(args.yaml).data
         self.n_boards = int(self.config['n_boards'])
-        self.wfm = Waveform(self.config)
-
-        self.t_idx=0 # trigger index
-        # self.prev_board_id = 0
+        self.boardId_order=np.array(self.config['boardId_order'], dtype=int)
 
     def sanity_check(self):
         '''
@@ -53,44 +59,47 @@ class RunDROP():
         '''
         One Waveform per events. Each call iterates by one event.
         '''
-        wfm = Waveform(self.config)
         trigger = self.raw_data_file.getNextTrigger()
+
+        # end of file?
         if trigger is None:
             print("Info: The end of this file is reached. Close.")
             self.raw_data_file.close()
-            return False
+            return RunStatus.STOP
 
-        # process specific events
-        if self.start_id>0 and self.n_events>0:
-            start = self.start_id
-            end = start + self.n_events
-            if trigger.eventCounter<start or trigger.eventCounter>=end:
-                return self.next()
+        # only process within [start_id, end_id)
+        event_id = trigger.eventCounter
+        if event_id<self.start_id or event_id>=self.end_id:
+            return RunStatus.SKIP
 
-        # if trigger.boardId in board_id_list:
-        #     return False
-        # board_id_list.append(trigger.boardId)
+        # If the first boardId is not found in one cycle, stop
+        stop_run = False
+        if trigger.boardId != self.boardId_order[0]:
+            stop_run = True # temporially set True
+            for i in range(self.n_boards-1):
+                trigger = self.raw_data_file.getNextTrigger()
+                if trigger.boardId==self.boardId_order[0]:
+                    stop_run=False # found it
+                    break;
+        if stop_run:
+            return RunStatus.STOP
 
-        new_event_flag = self.t_idx % self.n_boards==0
-        if new_event_flag:
-            wfm.traces = trigger.traces.copy() # new copy
-            wfm.triggerTimeTag = trigger.triggerTimeTag
-            wfm.triggerTime = trigger.triggerTime
-            wfm.event_id=trigger.eventCounter
-            wfm.filePos=trigger.filePos
-            self.t_idx+=1
-        for i in range(self.n_boards-1):
-            prev_board_id = trigger.boardId
+        wfm = Waveform(self.config)
+        wfm.traces = trigger.traces.copy() # new copy
+        wfm.triggerTimeTag = trigger.triggerTimeTag
+        wfm.triggerTime = trigger.triggerTime
+        wfm.event_id=trigger.eventCounter
+        wfm.filePos=trigger.filePos
+
+        for i in range(1, self.n_boards):
             trigger = self.raw_data_file.getNextTrigger()
-            if prev_board_id==trigger.boardId:
-                print('ERROR: repeated boardId')
-                return False
-            wfm.traces.update(trigger.traces)
-            self.t_idx+=1
-        self.wfm = wfm # save a copy
+            if trigger.boardId != self.boardId_order[i]:
+                return RunStatus.SKIP
+            else:
+                wfm.traces.update(trigger.traces)
 
-        # self.prev_board_id=trigger.boardId
-        return True
+        self.wfm = wfm # save
+        return RunStatus.NORMAL
 
     def display_wfm(self, ch=None):
         self.wfm.display(ch)
@@ -103,14 +112,22 @@ def main(argv):
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
     parser.add_argument('--raw', type=str, help='path to the raw data file')
     parser.add_argument('--yaml', type=str, help='path to the yaml config file')
-    parser.add_argument('--start_id', type=int, default=-1, help='process start with start_id (default: -1)')
-    parser.add_argument('--n_events', type=int, default=-1, help='the number of events to process (defalt: -1)')
+    parser.add_argument('--start_id', type=int, default=0, help='start process from start_id (default: 0)')
+    parser.add_argument('--end_id', type=int, default=MAX_N_EVENT, help='stop process at end_id (defalt: Arbiarty large)')
+    parser.add_argument('--output', type=str, help='output file (test.root). Full path: output_dir/test.root')
     args = parser.parse_args()
 
     run = RunDROP(args)
-    while (run.nest()):
-        # call algorthim
-        pass
+    for i in range(MAX_N_EVENT):
+        status = run.next()
+        if status==RunStatus.STOP:
+            break
+        if status==RunStatus.SKIP:
+            continue
+        if status==RunStatus.NORMAL:
+            # do your normal event reconstruction
+            pass
+
 
 if __name__ == "__main__":
    main(sys.argv[1:])
