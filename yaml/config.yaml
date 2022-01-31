@@ -1,14 +1,14 @@
-# DAQ config setting on LabVIEW
+# General DAQ config setting on LabVIEW
 n_boards: 2
 daq_length: 640 # Xin: daq_length set on labVIEW. Not the recorded num. of samples.
 post_trigger: 0.5
 boardId_order: [1,2] # Order of board recorded in file. Usually master board is the first.
 
-#I/O
-data_dir: "data"
+# RQWriter
 output_dir: "output"
+bracket_size: 100 # int, write to file every x events
 
-# Waveform
+# Waveform: baseline subtraction
 apply_high_pass_filter: False
 high_pass_cutoff_Hz: 5e6
 rolling_length: 50
@@ -16,13 +16,13 @@ sigma_above_baseline: 3.0
 pre_pulse: 5
 post_pulse: 5
 
-# scipy peak finding
+# Waveform: ROI
+roi_start: [290, 380]
+roi_end: [320, 450]
+pre_roi_length: 100
+
+# PulseFinder: scipy peak finding
 scipy_find_peaks:
   distance: 5
   threshold: 1
   height: 2 # None
-
-# ROI integral, pre-ROI used to compute baseline, sample
-roi_start: [290, 380]
-roi_end: [320, 450]
-pre_roi_length: 100
