@@ -8,7 +8,6 @@ from numpy import zeros, argwhere, trapz, diff, sign, concatenate, quantile
 import numpy as np
 import matplotlib.pylab as plt
 from matplotlib import cm
-from scipy.signal import find_peaks
 
 from caen_reader import RawDataFile
 from caen_reader import RawTrigger
@@ -24,17 +23,12 @@ class Waveform(RawTrigger):
     """
     Waveform class is derived from RawTrigger class
     """
-    def __init__(self, config):
+    def __init__(self, config: dict):
         super(RawTrigger, self).__init__()
         self.roll_len = int(config['rolling_length'])
         self.sigma_thr = float(config['sigma_above_baseline'])
         self.daq_len = int(config['daq_length'])
         self.post_tri = float(config['post_trigger'])
-        self.pre_pulse = int(config['pre_pulse'])
-        self.post_pulse = int(config['post_pulse'])
-        self.sfp_dist = int(config['scipy_find_peaks']['distance'])
-        self.sfp_thre = config['scipy_find_peaks']['threshold']
-        self.sfp_heig = config['scipy_find_peaks']['height']
         self.roi_start = config['roi_start']
         self.roi_end = config['roi_end']
         self.pre_roi_length = config['pre_roi_length']
@@ -94,39 +88,6 @@ class Waveform(RawTrigger):
         mean, std = self.get_flat_baseline(tot)
         self.base_mean['sum'], self.base_std['sum'] = mean, std
         return None
-
-    def scipy_find_peaks(self):
-        """
-        Scipy find_peaks functions
-        """
-        self.do_baseline_subtraction()
-        self.sum_channels()
-        self.peaks={}
-        for ch, val in self.amplitude.items():
-            a = self.amplitude[ch]
-            std = self.base_std[ch]
-            peaks, _ = find_peaks(
-            a,
-            distance=self.sfp_dist,
-            threshold=self.sfp_thre*std,
-            height=self.sfp_heig*std
-            )
-            self.peaks[ch] = peaks #peak position
-        return None
-
-    def get_spe(self, ch='sum'):
-        """ Work in Progress """
-        if self.peaks[ch].size == 0:
-            return []
-
-        pls=Pulses()
-        pls.start = self.peaks[ch]-4
-        pls.end = pls.start+4
-        for i in range(len(self.peaks[ch])):
-            pls.height.append( np.max(self.amplitude[ch][start:end]) )
-            pls.area.append( np.sum(self.amplitude[ch][start:end]) )
-            pulses.append(pls)
-        return pulses
 
     def rolling_baseline(self):
         """work in progress"""
@@ -209,15 +170,13 @@ class Waveform(RawTrigger):
                     ax2.set_title('event_id=%d, Board 2' % self.event_id)
             ax1.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
         else:
-            fig = plt.figure(figsize=[9,4])
+            fig = plt.figure(figsize=[8,4])
             plt.subplot(111)
             if isinstance(ch, str):
                 a = self.amplitude[ch]
-                p = self.peaks[ch]
                 plt.plot(a, label=ch)
                 plt.plot()
                 plt.plot(np.zeros_like(a), '--', color='gray', label='flat baseline')
-                plt.plot(p, a[p], "x")
             elif isinstance(ch, list):
                 for t in ch:
                     plt.plot(self.traces[t], label=t)

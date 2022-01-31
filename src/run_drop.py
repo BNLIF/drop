@@ -7,6 +7,7 @@ from enum import Enum
 from yaml_reader import YamlReader
 from waveform import Waveform
 from caen_reader import RawDataFile
+from pulse_finder import PulseFinder
 
 MAX_N_EVENT = 999999999
 
@@ -125,7 +126,9 @@ def main(argv):
         if status==RunStatus.SKIP:
             continue
         if status==RunStatus.NORMAL:
-            # do your normal event reconstruction
+            # do reconstruction
+            run.wfm.do_baseline_subtraction()
+            run.wfm.sum_channels()
             pass
 
 
