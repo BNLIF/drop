@@ -30,6 +30,9 @@ class RunDROP():
         self.config  = YamlReader(args.yaml).data
         self.n_boards = int(self.config['n_boards'])
         self.boardId_order=np.array(self.config['boardId_order'], dtype=int)
+        # counter
+        self.n_events = 0 # number of good events
+        self.n_triggers = 0 # total num. of triggers
 
     def sanity_check(self):
         '''
@@ -47,6 +50,7 @@ class RunDROP():
         raw_data_file = RawDataFile(self.args.raw_path)
         for i in range(self.n_boards):
             trigger = raw_data_file.getNextTrigger()
+            self.n_triggers += 1
             if i==0:
                 t0 = trigger.traces.copy()
             else:
@@ -61,6 +65,7 @@ class RunDROP():
         One Waveform per events. Each call iterates by one event.
         '''
         trigger = self.raw_data_file.getNextTrigger()
+        self.n_triggers += 1
 
         # end of file?
         if trigger is None:
@@ -79,6 +84,7 @@ class RunDROP():
             stop_run = True # temporially set True
             for i in range(self.n_boards-1):
                 trigger = self.raw_data_file.getNextTrigger()
+                self.n_triggers += 1
                 if trigger.boardId==self.boardId_order[0]:
                     stop_run=False # found it
                     break;
@@ -94,6 +100,7 @@ class RunDROP():
 
         for i in range(1, self.n_boards):
             trigger = self.raw_data_file.getNextTrigger()
+            self.n_triggers += 1
             if trigger.boardId != self.boardId_order[i]:
                 return RunStatus.SKIP
             else:
@@ -129,6 +136,7 @@ def main(argv):
             # do reconstruction
             run.wfm.do_baseline_subtraction()
             run.wfm.sum_channels()
+            run.n_events +=1
             pass
 
 
