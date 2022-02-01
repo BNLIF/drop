@@ -43,6 +43,7 @@ class PulseFinder():
                 height=par['height']*std
             )
             self.peaks[ch] = peaks #peak position
+        self.n_pulses = len(self.peaks['sum'])
         return None
 
     def get_spe(self, ch='sum'):

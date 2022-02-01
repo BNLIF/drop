@@ -5,7 +5,7 @@ post_trigger: 0.5
 boardId_order: [1,2] # Order of board recorded in file. Usually master board is the first.
 
 # RQWriter
-output_dir: "output"
+output_dir: "/Users/xxiang/MyGitLab/WbLS/drop/output"
 bracket_size: 100 # int, write to file every x events
 
 # Waveform: baseline subtraction

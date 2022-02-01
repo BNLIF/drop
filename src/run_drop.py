@@ -1,6 +1,6 @@
 import argparse
 import sys
-from numpy import array
+from numpy import array, isscalar
 import numpy as np
 from enum import Enum
 
@@ -8,6 +8,7 @@ from yaml_reader import YamlReader
 from waveform import Waveform
 from caen_reader import RawDataFile
 from pulse_finder import PulseFinder
+from rq_writer import RQWriter
 
 MAX_N_EVENT = 999999999
 
@@ -25,7 +26,7 @@ class RunDROP():
         self.args = args # save a copy
         self.start_id = int(args.start_id)
         self.end_id = int(args.end_id)
-        self.raw_data_file = RawDataFile(args.raw)
+        self.raw_data_file = RawDataFile(args.if_path)
         # config
         self.config  = YamlReader(args.yaml).data
         self.n_boards = int(self.config['n_boards'])
@@ -47,7 +48,7 @@ class RunDROP():
             sys.exit('roi_end must be strictly larger than roi_start')
 
         # Check a few triggers first
-        raw_data_file = RawDataFile(self.args.raw_path)
+        raw_data_file = RawDataFile(self.args.if_path)
         for i in range(self.n_boards):
             trigger = raw_data_file.getNextTrigger()
             self.n_triggers += 1
@@ -118,14 +119,19 @@ class RunDROP():
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
-    parser.add_argument('--raw', type=str, help='path to the raw data file')
-    parser.add_argument('--yaml', type=str, help='path to the yaml config file')
+    parser.add_argument('--if_path', type=str, help='required. full path to the raw data file')
+    parser.add_argument('--yaml', type=str, help='required. path to the yaml config file')
     parser.add_argument('--start_id', type=int, default=0, help='start process from start_id (default: 0)')
     parser.add_argument('--end_id', type=int, default=MAX_N_EVENT, help='stop process at end_id (defalt: Arbiarty large)')
-    parser.add_argument('--output', type=str, help='output file (test.root). Full path: output_dir/test.root')
+    parser.add_argument('--of', type=str, default="", help='output file including extension (ex. test.root). Full path will be at output_dir/test.root')
     args = parser.parse_args()
 
+    # RunDROP is at the top of food-chain
     run = RunDROP(args)
+
+    # create output file
+    rq_w = RQWriter(run.config, args)
+
     for i in range(MAX_N_EVENT):
         status = run.next()
         if status==RunStatus.STOP:
@@ -133,12 +139,45 @@ def main(argv):
         if status==RunStatus.SKIP:
             continue
         if status==RunStatus.NORMAL:
+            run.n_events +=1
+
             # do reconstruction
             run.wfm.do_baseline_subtraction()
             run.wfm.sum_channels()
-            run.n_events +=1
-            pass
+            pf = PulseFinder(run.config, run.wfm)
+            pf.scipy_find_peaks()
 
+            """ note:
+            write one entry at a time. This creates many small brackets,
+            and is considered a bad practice by Jim Pivarski. Code may
+            be slow code this way, but simpler (no need to accumulate
+            many events before writing).
+            https://github.com/scikit-hep/uproot4/pull/428
+            """
+            rq_w.write_event_rq({"n_pulses": [pf.n_pulses]})
+
+            # add to bracket
+            # b_size = rq_w.bracket_size
+            # if run.n_events % b_size ==0:
+            #     # create event rq basket
+            #     ev_rq_b = {"n_pulses": [pf.pulses]}
+            # else:
+            #     # concatenate
+            #     for key, val in ev_rq_b.items():
+            #         ev_rq_b[key].concatenate([val, pf])
+            #     ev_rq_b.update({"n_pulses": })
+            #     if run.n_events % b_size==(b_size-1):
+            #         # last in bracket, write
+            #         rq_w.write_event_rq(ev_rq_b
+            #         })
+
+    # write run tree
+    rq_w.write_run_rq({
+    "n_events": [run.n_events],
+    "n_triggers": [run.n_triggers]
+    })
+
+    rq_w.close()
 
 if __name__ == "__main__":
    main(sys.argv[1:])
