@@ -5,19 +5,19 @@ Outline
 - sum channels
 '''
 from numpy import zeros, argwhere, trapz, diff, sign, concatenate, quantile
+from numpy import median, cumsum
 import numpy as np
 import matplotlib.pylab as plt
 from matplotlib import cm
-
-from caen_reader import RawDataFile
-from caen_reader import RawTrigger
 from numpy.lib.stride_tricks import sliding_window_view
-
 from utilities import generate_colormap, digitial_butter_highpass_filter
 import re
 
-EPS=1e-6
+from yaml_reader import ADC_RATE_HZ
+from caen_reader import RawDataFile
+from caen_reader import RawTrigger
 
+EPS=1e-6
 
 class Waveform(RawTrigger):
     """
@@ -42,6 +42,7 @@ class Waveform(RawTrigger):
         self.base_mean = {} # baseline mean
         self.base_std = {} # baseline std
         self.amplitude={} # amplitude is baseline subtracted trace
+        self.amplitude_int={} # integrated amplitude
         return None
 
     def trigger_position(self):
@@ -63,7 +64,7 @@ class Waveform(RawTrigger):
         post= val[t0+50:]
         base = concatenate([pre, post])
         qx = quantile(base, [0.15865, 0.84135]) #central 68%
-        return np.median(base), abs(qx[1]-qx[0])
+        return median(base), abs(qx[1]-qx[0])
 
     def do_baseline_subtraction(self):
         """
@@ -93,6 +94,13 @@ class Waveform(RawTrigger):
         mean, std = self.get_flat_baseline(tot)
         self.base_mean['sum'], self.base_std['sum'] = mean, std
         return None
+
+    def integrate_waveform(self):
+        """
+        integrated waveform
+        """
+        for ch, val in self.amplitude.items():
+            self.amplitude_int[ch] = cumsum(val)*(1e9/ADC_RATE_HZ) # adc*ns
 
     def rolling_baseline(self):
         """work in progress"""
@@ -125,7 +133,7 @@ class Waveform(RawTrigger):
             roi={}
             roi_sum = 0.
             for ch, val in self.amplitude.items():
-                base = np.median(val[pre_roi:start]) # not to confused with built-in mean()
+                base = median(val[pre_roi:start]) # not to confused with built-in mean()
                 roi[ch]=np.sum(-(val[start:end]-base))*(end-start)
                 roi_sum += roi[ch]
             roi['sum']=roi_sum
@@ -181,7 +189,7 @@ class Waveform(RawTrigger):
                 a = self.amplitude[ch]
                 plt.plot(a, label=ch)
                 plt.plot()
-                plt.plot(np.zeros_like(a), '--', color='gray', label='flat baseline')
+                plt.plot(zeros(a), '--', color='gray', label='flat baseline')
             elif isinstance(ch, list):
                 for t in ch:
                     plt.plot(self.traces[t], label=t)

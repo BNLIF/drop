@@ -8,9 +8,9 @@ from yaml_reader import YamlReader
 from waveform import Waveform
 from caen_reader import RawDataFile
 from pulse_finder import PulseFinder
-from rq_writer import RQWriter
+from rq_writer import RQWriter, EventRQBasket
 
-MAX_N_EVENT = 999999999
+MAX_N_EVENT = 999999999 # Arbiarty large
 
 class RunStatus(Enum):
     NORMAL = 0 # all good, keep going
@@ -119,57 +119,43 @@ class RunDROP():
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
-    parser.add_argument('--if_path', type=str, help='required. full path to the raw data file')
-    parser.add_argument('--yaml', type=str, help='required. path to the yaml config file')
-    parser.add_argument('--start_id', type=int, default=0, help='start process from start_id (default: 0)')
-    parser.add_argument('--end_id', type=int, default=MAX_N_EVENT, help='stop process at end_id (defalt: Arbiarty large)')
-    parser.add_argument('--of', type=str, default="", help='output file including extension (ex. test.root). Full path will be at output_dir/test.root')
+    parser.add_argument('--if_path', type=str, help='Required. full path to the raw data file')
+    parser.add_argument('--yaml', type=str, help='Required. path to the yaml config file')
+    parser.add_argument('--start_id', type=int, default=0, help='Optional. start process from start_id (default: 0)')
+    parser.add_argument('--end_id', type=int, default=MAX_N_EVENT, help='Optional. stop process at end_id (defalt: Arbiarty large)')
+    parser.add_argument('--of', type=str, default="", help='Optional. output file including extension (ex. test.root). Full path will be at output_dir/test.root. Default: input file name appended with .root will be used.' )
     args = parser.parse_args()
 
     # RunDROP is at the top of food-chain
     run = RunDROP(args)
 
-    # create output file
+    # create output file to write
     rq_w = RQWriter(run.config, args)
-
+    # create basket to hold rq in memory before writing
+    ev_b = EventRQBasket()
     for i in range(MAX_N_EVENT):
         status = run.next()
         if status==RunStatus.STOP:
+            # empty basket if filled
             break
-        if status==RunStatus.SKIP:
+        elif status==RunStatus.SKIP:
             continue
-        if status==RunStatus.NORMAL:
+        else:
+            # RunStatus.NORMAL, proceed reconstruction
             run.n_events +=1
 
-            # do reconstruction
-            run.wfm.do_baseline_subtraction()
-            run.wfm.sum_channels()
-            pf = PulseFinder(run.config, run.wfm)
-            pf.scipy_find_peaks()
+        # do reconstruction
+        run.wfm.do_baseline_subtraction()
+        run.wfm.sum_channels()
+        run.wfm.integrate_waveform()
+        pf = PulseFinder(run.config, run.wfm)
+        pf.find_pulses()
 
-            """ note:
-            write one entry at a time. This creates many small brackets,
-            and is considered a bad practice by Jim Pivarski. Code may
-            be slow code this way, but simpler (no need to accumulate
-            many events before writing).
-            https://github.com/scikit-hep/uproot4/pull/428
-            """
-            rq_w.write_event_rq({"n_pulses": [pf.n_pulses]})
-
-            # add to bracket
-            # b_size = rq_w.bracket_size
-            # if run.n_events % b_size ==0:
-            #     # create event rq basket
-            #     ev_rq_b = {"n_pulses": [pf.pulses]}
-            # else:
-            #     # concatenate
-            #     for key, val in ev_rq_b.items():
-            #         ev_rq_b[key].concatenate([val, pf])
-            #     ev_rq_b.update({"n_pulses": })
-            #     if run.n_events % b_size==(b_size-1):
-            #         # last in bracket, write
-            #         rq_w.write_event_rq(ev_rq_b
-            #         })
+        if ev_b.size < rq_w.basket_size:
+            ev_b.fill(run.wfm, pf)
+        else:
+            rq_w.write_event_rq(ev_b)
+            ev_b.reset() # empty basket, reset basket size=0
 
     # write run tree
     rq_w.write_run_rq({

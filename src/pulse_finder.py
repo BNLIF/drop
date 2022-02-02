@@ -1,9 +1,8 @@
+from numpy import zeros, sort, arange, ndarray, uint32
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from waveform import Waveform
-
-MAX_N_PULSES = 100
 
 class PulseFinder():
     """
@@ -11,12 +10,15 @@ class PulseFinder():
     """
     def __init__(self, config: dict, wfm: Waveform):
 
-        # define pulse variables to be calculate
+        # initialize variables
+        self.peaks={}
         self.n_pulses = 0
-        self.start = np.zeros(MAX_N_PULSES, dtype=int)
-        self.height_adc = np.zeros(MAX_N_PULSES, dtype=int)
-        self.area_adc = np.zeros(MAX_N_PULSES, dtype=int)
-        self.coincidence =  np.zeros(MAX_N_PULSES, dtype=int)
+        self.id = []
+        self.start = []
+        self.end = []
+        self.height_adc = []
+        self.area_adc = []
+        self.coincidence =  []
         # save config param for latter access
         self.pre_pulse = int(config['pre_pulse'])
         self.post_pulse = int(config['post_pulse'])
@@ -32,7 +34,6 @@ class PulseFinder():
         """
         Scipy find_peaks functions
         """
-        self.peaks={}
         par = self.scipy_param
         for ch, val in self.wfm.amplitude.items():
             a = self.wfm.amplitude[ch]
@@ -43,25 +44,42 @@ class PulseFinder():
                 height=par['height']*std
             )
             self.peaks[ch] = peaks #peak position
-        self.n_pulses = len(self.peaks['sum'])
         return None
 
-    def get_spe(self, ch='sum'):
-        """ Work in Progress """
-        if self.peaks[ch].size == 0:
-            return []
+    def find_pulses(self):
+        if not bool(self.peaks):
+            self.scipy_find_peaks()
+        # peaks found at sum channel are used to define pulses
+        peaks = sort(self.peaks['sum'])
 
-        pls=Pulses()
-        pls.start = self.peaks[ch]-4
-        pls.end = pls.start+4
-        for i in range(len(self.peaks[ch])):
-            pls.height.append( np.max(self.amplitude[ch][start:end]) )
-            pls.area.append( np.sum(self.amplitude[ch][start:end]) )
-            pulses.append(pls)
-        return pulses
+        self.n_pulses = len(peaks)
+        amp = self.wfm.amplitude['sum'] # amplitude in adc
+        amp_int = self.wfm.amplitude_int['sum'] # integrated amplitude in adc*ns
+        if self.n_pulses>0:
+            self.id = arange(self.n_pulses, dtype=uint32)
+            self.start =peaks-self.pre_pulse
+            self.end = peaks+self.post_pulse
+            np.place(self.start, self.start<0, 0)
+            np.place(self.end, self.end>=len(amp), len(amp)-1)
+            self.area_adc = amp_int[self.end]-amp_int[self.start]
+            # todo: vectorize pulse height calc
+            tmp = []
+            for i in self.id:
+                # if len(amp[self.start[i]:self.end[i]])==0:
+                #     print(i, self.start[i], self.end[i])
+                pmax= np.max(amp[self.start[i]:self.end[i]])
+                tmp.append( pmax )
+            self.height_adc = tmp
+        # todo: adjust credential if it's a spe
+
+
+    def is_spe(self, ch='sum') -> bool:
+        """ Work in Progress """
+        pass
 
     def display(self, ch='sum'):
         '''
+        A plotting function showcase pulse finder
         ch: string, ex. b1_ch0. Default: sum
         '''
         if isinstance(ch, list):
@@ -75,7 +93,7 @@ class PulseFinder():
             plt.plot(a, label=ch)
             p = self.peaks[ch]
             plt.plot(p, a[p], 'x')
-            plt.plot(np.zeros_like(a), '--', color='gray', label='flat baseline')
+            plt.plot(zeros_like(a), '--', color='gray', label='flat baseline')
             plt.legend(loc=0)
             ymin, ymax = plt.ylim()
             plt.ylim(ymax=ymax + (ymax-ymin)*.15)
