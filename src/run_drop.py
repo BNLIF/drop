@@ -136,7 +136,8 @@ def main(argv):
     for i in range(MAX_N_EVENT):
         status = run.next()
         if status==RunStatus.STOP:
-            # empty basket if filled
+            if ev_b.size>0:
+                rq_w.write_event_rq(ev_b)
             break
         elif status==RunStatus.SKIP:
             continue
@@ -154,6 +155,7 @@ def main(argv):
         if ev_b.size < rq_w.basket_size:
             ev_b.fill(run.wfm, pf)
         else:
+            print('hello')
             rq_w.write_event_rq(ev_b)
             ev_b.reset() # empty basket, reset basket size=0
 
@@ -163,6 +165,7 @@ def main(argv):
     "n_triggers": [run.n_triggers]
     })
 
+    # remeber to close file
     rq_w.close()
 
 if __name__ == "__main__":

@@ -36,13 +36,29 @@ class EventRQBasket:
         self.size = 0
 
     def fill(self, wfm: Waveform, pf: PulseFinder):
+        """
+        Add variables to the basket. Append one event at a time.
+
+        Note:
+        The small but growing list of data types can be written as TTrees:
+        - dict of NumPy arrays
+        - Single numpy array
+        - Awkward Array containing one level of variable length
+        - a single Pandas DataFrame
+
+        So a list of numpy array is not an acceptable format. A list of
+        list, on the other hand, is okay because it can be casted into
+        a awkward array at extend stage. Hence, call tolist() below. I
+        hope there is a better solution.
+        https://uproot.readthedocs.io/en/latest/basic.html
+        """
         self.event_id.append(wfm.event_id)
 
         self.n_pulses.append(pf.n_pulses)
-        self.pulse_id.append(pf.id)
-        self.pulse_start.append(pf.start)
-        self.pulse_start.append(pf.end)
-        self.pulse_area_adc.append(pf.area_adc) # actually adc*ns
+        self.pulse_id.append(pf.id.tolist())
+        self.pulse_start.append(pf.start.tolist())
+        self.pulse_end.append(pf.end.tolist())
+        self.pulse_area_adc.append(pf.area_adc.tolist()) # actually adc*ns
         self.pulse_height_adc.append(pf.height_adc)
         self.pulse_coincidence.append(pf.coincidence)
         self.size +=1
@@ -78,9 +94,9 @@ class RQWriter:
         if f_ext=='.root':
             self.file = uproot.recreate(self.of_path)
             self.file.mktree("event", {
-                "event_id": uint32,
-                "n_pulses": uint32,
-                "pulse_id": "var* uint32",
+                "event_id": "uint32",
+                "n_pulses": "uint32",
+                "pulse_id": "var * uint32",
                 "pulse_start": "var * int32",
                 "pulse_end": "var * int32",
                 "pulse_area_adc": "var*float32",
@@ -111,11 +127,12 @@ class RQWriter:
         f['event'].extend({
             "event_id": rq.event_id,
             "n_pulses": rq.n_pulses,
-            "pulse_start": rq.pulse_start,
-            "pulse_end": rq.pulse_end,
-            "pulse_area": rq.pulse_area,
-            "pulse_height": rq.pulse_height,
-            "pulse_coincidence": rq.pulse_coincidence,
+            "pulse_id": ak.Array(rq.pulse_id),
+            "pulse_start": ak.Array(rq.pulse_start),
+            "pulse_end": ak.Array(rq.pulse_end),
+            "pulse_area_adc": ak.Array(rq.pulse_area_adc),
+            "pulse_height_adc": ak.Array(rq.pulse_height_adc),
+            "pulse_coincidence": ak.Array(rq.pulse_coincidence),
         })
 
     def remove_branches(self):

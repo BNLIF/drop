@@ -1,4 +1,4 @@
-from numpy import zeros, sort, arange, ndarray, uint32
+from numpy import array, zeros, sort, arange, ndarray, uint32, place, logical_and
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
@@ -9,16 +9,20 @@ class PulseFinder():
     Finding pulses
     """
     def __init__(self, config: dict, wfm: Waveform):
+        """
+        Note:
+        Initializes variables. When no pulse found, initial value are used. So
+        better to have consistent initial type.
+        """
+        self.peaks={} # dict
+        self.n_pulses = 0 # int
+        self.id = array([]) # type: ndarray
+        self.start = array([]) # type: ndarray
+        self.end = array([]) # type: ndarray
+        self.area_adc = array([]) # type: ndarray
+        self.height_adc = [] #type: list
+        self.coincidence =  [] #type: list
 
-        # initialize variables
-        self.peaks={}
-        self.n_pulses = 0
-        self.id = []
-        self.start = []
-        self.end = []
-        self.height_adc = []
-        self.area_adc = []
-        self.coincidence =  []
         # save config param for latter access
         self.pre_pulse = int(config['pre_pulse'])
         self.post_pulse = int(config['post_pulse'])
@@ -50,26 +54,33 @@ class PulseFinder():
         if not bool(self.peaks):
             self.scipy_find_peaks()
         # peaks found at sum channel are used to define pulses
-        peaks = sort(self.peaks['sum'])
+        peaks_sum = sort(self.peaks['sum'])
 
-        self.n_pulses = len(peaks)
+        self.n_pulses = len(peaks_sum)
         amp = self.wfm.amplitude['sum'] # amplitude in adc
         amp_int = self.wfm.amplitude_int['sum'] # integrated amplitude in adc*ns
         if self.n_pulses>0:
             self.id = arange(self.n_pulses, dtype=uint32)
-            self.start =peaks-self.pre_pulse
-            self.end = peaks+self.post_pulse
-            np.place(self.start, self.start<0, 0)
-            np.place(self.end, self.end>=len(amp), len(amp)-1)
+            self.start =peaks_sum-self.pre_pulse
+            self.end = peaks_sum+self.post_pulse
+            place(self.start, self.start<0, 0)
+            place(self.end, self.end>=len(amp), len(amp)-1)
             self.area_adc = amp_int[self.end]-amp_int[self.start]
-            # todo: vectorize pulse height calc
-            tmp = []
+
+            # todo: vectorize the loop
             for i in self.id:
-                # if len(amp[self.start[i]:self.end[i]])==0:
-                #     print(i, self.start[i], self.end[i])
-                pmax= np.max(amp[self.start[i]:self.end[i]])
-                tmp.append( pmax )
-            self.height_adc = tmp
+                start = self.start[i]
+                end = self.end[i]
+                pmax = np.max(amp[start:end])
+                self.height_adc.append(pmax)
+                coin = 0
+                for ch, val in self.peaks.items():
+                    if ch=='sum':
+                        continue
+                    mask = logical_and(val>=start, val<end)
+                    if len(val[mask])>0:
+                        coin +=1
+                self.coincidence.append(coin)
         # todo: adjust credential if it's a spe
 
 
