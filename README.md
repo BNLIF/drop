@@ -50,7 +50,7 @@ In your virtual env (recommended), check out the help manual.
 python run_drop.py --help
 ```
 
-**Note: the pipeline is still under-development. Ideally, the code should output a RQ in root file (or other format), but it does not have this functionality right now. You may have to call class methods individually. Sorry.**
+**Note: the pipeline is still under-development. For example, the RQ file saved into a root tree has a limited number of branches. **
 
 When you're done, do the following to exit the virtual env:
 
