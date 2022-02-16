@@ -6,13 +6,18 @@ from waveform import Waveform
 
 class PulseFinder():
     """
-    Finding pulses
+    Finding pulses.
     """
     def __init__(self, config: dict, wfm: Waveform):
-        """
-        Note:
-        Initializes variables. When no pulse found, initial value are used. So
-        better to have consistent initial type.
+        """Constructor
+
+        Args:
+            config (dict): yaml file config in dictionary
+            wfm (Waveform): waveform by Waveform class
+
+        Notes:
+            Initializes variables. When no pulse found, initial value are used. So
+            better to have consistent initial type.
         """
         self.peaks={} # dict
         self.n_pulses = 0 # int
@@ -51,6 +56,9 @@ class PulseFinder():
         return None
 
     def find_pulses(self):
+        """Main function of PulseFinder. As the name suggests, find pulses. Only
+        run this after baseline subtraction.
+        """
         if not bool(self.peaks):
             self.scipy_find_peaks()
         # peaks found at sum channel are used to define pulses
@@ -91,7 +99,10 @@ class PulseFinder():
     def display(self, ch='sum'):
         '''
         A plotting function showcase pulse finder
-        ch: string, ex. b1_ch0. Default: sum
+
+        Args:
+            ch (str, list):  specified a channel to dispaly.
+                ex. b1_ch0, ['b1_ch0', 'b1_ch1']. Default: sum
         '''
         if isinstance(ch, list):
             print("ERROR: ch is a string, not a list. Use Waveform::display \

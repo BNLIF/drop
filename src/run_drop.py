@@ -22,6 +22,13 @@ class RunDROP():
     Main Class. Once per run. Manage all operations.
     """
     def __init__(self, args):
+        """Constructor
+
+        Args:
+            args: return of parser.parse_args(). This is the input arguments
+                when you run the program
+        """
+
         # args
         self.args = args # save a copy
         self.start_id = int(args.start_id)
@@ -63,7 +70,12 @@ class RunDROP():
 
     def next(self):
         '''
-        One Waveform per events. Each call iterates by one event.
+        Iterates to the next event. One Waveform per events. Each call iterates
+        by one event, but one event may contain multiple triggers. getNextTrigger()
+        iterates one trigger at a time. Carefully Check the boardId order.
+
+        Returns:
+            RunStatus: NORMAL (0), SKIP (1), STOP (2)
         '''
         trigger = self.raw_data_file.getNextTrigger()
         self.n_triggers += 1
@@ -111,6 +123,7 @@ class RunDROP():
         return RunStatus.NORMAL
 
     def display_wfm(self, ch=None):
+        """display waveform"""
         self.wfm.display(ch)
 
     def display_ch_hits(self):

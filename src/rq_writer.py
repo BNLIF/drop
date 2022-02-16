@@ -39,12 +39,16 @@ class EventRQBasket:
         """
         Add variables to the basket. Append one event at a time.
 
-        Note:
-        The small but growing list of data types can be written as TTrees:
-        - dict of NumPy arrays
-        - Single numpy array
-        - Awkward Array containing one level of variable length
-        - a single Pandas DataFrame
+        Args:
+            wfm (Waveform): waveform from Waveform class.
+            pf (PulseFinder): from PulseFinder class
+
+        Notes:
+            The small but growing list of data types can be written as TTrees:
+                * dict of NumPy arrays
+                * Single numpy array
+                * Awkward Array containing one level of variable length
+                * a single Pandas DataFrame
 
         So a list of numpy array is not an acceptable format. A list of
         list, on the other hand, is okay because it can be casted into
