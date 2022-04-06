@@ -18,18 +18,14 @@ The full dependence is specified in requirememts.txt.
 
 ## Installation and Setup
 
-Download this repoistory:
-```bash
-git clone git@gitlab.com:WbLS/drop.git
-```
-You need to be added to WbLS gitlab group to download this repo. If you do not know how to use git, check out [here] (https://realpython.com/python-git-github-intro/).
+Download is open to public, but write permission is limited to BNL Intensity Frontier (BNLIF). 
 
-Upgrade your pip (optional):
+Upgrade your pip (optional) to keep up to date with the dependence requirement:
 ```bash
 pip install --upgrade pip
 ```
 
-Create a virtual environment and activate it (optional but recommended):
+Create a virtual environment and activate it (optional):
 ```bash
 python3 -m venv env
 source env/bin/activate
