@@ -1,10 +1,10 @@
 # About DROP
 
+**D**ata **R**econstruction **O**ffline **P**ackage (**DROP**) is a collection of python toolbox to process and analyze the data collected by the Water-based Liquid Scintillator (WbLS) 1-tonne demonstrator. The binary decoder part is based on [CAENReader](https://github.com/tlangfor/CAENReader). The rest is developed according to the needs of BNL WbLS experiment, although it can be extended for other experiments.
+
 ![Data Flowchart](fig/data_flowchart.png)
 
-**D**ata **R**econstruction **O**ffline **P**ackage (**DROP**) is a python toolbox to process and analyze the data collected by the Water-based Liquid Scintillator (WbLS) 1-tonne demonstrator. The binary decoder part is based on [CAENReader](https://github.com/tlangfor/CAENReader). 
-
-The access to this gitlab repoistory is grant to the WbLS group, or individual invitation-only. For developer & maintainer access, please contact Xin: <xxiang@bnl.gov>
+The write access to this gitlab repoistory is grant to the WbLS group, or individual invitation-only. For developer & maintainer access, please contact Xin: <xxiang@bnl.gov>
 
 # Getting Started
 
@@ -46,6 +46,11 @@ In your virtual env (recommended), check out the help manual.
 
 ```bash
 python run_drop.py --help
+```
+
+To convert the raw data from binary file to root file, check out the rooter:
+```bash
+python raw_data_rooter --help
 ```
 
 **Note: the pipeline is still under-development. For example, the RQ file saved into a root tree has a limited number of branches. **
