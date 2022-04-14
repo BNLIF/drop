@@ -1,5 +1,7 @@
 # About DROP
 
+![Data Flowchart](data_flowchart.png)
+
 **D**ata **R**econstruction **O**ffline **P**ackage (**DROP**) is a python toolbox to process and analyze the data collected by the Water-based Liquid Scintillator (WbLS) 1-tonne demonstrator. The binary decoder part is based on [CAENReader](https://github.com/tlangfor/CAENReader). 
 
 The access to this gitlab repoistory is grant to the WbLS group, or individual invitation-only. For developer & maintainer access, please contact Xin: <xxiang@bnl.gov>
