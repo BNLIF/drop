@@ -25,16 +25,17 @@ class Waveform(RawTrigger):
     """
     def __init__(self, config: dict):
         super(RawTrigger, self).__init__()
-        self.apply_high_pass_filter = bool(config['apply_high_pass_filter'])
-        self.high_pass_cutoff_Hz = float(config['high_pass_cutoff_Hz'])
-        self.roll_len = int(config['rolling_length'])
-        self.sigma_thr = float(config['sigma_above_baseline'])
-        self.daq_len = int(config['daq_length'])
-        self.post_tri = float(config['post_trigger'])
-        self.roi_start = config['roi_start']
-        self.roi_end = config['roi_end']
-        self.pre_roi_length = config['pre_roi_length']
-        self.trigger_position() # art of finding trigger position
+        if config is not None:
+            self.apply_high_pass_filter = bool(config['apply_high_pass_filter'])
+            self.high_pass_cutoff_Hz = float(config['high_pass_cutoff_Hz'])
+            self.roll_len = int(config['rolling_length'])
+            self.sigma_thr = float(config['sigma_above_baseline'])
+            self.daq_len = int(config['daq_length'])
+            self.post_tri = float(config['post_trigger'])
+            self.roi_start = config['roi_start']
+            self.roi_end = config['roi_end']
+            self.pre_roi_length = config['pre_roi_length']
+            self.trigger_position() # art of finding trigger position
 
         self.event_id=-1
 
