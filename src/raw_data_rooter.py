@@ -6,6 +6,7 @@ from os import path
 from enum import Enum
 import awkward as ak
 from os.path import splitext
+import copy
 import uproot
 
 from caen_reader import RawDataFile
@@ -13,14 +14,14 @@ from waveform import Waveform
 
 N_BOARDS = 2
 BOARD_ID_ORDER = [1,2] # board id order in binary file
-MAX_N_EVENT = 5000 # Arbiarty large
-MAX_BASKET_SIZE = 10 # number of events per TBasket
+MAX_N_EVENT = 999999 # Arbiarty large
+MAX_BASKET_SIZE = 1000 # number of events per TBasket
 if MAX_BASKET_SIZE<=10:
     print("Info: write small baskets is not recommended by Jim \
     Pivarski. Code may be slow this way. Rule of thumb: at least \
     100 kb/basket/branch. See: \
     https://github.com/scikit-hep/uproot4/pull/428")
-
+INITIAL_BASEKTEL_CAPACITY=1000 # number of basket per file
 
 class RunStatus(Enum):
     NORMAL = 0 # all good, keep going
@@ -42,13 +43,15 @@ class RawDataRooter():
         if args.output_dir=="":
             self.of_path = args.if_path +'.root'
         else:
-            self.of_path = args.output_dir + '/' + args.of
+            fname = path.basename( args.if_path)
+            self.of_path = args.output_dir + '/' + fname + '.root'
 
-        # counter
-        self.n_events = 0 # number of good events
-        self.n_triggers = 0 # total num. of triggers
-
-        self.sanity_check()
+        # useful variables
+        self.n_proc_events = 0 # number of good (actually processed) events
+        self.proc_event_id = set() # keep a record of processed event id
+        self.first_trg_candidate = False
+        
+        # self.sanity_check()
         self.find_active_ch_names()
 
     def sanity_check(self):
@@ -58,12 +61,11 @@ class RawDataRooter():
         # Check a few triggers first from binary file
         raw_data_file = RawDataFile(self.args.if_path)
         for i in range(N_BOARDS):
-            trigger = raw_data_file.getNextTrigger()
-            self.n_triggers += 1
+            trg = raw_data_file.getNextTrigger()
             if i==0:
-                t0 = trigger.traces.copy()
+                t0 = trg.traces.copy()
             else:
-                t1 = trigger.traces
+                t1 = trg.traces
                 if t1==t0:
                     sys.exit('Identical traces!')
         raw_data_file.close()
@@ -76,8 +78,8 @@ class RawDataRooter():
         ch_names = []
         raw_data_file = RawDataFile(self.args.if_path)
         for i in range(N_BOARDS):
-            trigger = raw_data_file.getNextTrigger()
-            for ch, val in trigger.traces.items():
+            trg = raw_data_file.getNextTrigger()
+            for ch, val in trg.traces.items():
                 ch_names.append(ch)
         self.ch_names = ch_names
         raw_data_file.close()
@@ -92,49 +94,57 @@ class RawDataRooter():
         Returns:
             RunStatus: NORMAL (0), SKIP (1), STOP (2)
         '''
-        trigger = self.raw_data_file.getNextTrigger()
-        self.n_triggers += 1
-
+        if self.first_trg_candidate==False:
+            trg = self.raw_data_file.getNextTrigger()
+        else:
+            trg = self.prev_trg
+            
         # end of file?
-        if trigger is None:
+        if trg is None:
             print("Info: The end of this file is reached. Close.")
             self.raw_data_file.close()
             return RunStatus.STOP
 
         # only process within [start_id, end_id)
-        event_id = trigger.eventCounter
-        if event_id<self.start_id or event_id>=self.end_id:
-            self.skip_event_id = event_id
+        first_trg_id = trg.eventCounter
+        if first_trg_id<self.start_id or first_trg_id>=self.end_id:
+            self.skipped_event_id = first_trg_id
             return RunStatus.SKIP
 
-        # If the first boardId is not found in one cycle, stop
-        stop_run = False
-        if trigger.boardId != BOARD_ID_ORDER[0]:
-            stop_run = True # temporially set True
-            for i in range(N_BOARDS-1):
-                trigger = self.raw_data_file.getNextTrigger()
-                self.n_triggers += 1
-                if trigger.boardId==BOARD_ID_ORDER[0]:
-                    stop_run=False # found it
-                    break;
-        if stop_run:
-            return RunStatus.STOP
+        # the first boardId needs to match BOARD_ID_ORDER[0]. Skip to the next if not.
+        if trg.boardId != BOARD_ID_ORDER[0]:
+            self.skipped_event_id = first_trg_id
+            return RunStatus.SKIP
 
+        # check if the first trigger is duplicated
+        if first_trg_id in self.proc_event_id:
+            self.skipped_event_id = first_trg_id
+            return RunStatus.SKIP
+        else:
+            self.proc_event_id.add(first_trg_id)
+        
+        # record the first trigger to waveform
         wfm = Waveform(config=None)
-        wfm.traces = trigger.traces.copy() # new copy
-        wfm.triggerTimeTag = trigger.triggerTimeTag
-        wfm.triggerTime = trigger.triggerTime
-        wfm.event_id=trigger.eventCounter
-        wfm.filePos=trigger.filePos
+        wfm.traces = trg.traces.copy() # new copy
+        wfm.triggerTimeTag = trg.triggerTimeTag
+        wfm.triggerTime = trg.triggerTime
+        wfm.event_id=first_trg_id
+        wfm.filePos=trg.filePos
 
+        # loop over the rest
         for i in range(1, N_BOARDS):
-            trigger = self.raw_data_file.getNextTrigger()
-            self.n_triggers += 1
-            if trigger.boardId != BOARD_ID_ORDER[i]:
+            trg = self.raw_data_file.getNextTrigger()
+            if trg.boardId != BOARD_ID_ORDER[i]:
+                if trg.boardId==BOARD_ID_ORDER[0]:
+                    self.first_trg_candidate=True
+                    self.prev_trg = copy.deepcopy(trg)
+                else:
+                    self.first_trg_candidate=False
+                self.skipped_event_id = first_trg_id
                 return RunStatus.SKIP
             else:
-                wfm.traces.update(trigger.traces)
-
+                wfm.traces.update(trg.traces)
+                
         self.wfm = wfm # save
         return RunStatus.NORMAL
 
@@ -160,7 +170,7 @@ class RawDataRooter():
 
             # make tree
             self.file.mktree("daq", {'adc': a.type, 'event': event },
-            initial_basket_capacity=100)
+            initial_basket_capacity=INITIAL_BASEKTEL_CAPACITY)
             # self.file['daq'].show()
         else:
             sys.exit('Sorry, requested output file format is not yet implmented.')
@@ -211,10 +221,9 @@ def main(argv):
         if status==RunStatus.STOP:
             if rooter.basket_size>0:
                 rooter.dump_basket()
-                print('STOP')
             break
         elif status==RunStatus.SKIP:
-            print('SKIP:', i, rooter.skip_event_id, rooter.n_events)
+            print('SKIP:', i, rooter.skipped_event_id, rooter.n_proc_events, len(rooter.proc_event_id), rooter.proc_event_id)
             continue
         else:
             if rooter.basket_size < MAX_BASKET_SIZE:
@@ -222,10 +231,11 @@ def main(argv):
             else:
                 rooter.dump_basket()
                 rooter.reset_basket()
-            if rooter.n_events % 10==0:
-                print('processed %d th events' % rooter.n_events)
-            rooter.n_events +=1
+            if rooter.n_proc_events % 100 ==0:
+                print('processed %d th events' % rooter.n_proc_events)
+            rooter.n_proc_events +=1
 
+    print(rooter.n_proc_events)
     rooter.close_file()
 
 

@@ -42,20 +42,27 @@ Alternatively, you can pip install package one by one.
 
 ## Usage
 
-In your virtual env (recommended), check out the help manual. 
-
-```bash
-python run_drop.py --help
+Enter virtual environment if not already in (recommneded):
+```
+source env/bin/activate
 ```
 
 To convert the raw data from binary file to root file, check out the rooter:
 ```bash
-python raw_data_rooter --help
+python src/raw_data_rooter.py --help
+```
+Checkout the global parameters (ALL CAP) defined at the beginning of the script.
+
+
+In your virtual env (recommended), check out the help manual. 
+
+```bash
+python src/run_drop.py --help
 ```
 
 **Note: the pipeline is still under-development. For example, the RQ file saved into a root tree has a limited number of branches. **
 
-When you're done, do the following to exit the virtual env:
+When you're done, exit the virtual env:
 
 ```
 deactivate

@@ -1,2 +1,4 @@
 # enter environment
-source env/bin/activate
+#source env/bin/activate
+
+export PYTHONPATH="${PWD}/src"
