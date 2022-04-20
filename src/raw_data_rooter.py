@@ -6,7 +6,6 @@ from os import path
 from enum import Enum
 import awkward as ak
 from os.path import splitext
-import copy
 import uproot
 
 from caen_reader import RawDataFile
@@ -47,9 +46,9 @@ class RawDataRooter():
             self.of_path = args.output_dir + '/' + fname + '.root'
 
         # useful variables
-        self.n_proc_events = 0 # number of good (actually processed) events
+        self.n_events_proc = 0 # number of good (actually processed) events
         self.proc_event_id = set() # keep a record of processed event id
-        self.first_trg_candidate = False
+        self.n_trg_read = 0 # number of trigger read from binary
         
         # self.sanity_check()
         self.find_active_ch_names()
@@ -94,14 +93,12 @@ class RawDataRooter():
         Returns:
             RunStatus: NORMAL (0), SKIP (1), STOP (2)
         '''
-        if self.first_trg_candidate==False:
-            trg = self.raw_data_file.getNextTrigger()
-        else:
-            trg = self.prev_trg
-            
+        trg = self.raw_data_file.getNextTrigger()
+        self.n_trg_read +=1 # increment by 1 whenever getNextTrigger is called
+        
         # end of file?
         if trg is None:
-            print("Info: The end of this file is reached. Close.")
+            print("Info: End of file. Close!")
             self.raw_data_file.close()
             return RunStatus.STOP
 
@@ -134,12 +131,12 @@ class RawDataRooter():
         # loop over the rest
         for i in range(1, N_BOARDS):
             trg = self.raw_data_file.getNextTrigger()
+            self.n_trg_read +=1
+            if trg is None:
+                print("Info: End of file. Close!")
+                return RunStatus.STOP
+            
             if trg.boardId != BOARD_ID_ORDER[i]:
-                if trg.boardId==BOARD_ID_ORDER[0]:
-                    self.first_trg_candidate=True
-                    self.prev_trg = copy.deepcopy(trg)
-                else:
-                    self.first_trg_candidate=False
                 self.skipped_event_id = first_trg_id
                 return RunStatus.SKIP
             else:
@@ -205,6 +202,13 @@ class RawDataRooter():
         """
         self.file.close()
 
+    def print_info(self):
+        print("")
+        print("----------------------")
+        print("Num. of events processed:", self.n_events_proc)
+        print("Num. of triggers read:", self.n_trg_read)
+        print("Pass rate:", (self.n_events_proc*N_BOARDS)/self.n_trg_read)
+    
 def main(argv):
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
     parser.add_argument('--if_path', type=str, help='Required. full path to the raw data file')
@@ -223,7 +227,7 @@ def main(argv):
                 rooter.dump_basket()
             break
         elif status==RunStatus.SKIP:
-            print('SKIP:', i, rooter.skipped_event_id, rooter.n_proc_events, len(rooter.proc_event_id), rooter.proc_event_id)
+            print('SKIP:', i, rooter.skipped_event_id, rooter.n_events_proc, len(rooter.proc_event_id))
             continue
         else:
             if rooter.basket_size < MAX_BASKET_SIZE:
@@ -231,13 +235,12 @@ def main(argv):
             else:
                 rooter.dump_basket()
                 rooter.reset_basket()
-            if rooter.n_proc_events % 100 ==0:
-                print('processed %d th events' % rooter.n_proc_events)
-            rooter.n_proc_events +=1
+            if rooter.n_events_proc % 10 ==0:
+                print('processed %d th events' % rooter.n_events_proc)
+            rooter.n_events_proc +=1
 
-    print(rooter.n_proc_events)
+    rooter.print_info()
     rooter.close_file()
-
 
 if __name__ == "__main__":
    main(sys.argv[1:])
