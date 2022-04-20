@@ -93,7 +93,8 @@ class RawDataFile:
 
         # Calculate length of each trace, using eventSize (in long words) and removing the 4 long words from the header
         size = int(4 * eventSize - 16)
-
+        self.recordLen = size//(2*numChannels) # Xin: save the length of traces
+        
         # looping over the entries in the whichChan list, only reading data if the entry is 1
         for ind, k in enumerate(whichChan):
             if k == 1:
@@ -177,6 +178,7 @@ class RawTrigger:
 
         #Xin added
         self.boardId = 0
+        self.size = 0
 
     def display(self, trName=None):
 
