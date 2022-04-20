@@ -235,7 +235,7 @@ def main(argv):
             else:
                 rooter.dump_basket()
                 rooter.reset_basket()
-            if rooter.n_events_proc % 10 ==0:
+            if rooter.n_events_proc % 100 ==0:
                 print('processed %d th events' % rooter.n_events_proc)
             rooter.n_events_proc +=1
 
