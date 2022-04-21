@@ -2,6 +2,16 @@
 X. Xiang <xxiang@bnl.gov>
 
 Convert raw data from binary to root format for long term storage. No fancy event reconstruction.
+
+A trigger is a digitizer's data. Map triggers to events by using a event queue. 
+An event queue is like a table: row->event_id, col->info
+
+Algotrhim in a nutshell:
+0. Create an event queue
+1. Read a trigger
+2. Check this trigger's event_id in event queue; if not exist, create a new row in the queue. If exist, add to the row.
+3. Periodically check if queue has any rows fully filled. If yes, dump the fully filled rows to file.
+
 '''
 
 import argparse
@@ -91,7 +101,7 @@ class RawDataRooter():
         """
         ch_names = set()
         raw_data_file = RawDataFile(self.args.if_path)
-        for i in range(10):
+        for i in range(20):
             trg = raw_data_file.getNextTrigger()
             for ch, val in trg.traces.items():
                 ch_names.add(ch)
@@ -101,12 +111,11 @@ class RawDataRooter():
 
     def next(self):
         '''
-        Iterates to the next event. One Waveform per events. Each call iterates
-        by one event, but one event may contain multiple triggers. getNextTrigger()
-        iterates one trigger at a time. Carefully Check the boardId order.
+        Iterate one trigger at a time. Careful check condition. 
+        If all good, fill event_queue.
 
         Returns:
-            RunStatus: NORMAL (0), SKIP (1), STOP (2)
+            RunStatus: NORMAL, SKIP, STOP
         '''
         trg = self.raw_data_file.getNextTrigger()        
         if trg is None: # end of file?
@@ -157,12 +166,19 @@ class RawDataRooter():
             # self.file['daq'].show()
         else:
             sys.exit('Sorry, requested output file format is not yet implmented.')
-
+        return None
+    
     def reset_event_queue(self):
+        """
+        Reset the event queue.
+        """
         self.event_queue = {}
         return None
         
     def fill_event_queue(self, trg):
+        """
+        Fill event queue, one trigger at a time.
+        """
         boardId = trg.boardId
         trg_id = trg.eventCounter
         if trg_id in self.event_queue:
@@ -175,9 +191,6 @@ class RawDataRooter():
                     self.event_queue[trg_id][ch] = val
         else:
             self.event_queue[trg_id] = trg.traces
-            #self.event_queue[trg_id] = {}
-            #for ch, val in trg.traces.items():
-            #    self.event_queue[trg_id][ch] = val
         # add ttt to the queue
         ttt = trg.triggerTimeTag
         if boardId==1:
@@ -197,6 +210,9 @@ class RawDataRooter():
         return full_event_id
     
     def dump_events(self):
+        """
+        Dump fully filled events from queue to tree
+        """
         # get rows from queue
         i_set = self.get_full_queue_id()
         if len(i_set)==0:
@@ -244,6 +260,11 @@ class RawDataRooter():
             return None
     
 def main(argv):
+    """
+    Main function. Usage:
+    python raw_data_rooter.py --help
+    """
+
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
     parser.add_argument('--if_path', type=str, help='Required. full path to the raw data file')
     parser.add_argument('--start_id', type=int, default=0, help='Optional. start process from start_id (default: 0)')
