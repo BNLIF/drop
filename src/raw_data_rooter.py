@@ -31,12 +31,11 @@ from caen_reader import RawDataFile
 #----------------------------------- 
 N_BOARDS = 3
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
-MAX_BASKET_SIZE = 100 # number of events per TBasket in ROOT
+DUMP_SIZE = 300 # number of triggers to accumulate in queue before dump
 INITIAL_BASEKTEL_CAPACITY=1000 # number of basket per file
+MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
 
-#if len(BOARD_ID_ORDER) != N_BOARDS:
-#    sys.exit("The length of BOARD_ID_ORDER must be N_BOARDS!")
-if MAX_BASKET_SIZE<=10:
+if DUMP_SIZE<=10:
     print("Info: write small baskets is not recommended by Jim \
     Pivarski. Code may be slow this way. Rule of thumb: at least \
     100 kb/basket/branch. See: \
@@ -71,7 +70,8 @@ class RawDataRooter():
         self.read_event_id = set() # keep a record of event id read in (updated in next())
         self.dumped_event_id = set() # keep a record of event id dumpped
         self.tot_n_evt_proc = 0 # number of good events saved (updated after dump)
-
+        self.dump_counter = 0 # number of dumps
+        
         # self.sanity_check()
         self.find_active_ch_names()
         self.reset_event_queue()
@@ -234,6 +234,8 @@ class RawDataRooter():
             del self.event_queue[i]
             self.dumped_event_id.add(i) # keep a record of deleted event_id
         self.tot_n_evt_proc = len(self.dumped_event_id)
+        # keep track of num. of dumps
+        self.dump_counter += 1
         return None
                 
     def close_file(self):
@@ -287,9 +289,11 @@ def main(argv):
             print('SKIP:', i, rooter.skipped_event_id, tot_n_evt_proc)
             continue
         else:
-            n_queue = len(rooter.event_queue)
-            if n_queue >= MAX_BASKET_SIZE:
+            if rooter.n_trg_read % DUMP_SIZE == 0:
                 rooter.dump_events()
+                n_queue = len(rooter.event_queue)
+                if n_queue>MAX_EVENT_QUEUE:
+                    print("WARNING: your event queue is getting too big.")
         rooter.show_progress()
 
     rooter.print_summary()
