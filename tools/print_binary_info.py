@@ -14,7 +14,7 @@ if_path=str(sys.argv[1])
 raw_data_file = RawDataFile(if_path)
 width=9
 prev_ttt=0
-for i in range(10000):
+for i in range(1000):
     trigger = raw_data_file.getNextTrigger()
     if trigger is None:
         print("Done")
