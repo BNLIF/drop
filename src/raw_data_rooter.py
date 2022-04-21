@@ -23,15 +23,13 @@ from enum import Enum
 import awkward as ak
 from os.path import splitext
 import uproot 
-
 from caen_reader import RawDataFile
-# from waveform import Waveform
+
 
 #----------------------------------- 
 # Global Parameters are Captialized
 #----------------------------------- 
-N_BOARDS = 2
-#BOARD_ID_ORDER = [3,1,2] # board id order in binary file
+N_BOARDS = 3
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 MAX_BASKET_SIZE = 100 # number of events per TBasket in ROOT
 INITIAL_BASEKTEL_CAPACITY=1000 # number of basket per file
@@ -69,11 +67,11 @@ class RawDataRooter():
             self.of_path = args.output_dir + '/' + fname + '.root'
 
         # useful variables
-        self.tot_n_evt_proc = 0 # number of good (actually processed) events
-        self.n_trg_read = 0 # number of trigger read from binary
-        self.read_event_id = set() # keep a record of event id read in
+        self.n_trg_read = 0 # number of trigger read from binary (updated in next())
+        self.read_event_id = set() # keep a record of event id read in (updated in next())
         self.dumped_event_id = set() # keep a record of event id dumpped
-        
+        self.tot_n_evt_proc = 0 # number of good events saved (updated after dump)
+
         # self.sanity_check()
         self.find_active_ch_names()
         self.reset_event_queue()
@@ -237,14 +235,14 @@ class RawDataRooter():
             self.dumped_event_id.add(i) # keep a record of deleted event_id
         self.tot_n_evt_proc = len(self.dumped_event_id)
         return None
-        
                 
     def close_file(self):
         """
         Close the open data file. Helpful when doing on-the-fly testing
         """
         self.file.close()
-
+        return None
+        
     def print_summary(self):
         print("")
         print("----------------------")
@@ -252,12 +250,13 @@ class RawDataRooter():
         print("Num. of events processed:", self.tot_n_evt_proc)
         print("Num. of triggers read:", self.n_trg_read)
         print("Pass rate:", (self.tot_n_evt_proc*N_BOARDS)/self.n_trg_read)
-
+        return None
+    
     def show_progress(self):
         if self.n_trg_read % 100 ==0:
             tot_n_evt_proc = len(self.dumped_event_id)
             print('read %d th trggers,' % self.n_trg_read, " dumped %d events" % tot_n_evt_proc)
-            return None
+        return None
     
 def main(argv):
     """
