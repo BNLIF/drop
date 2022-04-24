@@ -20,6 +20,7 @@ from numpy import array, isscalar, zeros
 import numpy as np
 from os import path
 from enum import Enum
+import re
 import awkward as ak
 from os.path import splitext
 import uproot 
@@ -101,6 +102,10 @@ class RawDataRooter():
         raw_data_file = RawDataFile(self.args.if_path)
         for i in range(20):
             trg = raw_data_file.getNextTrigger()
+            if trg is None:
+                print("current active channels are:")
+                print(ch_names)
+                break
             for ch, val in trg.traces.items():
                 ch_names.add(ch)
         self.ch_names = ch_names
@@ -124,7 +129,7 @@ class RawDataRooter():
         # only process within [start_id, end_id)
         trg_id = trg.eventCounter
         if trg_id<self.start_id or trg_id>=self.end_id:
-            self.skipped_event_id = first_trg_id
+            self.skipped_event_id = trg_id
             return RunStatus.SKIP
         self.n_trg_read +=1 
         self.read_event_id.add(trg_id)
@@ -237,7 +242,28 @@ class RawDataRooter():
         # keep track of num. of dumps
         self.dump_counter += 1
         return None
-                
+
+    def dump_run_info(self):
+        """
+        Run tree contains meta data describing the DAQ config. One entry per run.
+        """
+        # list of string cannot be saved to tree
+        # ch_id = boardId * 100 + chID is int
+        ch_id = []
+        for ch in self.ch_names:
+            ch_str = re.findall(r'\d+', ch)
+            ch_id.append( int(ch_str[0])*100+int(ch_str[1]) )
+
+        leftover_event_id = self.event_queue.keys()
+        self.file['run_info'] = {
+            'active_ch_id': [ch_id],
+            'n_boards': [N_BOARDS],
+            'n_trg_read': [self.n_trg_read],
+            'n_event_proc': [self.tot_n_evt_proc],
+            'leftover_event_id': [leftover_event_id]
+        }
+        return None
+
     def close_file(self):
         """
         Close the open data file. Helpful when doing on-the-fly testing
@@ -295,7 +321,7 @@ def main(argv):
                 if n_queue>MAX_EVENT_QUEUE:
                     print("WARNING: your event queue is getting too big.")
         rooter.show_progress()
-
+    rooter.dump_run_info()
     rooter.print_summary()
     rooter.close_file()
 
