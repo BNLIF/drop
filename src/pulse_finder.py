@@ -19,15 +19,6 @@ class PulseFinder():
             Initializes variables. When no pulse found, initial value are used. So
             better to have consistent initial type.
         """
-        self.peaks={} # dict
-        self.n_pulses = 0 # int
-        self.id = array([]) # type: ndarray
-        self.start = array([]) # type: ndarray
-        self.end = array([]) # type: ndarray
-        self.area_adc = array([]) # type: ndarray
-        self.height_adc = [] #type: list
-        self.coincidence =  [] #type: list
-
         # save config param for latter access
         self.pre_pulse = int(config['pre_pulse'])
         self.post_pulse = int(config['post_pulse'])
@@ -36,8 +27,22 @@ class PulseFinder():
             'threshold': float(config['scipy_find_peaks']['threshold']),
             'height': float(config['scipy_find_peaks']['height'])
         }
-        # waveform
-        self.wfm = wfm
+
+        self.reset()
+
+    def reset(self):
+        """
+        Variables that needs to be reset per event
+        """
+        self.peaks={} # dict
+        self.n_pulses = 0 # int
+        self.id = array([]) # type: ndarray
+        self.start = array([]) # type: ndarray
+        self.end = array([]) # type: ndarray
+        self.area_adc = array([]) # type: ndarray
+        self.height_adc = [] #type: list
+        self.coincidence =  [] #type: list
+        self.wfm = None
 
     def scipy_find_peaks(self):
         """

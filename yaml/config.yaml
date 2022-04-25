@@ -1,12 +1,7 @@
 # General DAQ config setting on LabVIEW
-n_boards: 2
+batch_size: 100 # int
 daq_length: 640 # Xin: daq_length set on labVIEW. Not the recorded num. of samples.
 post_trigger: 0.5
-boardId_order: [1,2] # Order of board recorded in file. Usually master board is the first.
-
-# RQWriter
-output_dir: "/Users/xxiang/MyGitLab/WbLS/drop/output"
-basket_size: 1000 # int, write to file every x events
 
 # Waveform: baseline subtraction
 apply_high_pass_filter: False

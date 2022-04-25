@@ -3,7 +3,7 @@ X. Xiang <xxiang@bnl.gov>
 
 Convert raw data from binary to root format for long term storage. No fancy event reconstruction.
 
-A trigger is a digitizer's data. Map triggers to events by using a event queue. 
+A trigger is a digitizer's data. Map triggers to events by using a event queue.
 An event queue is like a table: row->event_id, col->info
 
 Algotrhim in a nutshell:
@@ -23,13 +23,13 @@ from enum import Enum
 import re
 import awkward as ak
 from os.path import splitext
-import uproot 
+import uproot
 from caen_reader import RawDataFile
 
 
-#----------------------------------- 
+#-----------------------------------
 # Global Parameters are Captialized
-#----------------------------------- 
+#-----------------------------------
 N_BOARDS = 3
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 DUMP_SIZE = 300 # number of triggers to accumulate in queue before dump
@@ -72,11 +72,11 @@ class RawDataRooter():
         self.dumped_event_id = set() # keep a record of event id dumpped
         self.tot_n_evt_proc = 0 # number of good events saved (updated after dump)
         self.dump_counter = 0 # number of dumps
-        
+
         # self.sanity_check()
         self.find_active_ch_names()
         self.reset_event_queue()
-        
+
     def sanity_check(self):
         '''
         Werid thing may happen. Check.:
@@ -114,41 +114,41 @@ class RawDataRooter():
 
     def next(self):
         '''
-        Iterate one trigger at a time. Careful check condition. 
+        Iterate one trigger at a time. Careful check condition.
         If all good, fill event_queue.
 
         Returns:
             RunStatus: NORMAL, SKIP, STOP
         '''
-        trg = self.raw_data_file.getNextTrigger()        
+        trg = self.raw_data_file.getNextTrigger()
         if trg is None: # end of file?
             print("Info: End of file. Close!")
             self.raw_data_file.close()
             return RunStatus.STOP
-        
+
         # only process within [start_id, end_id)
         trg_id = trg.eventCounter
         if trg_id<self.start_id or trg_id>=self.end_id:
             self.skipped_event_id = trg_id
             return RunStatus.SKIP
-        self.n_trg_read +=1 
+        self.n_trg_read +=1
         self.read_event_id.add(trg_id)
-        
+
         # duplicated trigger appearing after event dumped to file
         if trg_id in self.dumped_event_id:
             return RunStatus.SKIP
-        
+
         # add to event queue
         status =  self.fill_event_queue(trg)
         return status
-        
+
     def create_output_file(self):
         """
         Create output file
         """
         _, f_ext = splitext(self.of_path)
         if f_ext=='.root':
-            
+
             self.file = uproot.recreate(self.of_path)
 
             # dummy channels traces
@@ -170,14 +170,14 @@ class RawDataRooter():
         else:
             sys.exit('Sorry, requested output file format is not yet implmented.')
         return None
-    
+
     def reset_event_queue(self):
         """
         Reset the event queue.
         """
         self.event_queue = {}
         return None
-        
+
     def fill_event_queue(self, trg):
         """
         Fill event queue, one trigger at a time.
@@ -197,13 +197,13 @@ class RawDataRooter():
         # add ttt to the queue
         ttt = trg.triggerTimeTag
         if boardId==1:
-            self.event_queue[trg_id]['ttt']=ttt        
+            self.event_queue[trg_id]['ttt']=ttt
         return RunStatus.NORMAL
-    
+
     def get_full_queue_id(self):
         """
         Return a set of event_id in queue that have all info filled
-        """        
+        """
         all_keys = self.ch_names.copy()
         all_keys.add('ttt')
         full_event_id = set()
@@ -211,7 +211,7 @@ class RawDataRooter():
             if set(ev.keys()) == all_keys:
                 full_event_id.add(i)
         return full_event_id
-    
+
     def dump_events(self):
         """
         Dump fully filled events from queue to tree
@@ -270,7 +270,7 @@ class RawDataRooter():
         """
         self.file.close()
         return None
-        
+
     def print_summary(self):
         print("")
         print("----------------------")
@@ -279,13 +279,13 @@ class RawDataRooter():
         print("Num. of triggers read:", self.n_trg_read)
         print("Pass rate:", (self.tot_n_evt_proc*N_BOARDS)/self.n_trg_read)
         return None
-    
+
     def show_progress(self):
         if self.n_trg_read % 100 ==0:
             tot_n_evt_proc = len(self.dumped_event_id)
             print('read %d th trggers,' % self.n_trg_read, " dumped %d events" % tot_n_evt_proc)
         return None
-    
+
 def main(argv):
     """
     Main function. Usage:
@@ -293,10 +293,11 @@ def main(argv):
     """
 
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
-    parser.add_argument('--if_path', type=str, help='Required. full path to the raw data file')
     parser.add_argument('--start_id', type=int, default=0, help='Optional. start process from start_id (default: 0)')
     parser.add_argument('--end_id', type=int, default=MAX_N_TRIGGERS, help='Optional. stop process at end_id (defalt: Arbiarty large)')
     parser.add_argument('--output_dir', type=str, default="", help='Optional. output directory. Default: not specified. If not specified, use input binary file directory.' )
+    required = parser.add_argument_group('Required Arguments')
+    required.add_argument('-i', '--if_path', type=str, help='Required. full path to the raw data file', required=True)
     args = parser.parse_args()
 
     rooter = RawDataRooter(args)

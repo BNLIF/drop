@@ -1,4 +1,6 @@
 '''
+One waveform per event.
+
 Outline
 - baseline subtraction per channel
 - pulse finding
@@ -12,19 +14,17 @@ from matplotlib import cm
 from numpy.lib.stride_tricks import sliding_window_view
 from utilities import generate_colormap, digitial_butter_highpass_filter
 import re
+import sys
 
 from yaml_reader import ADC_RATE_HZ
-from caen_reader import RawDataFile
-from caen_reader import RawTrigger
 
 EPS=1e-6
 
-class Waveform(RawTrigger):
+class Waveform():
     """
-    Waveform class is derived from RawTrigger class
+    Waveform class. One waveform per event.
     """
     def __init__(self, config: dict):
-        super(RawTrigger, self).__init__()
         if config is not None:
             self.apply_high_pass_filter = bool(config['apply_high_pass_filter'])
             self.high_pass_cutoff_Hz = float(config['high_pass_cutoff_Hz'])
@@ -36,15 +36,31 @@ class Waveform(RawTrigger):
             self.roi_end = config['roi_end']
             self.pre_roi_length = config['pre_roi_length']
             self.trigger_position() # art of finding trigger position
+        self.ch_names = None
+        self.n_boards = None
+        self.reset()
+        return None
 
-        self.event_id=-1
-
-        # calc in do_baseline_subtraction
+    def reset(self):
+        """
+        Variables that needs to be reset from event to event
+        """
+        # from raw data
+        self.raw_data = None
+        # calculated stuff
         self.base_mean = {} # baseline mean
         self.base_std = {} # baseline std
         self.amplitude={} # amplitude is baseline subtracted trace
         self.amplitude_int={} # integrated amplitude
-        return None
+
+    def set_n_boards(self, val):
+        self.n_boards = val
+    def set_ch_names(self, val):
+        self.ch_names = val
+    def set_raw_data(self, val):
+        self.raw_data = val
+        self.event_id = val.event_id
+        self.event_ttt = val.event_ttt
 
     def trigger_position(self):
         """
@@ -72,7 +88,11 @@ class Waveform(RawTrigger):
         Very basic
         Baseline is avg over all excluding trigger regions
         """
-        for ch, val in self.traces.items():
+        if self.ch_names is None:
+            sys.exit('ERROR: Waveform::ch_names is not specified. Use Waveform::set_ch_names()')
+
+        for ch in self.ch_names:
+            val = self.raw_data[ch]
             mean, std = self.get_flat_baseline(val)
             self.base_mean[ch], self.base_std[ch] = mean, std
             amp = -(val-self.base_mean[ch])
@@ -88,7 +108,7 @@ class Waveform(RawTrigger):
         """
         tot = 0
         for ch, val in self.amplitude.items():
-            tot += val
+            tot += val.to_numpy()
         self.amplitude['sum'] = tot
 
         # def baseline for sum channel
@@ -107,7 +127,8 @@ class Waveform(RawTrigger):
         """work in progress"""
         med = zeros(self.daq_len-10)
         std =zeros(self.daq_len)
-        for ch, val in self.traces.items():
+        for ch in self.ch_names:
+            val = self.raw_data[ch]
             v = sliding_window_view(val, self.roll_len)
             roll_start = self.roll_len-1
             med[roll_start:] = v.median(axis=-1)
@@ -158,47 +179,54 @@ class Waveform(RawTrigger):
             self.roi_height.append(height)
         return None
 
-    def display(self, ch=None):
-        '''
-        ch: string, ex. b1_ch0, sum. Default: None (all)
-        '''
-        # plotting style
-        plt.rcParams['axes.grid'] = True
-
-        if ch is None or ch=='all':
-            fig = plt.figure(figsize=[9,8])
-            cmap = generate_colormap(16)
-            ax1 = plt.subplot(211)
-            ax2 = plt.subplot(212)
-            for trace in sorted(self.traces.items()):
-                key=trace[0] # key ex: b1_ch0
-                # get end digits, which is ch number on a board
-                ch_id = int(re.match('.*?([0-9]+)$', key).group(1))
-                if 'b1_' in trace[0]:
-                    label='ch%d' % ch_id
-                    ax1.plot(trace[1], label=label, color=cmap.colors[ch_id])
-                    ax1.set_title('event_id=%d, Board 1' % self.event_id)
-                if 'b2_' in trace[0]:
-                    label='ch%d' % ch_id
-                    ax2.plot(trace[1], label=label, color=cmap.colors[ch_id])
-                    ax2.set_title('event_id=%d, Board 2' % self.event_id)
-            ax1.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
-        else:
-            fig = plt.figure(figsize=[8,4])
-            plt.subplot(111)
-            if isinstance(ch, str):
-                a = self.amplitude[ch]
-                plt.plot(a, label=ch)
-                plt.plot()
-                plt.plot(zeros(a), '--', color='gray', label='flat baseline')
-            elif isinstance(ch, list):
-                for t in ch:
-                    plt.plot(self.traces[t], label=t)
-            plt.legend(loc=0)
-
-        ymin, ymax = plt.ylim()
-        plt.ylim(ymax=ymax + (ymax-ymin)*.15)
-        plt.xlabel('Samples')
-        plt.ylabel('ADC')
-        plt.grid()
-        #plt.show()
+    # def display(self, ch=None):
+    #     '''
+    #     ch: string, ex. b1_ch0, sum. Default: None (all)
+    #     '''
+    #     # plotting style
+    #     plt.rcParams['axes.grid'] = True
+    #
+    #     if ch is None or ch=='all':
+    #         fig = plt.figure(figsize=[9,3*self.n_boards])
+    #         cmap = generate_colormap(16)
+    #
+    #
+    #         for k in range(self.n_boards):
+    #             ax1 = plt.subplot(self.n_boards,1,1)
+    #         ax2 = plt.subplot(self.n_boards,1,2)
+    #         for ch in sorted(self.ch_names):
+    #             val = self.raw_data[ch]
+    #             # get end digits, which is ch number on a board
+    #             ch_id = int(re.match('.*?([0-9]+)$', key).group(1))
+    #             if 'b1_' in ch:
+    #                 label='ch%d' % ch_id
+    #                 ax1.plot(val, label=label, color=cmap.colors[ch_id])
+    #                 ax1.set_title('event_id=%d, Board 1' % self.event_id)
+    #             if 'b2_' in ch:
+    #                 label='ch%d' % ch_id
+    #                 ax2.plot(val, label=label, color=cmap.colors[ch_id])
+    #                 ax2.set_title('event_id=%d, Board 2' % self.event_id)
+    #             if 'b3_' in ch:
+    #                 label='ch%d' % ch_id
+    #                 ax3.plot(val, label=label, color=cmap.colors[ch_id])
+    #                 ax3.set_title('event_id=%d, Board 3' % self.event_id)
+    #         ax1.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
+    #     else:
+    #         fig = plt.figure(figsize=[8,4])
+    #         plt.subplot(111)
+    #         if isinstance(ch, str):
+    #             a = self.amplitude[ch]
+    #             plt.plot(a, label=ch)
+    #             plt.plot()
+    #             plt.plot(zeros(a), '--', color='gray', label='flat baseline')
+    #         elif isinstance(ch, list):
+    #             for t in ch:
+    #                 plt.plot(self.traces[t], label=t)
+    #         plt.legend(loc=0)
+    #
+    #     ymin, ymax = plt.ylim()
+    #     plt.ylim(ymax=ymax + (ymax-ymin)*.15)
+    #     plt.xlabel('Samples')
+    #     plt.ylabel('ADC')
+    #     plt.grid()
+    #     #plt.show()
