@@ -1,3 +1,9 @@
+"""
+DROP convert raw waveform to reduced qualities.
+
+Contact:
+X. Xiang <xxiang@bnl.gov>
+"""
 import argparse
 import sys
 from numpy import array, isscalar
@@ -12,18 +18,13 @@ from rq_writer import RQWriter
 
 MAX_N_EVENT = 999999999 # Arbiarty large
 
-class RunStatus(Enum):
-    NORMAL = 0 # all good, keep going
-    STOP = 1 # stop the run
-    SKIP = 2 # bad, better skip to next
 
 class RunDROP():
     """
     Main Class. Once per run. Manage all operations.
     """
     def __init__(self, args):
-        """Constructor
-
+        """
         Args:
             args: return of parser.parse_args(). This is the input arguments
                 when you run the program
@@ -56,8 +57,11 @@ class RunDROP():
 
     def load_run_info(self):
         """
-        Get run info saved in run_info tree. There is only one entry per run.
-        Active ch_id = boardId*100+ch_id. Convert it to names str.
+        Load run_info tree, which contains one entry.
+
+        Notes:
+            Not yet possible to save str via uproot. Use numbering convension:
+            100*boardId + chID,
         """
         f = uproot.open(self.if_path)
         b_names = ['n_boards', 'n_event_proc', 'n_trg_read', 'leftover_event_id', 'active_ch_id']
@@ -77,9 +81,6 @@ class RunDROP():
         Args:
         - batch: high-level awkward array
         - writer: RQWriter
-
-        Returns:
-            RunStatus: NORMAL (0), SKIP (1), STOP (2)
         '''
         # reset writer
         writer.reset()
@@ -112,6 +113,7 @@ class RunDROP():
             # fill rq event structure
             writer.fill(wfm, pf)
         writer.dump_event_rq()
+        return None
 
 
     # def display_wfm(self, event_id=None, ch=None):
@@ -126,6 +128,9 @@ class RunDROP():
     #     pass
 
 def main(argv):
+    """
+    Main function
+    """
     parser = argparse.ArgumentParser(description='Data Reconstruction Offline Package')
     parser.add_argument('--start_id', type=int, default=0, help='Optional. start process from start_id (default: 0)')
     parser.add_argument('--end_id', type=int, default=MAX_N_EVENT, help='Optional. stop process at end_id (defalt: Arbiarty large)')
@@ -135,10 +140,10 @@ def main(argv):
     required.add_argument('-c', '--yaml', type=str, help='Required. path to the yaml config file', required=True)
     args = parser.parse_args()
 
-    # RunDROP is at the top of food-chain
+    # RunDROP class is at the top of food-chain
     run = RunDROP(args)
 
-    # create output file to write
+    # RQWriter creates output file, fill, and dump
     writer = RQWriter(args, basket_size=run.batch_size)
     writer.create_output()
 
@@ -150,7 +155,6 @@ def main(argv):
         # show progress
         pct = float(run.batch_size*i/run.n_event_proc*100)
         print("processed %dth batch, %.1f percent completed" % (i, pct))
-
 
     # write run tree once per file
     writer.dump_run_rq({
