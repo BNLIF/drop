@@ -78,10 +78,10 @@ class Waveform():
         """
         t0=self.tri_pos
         pre = val[:t0-20]
-        post= val[t0+50:]
+        post = val[t0+50:]
         base = concatenate([pre, post])
-        qx = quantile(base, [0.15865, 0.84135]) #central 68%
-        return median(base), abs(qx[1]-qx[0])
+        qx = quantile(base, [0.15865, 0.5, 0.84135]) #central 68%
+        return qx[1], abs(qx[2]-qx[0])
 
     def do_baseline_subtraction(self):
         """
@@ -92,7 +92,7 @@ class Waveform():
             sys.exit('ERROR: Waveform::ch_names is not specified. Use Waveform::set_ch_names()')
 
         for ch in self.ch_names:
-            val = self.raw_data[ch]
+            val = self.raw_data[ch].to_numpy() # numpy is faster
             mean, std = self.get_flat_baseline(val)
             self.base_mean[ch], self.base_std[ch] = mean, std
             amp = -(val-self.base_mean[ch])
@@ -108,7 +108,7 @@ class Waveform():
         """
         tot = 0
         for ch, val in self.amplitude.items():
-            tot += val.to_numpy()
+            tot += val
         self.amplitude['sum'] = tot
 
         # def baseline for sum channel

@@ -115,6 +115,10 @@ class RQWriter:
         """
         Write one basket at a time
         """
+        if not self.n_pulses:
+            print("WARNING: Empty list. Nothing to dump")
+            return None
+
         pulse = {
         'id': self.pulse_id,
         'start': self.pulse_start,

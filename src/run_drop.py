@@ -34,12 +34,14 @@ class RunDROP():
         self.start_id = int(args.start_id)
         self.end_id = int(args.end_id)
         self.if_path = args.if_path # save a copy of input file path
-        self.load_run_info()
-
         # config
         self.config  = YamlReader(args.yaml).data
         self.batch_size = int(self.config ['batch_size'])
         self.post_trigger = float(self.config['post_trigger'])
+        # variable
+        self.batch_id = 0
+        self.batch = None
+        self.load_run_info()
         self.sanity_check()
 
     def sanity_check(self):
@@ -82,6 +84,9 @@ class RunDROP():
         - batch: high-level awkward array
         - writer: RQWriter
         '''
+        # save ref for later ease of access
+        self.batch = batch
+
         # reset writer
         writer.reset()
 
@@ -93,7 +98,7 @@ class RunDROP():
         # create PulseFinder
         pf = PulseFinder(self.config, wfm)
 
-        # loop over events
+        # loop over events in this batch
         for i in range(len(batch)):
             event_id = batch[i].event_id
             event_ttt = batch[i].event_ttt
@@ -113,19 +118,20 @@ class RunDROP():
             # fill rq event structure
             writer.fill(wfm, pf)
         writer.dump_event_rq()
+        self.batch_id += 1
         return None
 
+    def show_progress(self):
+        """
+        print progress on screen
+        """
+        pct = float(self.batch_size*self.batch_id/self.n_event_proc*100)
+        first_ev_id = self.batch[0].event_id
+        last_ev_id = self.batch[-1].event_id
+        print('processed event_id [%d ... %d]' % (first_ev_id, last_ev_id), end=' ')
+        print("%dth batch, %.1f percent completed" % (self.batch_id, pct))
+        return None
 
-    # def display_wfm(self, event_id=None, ch=None):
-    #     tree = uproot.open("%s:daq" % self.if_path)
-    #     cut_str = "event_id == %d" % event_id
-    #     adc = tree.arrays(self.ch_names, cut_str)
-    #
-    #     self.wfm.display(ch)
-    #
-    # def display_ch_hits(self, event_id=None):
-    #     """here or a separate toolbox class??? """
-    #     pass
 
 def main(argv):
     """
@@ -148,13 +154,10 @@ def main(argv):
     writer.create_output()
 
     batch_list = uproot.iterate('%s:daq' % args.if_path, step_size=run.batch_size)
-    i = 0
+
     for batch in batch_list:
         run.process_batch(batch, writer)
-        i += 1
-        # show progress
-        pct = float(run.batch_size*i/run.n_event_proc*100)
-        print("processed %dth batch, %.1f percent completed" % (i, pct))
+        run.show_progress()
 
     # write run tree once per file
     writer.dump_run_rq({
