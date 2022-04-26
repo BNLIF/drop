@@ -81,14 +81,18 @@ class RunDROP():
         Process one batch at a time. Batch size is defined in the yaml file.
 
         Args:
-        - batch: high-level awkward array
-        - writer: RQWriter
+        - batch (high-level awkward array): a collection of raw events
+        - writer (RQWriter). If None, nothig to fill & write, but save to memory.
         '''
         # save ref for later ease of access
         self.batch = batch
 
         # reset writer
-        writer.reset()
+        if writer is None:
+            self.wfm_list = []
+            self.pf_list = []
+        else:
+            writer.reset()
 
         # create waveform, PulseFinder,
         wfm = Waveform(self.config)
@@ -116,8 +120,14 @@ class RunDROP():
             pf.wfm = wfm
             pf.find_pulses()
             # fill rq event structure
-            writer.fill(wfm, pf)
-        writer.dump_event_rq()
+            if writer is None:
+                self.wfm_list.append(wfm)
+                self.pf_list.append(pf)
+            else:
+                writer.fill(wfm, pf)
+
+        if writer is not None:
+            writer.dump_event_rq()
         self.batch_id += 1
         return None
 

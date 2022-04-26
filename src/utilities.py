@@ -1,5 +1,7 @@
+"""
+Utility functions that are used by DROP
+"""
 import math
-
 import numpy as np
 from scipy import signal
 from matplotlib.colors import ListedColormap
