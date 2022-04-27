@@ -2,8 +2,6 @@
 Usage:
 python print_binary_info.py /path/to/raw_binary_file
 """
-
-
 import os
 import sys
 
