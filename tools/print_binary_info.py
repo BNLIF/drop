@@ -6,7 +6,9 @@ python print_binary_info.py /path/to/raw_binary_file
 
 import os
 import sys
-src_path = os.environ['PYTHONPATH']
+
+# Note: run setup.sh to get environemtal variables
+src_path = os.environ['SOURCE_DIR']
 sys.path.append(src_path)
 from caen_reader import RawDataFile
 
