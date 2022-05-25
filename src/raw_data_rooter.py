@@ -254,14 +254,19 @@ class RawDataRooter():
             ch_str = re.findall(r'\d+', ch)
             ch_id.append( int(ch_str[0])*100+int(ch_str[1]) )
 
-        leftover_event_id = self.event_queue.keys()
-        self.file['run_info'] = {
-            'active_ch_id': [ch_id],
+        if self.event_queue:
+            leftover_event_id = self.event_queue.keys()
+        else:
+            leftover_event_id = -1
+        data = {
+            'active_ch_id': ch_id,
             'n_boards': [N_BOARDS],
             'n_trg_read': [self.n_trg_read],
             'n_event_proc': [self.tot_n_evt_proc],
             'leftover_event_id': [leftover_event_id]
-        }
+	}
+        #print(data)
+        self.file['run_info'] = data
         return None
 
     def close_file(self):
