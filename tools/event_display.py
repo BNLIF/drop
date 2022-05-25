@@ -43,6 +43,8 @@ class EventDisplay():
         # beautify
         # self.cmap = generate_colormap(16)
         self.cmap=plt.get_cmap('tab20')
+        self.fig_width=8
+        self.fig_height=4
 
     def grab_events(self, wanted_event_id):
         """
@@ -141,7 +143,7 @@ class EventDisplay():
             return None
 
     def __display_summed_waveform(self, i, no_show=False):
-        fig = plt.figure(figsize=[8,4])
+        fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         plt.subplot(111)
         a = self.wfm_list[i].amplitude['sum']
         plt.plot(a, label='summed channel')
@@ -158,7 +160,7 @@ class EventDisplay():
         return None
 
     def __display_ch_waveform(self, i, ch, no_show=False):
-        fig = plt.figure(figsize=[8,4])
+        fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         a = self.wfm_list[i].amplitude[ch]
         plt.plot(a, label=ch[4:]) # remove adc_ from ch names
         plt.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
@@ -173,7 +175,7 @@ class EventDisplay():
             plt.show()
 
     def __display_ch_raw_waveform(self, i, ch, no_show=False):
-        fig = plt.figure(figsize=[8,4])
+        fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         a = self.wfm_list[i].raw_data[ch].to_numpy()
         plt.plot(a, label=ch[4:])
         plt.legend(loc=0)
