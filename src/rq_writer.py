@@ -1,4 +1,5 @@
 from numpy import int32, uint16, uint32, float32, array, zeros
+import numpy as np
 import uproot
 import awkward as ak
 from os.path import splitext, basename, dirname
@@ -14,6 +15,7 @@ class RQWriter:
     def __init__(self, args, basket_size=1000):
         self.args = args
         self.basket_size = basket_size
+        self.init_basket_cap = 100
         if self.basket_size<=10:
             print("Info: write small baskets is not recommended by Jim \
             Pivarski. Code may be slow this way. Rule of thumb: at least \
@@ -62,7 +64,7 @@ class RQWriter:
         }
         pulse= ak.zip(pulse)
         #a=ak.values_astype(a, np.uint16)
-        self.file.mktree('event', {'pulse': pulse.type, 'event_id': 'uint32'})
+        self.file.mktree('event', {'pulse': pulse.type, 'event_id': 'uint32'}, initial_basket_capacity=self.init_basket_cap)
         print('\nInfo: creating tree structure as the following: ')
         self.file['event'].show()
         return None
@@ -118,7 +120,6 @@ class RQWriter:
         if not self.n_pulses:
             print("WARNING: Empty list. Nothing to dump")
             return None
-
         pulse = {
         'id': self.pulse_id,
         'start': self.pulse_start,
@@ -127,8 +128,9 @@ class RQWriter:
         'height_adc': self.pulse_height_adc,
         'coincidence': self.pulse_coincidence
         }
-        self.file['event'].extend({
+        data = {
             "event_id": self.event_id,
             'pulse': ak.zip(pulse)
-        })
+        }
+        self.file['event'].extend(data)
         return None

@@ -161,6 +161,7 @@ def main(argv):
 
     # RQWriter creates output file, fill, and dump
     writer = RQWriter(args, basket_size=run.batch_size)
+    writer.init_basket_cap = int(run.n_event_proc/run.batch_size)+2
     writer.create_output()
 
     batch_list = uproot.iterate('%s:daq' % args.if_path, step_size=run.batch_size)
