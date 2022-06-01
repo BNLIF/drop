@@ -158,7 +158,7 @@ class Waveform():
             roi_a={}
             for ch, val in self.amplitude.items():
                 roi_a[ch]=np.sum(val[start:end])
-            self.roi_area_adc.append(roi)
+            self.roi_area_adc.append(roi_a)
         return None
 
     def find_roi_height(self):
