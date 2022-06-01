@@ -27,8 +27,15 @@ class RQWriter:
         """
         Variables that needs to be reset per batch of events
         """
-        # Waveform variables
+        # Event level variable
         self.event_id=[]
+        self.event_ttt=[]
+
+        # channel level variables
+        self.ch_id = [] # boardId*100 + chID
+        self.roi0_height_adc = []
+        self.roi1_height_adc = []
+
         # PulseFinder variables
         self.n_pulses=[]
         self.pulse_id = []
@@ -54,7 +61,7 @@ class RQWriter:
 
         type_uint = ak.values_astype([[0,0], []], uint32)
         type_float = ak.values_astype([[0.,0.], []], float32)
-        pulse = {
+        pulse_info = {
         'id': type_uint,
         'start': type_uint,
         'end': type_uint,
@@ -62,9 +69,19 @@ class RQWriter:
         'height_adc': type_float,
         'coincidence': type_uint
         }
-        pulse= ak.zip(pulse)
+        ch_info = {
+            'id': type_uint,
+            'roi0_height_adc': type_float,
+            'roi1_height_adc': type_float
+        }
+        ch_type = ak.zip(ch_info).type
+        pulse_type= ak.zip(pulse_info).type
+
         #a=ak.values_astype(a, np.uint16)
-        self.file.mktree('event', {'pulse': pulse.type, 'event_id': 'uint32'}, initial_basket_capacity=self.init_basket_cap)
+        self.file.mktree('event', { 'event_id': 'uint32', 'event_ttt': 'uint32',
+                                    'ch' : ch_type,
+                                    'pulse': pulse_type},
+                         initial_basket_capacity=self.init_basket_cap)
         print('\nInfo: creating tree structure as the following: ')
         self.file['event'].show()
         return None
@@ -90,8 +107,22 @@ class RQWriter:
         hope there is a better solution.
         https://uproot.readthedocs.io/en/latest/basic.html
         """
+        # event level
         self.event_id.append(wfm.event_id)
+        self.event_ttt.append(wfm.event_ttt)
 
+        # channel level
+        self.ch_id.append( wfm.ch_id )
+        roi0_h = zeros(len(wfm.ch_id))
+        roi1_h = zeros(len(wfm.ch_id))
+        for i, ch_id in enumerate(wfm.ch_id):
+            ch_name = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
+            roi0_h[i] = wfm.roi_height_adc[0][ch_name]
+            roi1_h[i] = wfm.roi_height_adc[1][ch_name]
+        self.roi0_height_adc.append(roi0_h)
+        self.roi1_height_adc.append(roi1_h)
+
+        # pulse level
         self.n_pulses.append(pf.n_pulses)
         self.pulse_id.append(pf.id.tolist())
         self.pulse_start.append(pf.start.tolist())
@@ -99,6 +130,9 @@ class RQWriter:
         self.pulse_area_adc.append(pf.area_adc.tolist()) # actually adc*ns
         self.pulse_height_adc.append(pf.height_adc)
         self.pulse_coincidence.append(pf.coincidence)
+
+        # pulse x channel level
+        # <Work in Progress>
         return None
 
     def close(self):
@@ -120,7 +154,7 @@ class RQWriter:
         if not self.n_pulses:
             print("WARNING: Empty list. Nothing to dump")
             return None
-        pulse = {
+        pulse_info = {
         'id': self.pulse_id,
         'start': self.pulse_start,
         'end': self.pulse_end,
@@ -128,9 +162,16 @@ class RQWriter:
         'height_adc': self.pulse_height_adc,
         'coincidence': self.pulse_coincidence
         }
+        ch_info = {
+            'id': self.ch_id,
+            'roi0_height_adc': self.roi0_height_adc,
+            'roi1_height_adc': self.roi1_height_adc,
+        }
         data = {
             "event_id": self.event_id,
-            'pulse': ak.zip(pulse)
+            "event_ttt": self.event_ttt,
+            'ch': ak.zip(ch_info),
+            'pulse': ak.zip(pulse_info)
         }
         self.file['event'].extend(data)
         return None

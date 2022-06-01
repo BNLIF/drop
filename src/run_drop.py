@@ -97,6 +97,7 @@ class RunDROP():
         # create waveform, PulseFinder,
         wfm = Waveform(self.config)
         wfm.set_ch_names(self.ch_names)
+        wfm.set_ch_id(self.ch_id)
         wfm.set_n_boards(self.n_boards)
 
         # create PulseFinder
@@ -115,6 +116,8 @@ class RunDROP():
             wfm.do_baseline_subtraction()
             wfm.sum_channels()
             wfm.integrate_waveform()
+            wfm.find_roi_height()
+            wfm.find_roi_area()
             # pulses finding
             pf.reset()
             pf.wfm = wfm

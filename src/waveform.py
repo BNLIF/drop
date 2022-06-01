@@ -37,6 +37,7 @@ class Waveform():
             self.pre_roi_length = config['pre_roi_length']
             self.trigger_position() # art of finding trigger position
         self.ch_names = None
+        self.ch_id = None
         self.n_boards = None
         self.reset()
         return None
@@ -57,6 +58,8 @@ class Waveform():
         self.n_boards = val
     def set_ch_names(self, val):
         self.ch_names = val
+    def set_ch_id(self, val):
+        self.ch_id = val
     def set_raw_data(self, val):
         self.raw_data = val
         self.event_id = val.event_id
@@ -141,7 +144,7 @@ class Waveform():
         """work in progress"""
         pass
 
-    def integrate_roi(self):
+    def find_roi_area(self):
         # do baseline subtraction if haven't done so
         if bool(self.amplitude)==False:
             self.do_baseline_subtraction()
@@ -162,21 +165,20 @@ class Waveform():
             self.roi_list.append(roi)
         return None
 
-    def roi_max_height(self):
-        """Work in Progress"""
+    def find_roi_height(self):
         # do baseline subtraction if haven't done so
         if bool(self.amplitude)==False:
             self.do_baseline_subtraction()
             self.sum_channels()
 
-        self.roi_height=[]
+        self.roi_height_adc=[]
         for i in range(len(self.roi_start)):
             start=self.roi_start[i]
             end=self.roi_end[i]
             height={}
             for ch, val in self.amplitude.items():
                 height[ch] = np.max(val[start:end])
-            self.roi_height.append(height)
+            self.roi_height_adc.append(height)
         return None
 
     # def display(self, ch=None):

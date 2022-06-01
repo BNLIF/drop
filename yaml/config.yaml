@@ -1,5 +1,5 @@
 # General DAQ config setting on LabVIEW
-batch_size: 100 # int
+batch_size: 1000 # int
 daq_length: 640 # Xin: daq_length set on labVIEW. Not the recorded num. of samples.
 post_trigger: 0.5
 
@@ -12,8 +12,8 @@ pre_pulse: 5
 post_pulse: 5
 
 # Waveform: ROI
-roi_start: [290, 380]
-roi_end: [320, 450]
+roi_start: [275, 100]
+roi_end: [325, 150]
 pre_roi_length: 100
 
 # PulseFinder: scipy peak finding
