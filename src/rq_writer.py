@@ -35,6 +35,8 @@ class RQWriter:
         self.ch_id = [] # boardId*100 + chID
         self.roi0_height_adc = []
         self.roi1_height_adc = []
+        self.roi0_area_adc = []
+        self.roi1_area_adc = []
 
         # PulseFinder variables
         self.n_pulses=[]
@@ -72,7 +74,9 @@ class RQWriter:
         ch_info = {
             'id': type_uint,
             'roi0_height_adc': type_float,
-            'roi1_height_adc': type_float
+            'roi1_height_adc': type_float,
+            'roi0_area_adc': type_float,
+            'roi1_area_adc': type_float
         }
         ch_type = ak.zip(ch_info).type
         pulse_type= ak.zip(pulse_info).type
@@ -115,12 +119,18 @@ class RQWriter:
         self.ch_id.append( wfm.ch_id )
         roi0_h = zeros(len(wfm.ch_id))
         roi1_h = zeros(len(wfm.ch_id))
+        roi0_a = zeros(len(wfm.ch_id))
+        roi1_a = zeros(len(wfm.ch_id))
         for i, ch_id in enumerate(wfm.ch_id):
             ch_name = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
             roi0_h[i] = wfm.roi_height_adc[0][ch_name]
             roi1_h[i] = wfm.roi_height_adc[1][ch_name]
+            roi0_a[i] = wfm.roi_area_adc[0][ch_name]
+            roi1_a[i] = wfm.roi_area_adc[1][ch_name]
         self.roi0_height_adc.append(roi0_h)
         self.roi1_height_adc.append(roi1_h)
+        self.roi0_area_adc.append(roi0_a)
+        self.roi1_area_adc.append(roi1_a)
 
         # pulse level
         self.n_pulses.append(pf.n_pulses)
@@ -166,6 +176,8 @@ class RQWriter:
             'id': self.ch_id,
             'roi0_height_adc': self.roi0_height_adc,
             'roi1_height_adc': self.roi1_height_adc,
+            'roi0_area_adc': self.roi0_area_adc,
+            'roi1_area_adc': self.roi1_area_adc,
         }
         data = {
             "event_id": self.event_id,

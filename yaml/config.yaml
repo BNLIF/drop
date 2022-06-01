@@ -1,6 +1,6 @@
 # General DAQ config setting on LabVIEW
 batch_size: 1000 # int
-daq_length: 640 # Xin: daq_length set on labVIEW. Not the recorded num. of samples.
+daq_length: 500 # Xin: daq_length set on labVIEW. Not the recorded num. of samples.
 post_trigger: 0.5
 
 # Waveform: baseline subtraction
