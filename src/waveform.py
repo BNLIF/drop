@@ -150,19 +150,15 @@ class Waveform():
             self.do_baseline_subtraction()
             self.sum_channels()
 
-        self.roi_list=[]
+        self.roi_area_adc=[]
         for i in range(len(self.roi_start)):
             start=self.roi_start[i]
             end=self.roi_end[i]
-            pre_roi = start-self.pre_roi_length
-            roi={}
-            roi_sum = 0.
+            # pre_roi = start-self.pre_roi_length
+            roi_a={}
             for ch, val in self.amplitude.items():
-                base = median(val[pre_roi:start]) # not to confused with built-in mean()
-                roi[ch]=np.sum(-(val[start:end]-base))*(end-start)
-                roi_sum += roi[ch]
-            roi['sum']=roi_sum
-            self.roi_list.append(roi)
+                roi_a[ch]=np.sum(val[start:end])
+            self.roi_area_adc.append(roi)
         return None
 
     def find_roi_height(self):
