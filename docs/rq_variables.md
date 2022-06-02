@@ -1,13 +1,12 @@
 # RQ
 A brief summary of Reduced Quality (RQ) variables in root file.
 
-
 ## Tree: `run_info`
 
 Run Info.
 
 | Tables		| type			 |		Description			|
-|: ------------ 	|:----------------------:|: -------------------------------------------:|
+|: ------------ 	|----------------------| -------------------------------------------|
 | n_boards      	| uint32 		 | number of digitizer boards			|
 | n_event_proc      	| uint32		 | number of events processed			|
 | n_trg_read 		| uint32      	  	 | number of triggers read from binary file	|
@@ -21,7 +20,7 @@ Event info
 One per event
 
 | Variable Name | type		| Description		|
-|: ------------ |:-------------:|: -----------------:	|
+|:------------ |-------------| -----------------	|
 | event_id      | uint32	| unique event id	|	   
 | event_ttt     | uint32	| trigger time tag	|
 
@@ -30,7 +29,7 @@ One per event
 Every event has `npulse` number of variables
 
 | Variable Name      | type		| Description					|
-|: ------------      |:---------------:	|: -----------------:				|
+|: ------------      |---------------	| -----------------				|
 | npulse	     | uint32		| number of pulses				|
 | pulse_id	     | vector<uint32>	| unique pulse id, sorted   	   		|
 | pulse_start        | vector<uint32>	| the start index of a pulse			|
@@ -41,8 +40,9 @@ Every event has `npulse` number of variables
 
 ### Channel level variables
 Every event has `nch` number of variables
+
 | Variable Name      | type		| Description						|
-|: ------------      |:---------------:	|: ---------------------------------------:		|
+|:------------      |---------------	| ---------------------------------------		|
 | nch	     	     | uint32		| number of active channels				|
 | ch_roi0_height_adc | vector<float32>	| max height in adc within roi 0 (see yaml file)	|
 | ch_roi1_height_adc | vector<float32>	| max height in adc within roi 1 (see yaml file)	|
