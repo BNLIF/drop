@@ -1,5 +1,8 @@
+
 # RQ
-A brief summary of Reduced Quality (RQ) variables in root file.
+A brief summary of Reduced Quality (RQ) variables in root file. The RQ files contain high level reconstructed event infomation from waveforms. A RQ root file is typically identified with `_rq` in its name.
+
+> This markdown document is manually created on Jun 2 2022. Feel free to update it.
 
 ## Tree: `run_info`
 
