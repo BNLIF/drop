@@ -1,6 +1,6 @@
 <!-- markdownlint-disable -->
 
-<a href="../src/run_drop.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `run_drop`
 DROP convert raw waveform to reduced qualities. 
@@ -13,7 +13,7 @@ Contact: X. Xiang <xxiang@bnl.gov>
 
 ---
 
-<a href="../src/run_drop.py#L149"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L149"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `main`
 
@@ -26,12 +26,12 @@ Main function
 
 ---
 
-<a href="../src/run_drop.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `RunDROP`
 Main Class. Once per run. Manage all operations. 
 
-<a href="../src/run_drop.py#L26"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L26"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.__init__`
 
@@ -50,7 +50,7 @@ __init__(args)
 
 ---
 
-<a href="../src/run_drop.py#L60"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L60"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.load_run_info`
 
@@ -68,7 +68,7 @@ Load run_info tree, which contains one entry.
 
 ---
 
-<a href="../src/run_drop.py#L79"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L79"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.process_batch`
 
@@ -87,7 +87,7 @@ Process one batch at a time. Batch size is defined in the yaml file.
 
 ---
 
-<a href="../src/run_drop.py#L47"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L47"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.sanity_check`
 
@@ -99,7 +99,7 @@ Collection of check before running
 
 ---
 
-<a href="../src/run_drop.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.show_progress`
 

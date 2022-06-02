@@ -20,3 +20,4 @@ tomli==2.0.0
 typing_extensions==4.0.1
 uproot==4.1.9
 ipympl==0.9.1
+lazydocs-0.4.8
