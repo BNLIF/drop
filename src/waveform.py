@@ -149,6 +149,8 @@ class Waveform():
         if bool(self.amplitude)==False:
             self.do_baseline_subtraction()
             self.sum_channels()
+        if bool(self.integrate_waveform)==False:
+            self.integrate_waveform()
 
         self.roi_area_adc=[]
         for i in range(len(self.roi_start)):
@@ -156,8 +158,8 @@ class Waveform():
             end=self.roi_end[i]
             # pre_roi = start-self.pre_roi_length
             roi_a={}
-            for ch, val in self.amplitude.items():
-                roi_a[ch]=np.sum(val[start:end])
+            for ch, val in self.amplitude_int.items():
+                roi_a[ch] = val[end]-val[start]
             self.roi_area_adc.append(roi_a)
         return None
 
