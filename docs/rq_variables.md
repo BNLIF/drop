@@ -13,7 +13,7 @@ Run Info.
 | n_boards      	| uint32 		 | number of digitizer boards			|
 | n_event_proc      	| uint32		 | number of events processed			|
 | n_trg_read 		| uint32      	  	 | number of triggers read from binary file	|
-| leftover_event_id	| vector<uint32> 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
+| leftover_event_id	| vector\<uint32\> 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
 | active_ch_id		|  vector<uint32>	 | unique id for active channels      	       |
 
 ## Tree: `event`
