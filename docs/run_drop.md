@@ -3,9 +3,9 @@
 <a href="../src/run_drop.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `run_drop`
+DROP convert raw waveform to reduced qualities. 
 
-
-
+Contact: X. Xiang <xxiang@bnl.gov> 
 
 **Global Variables**
 ---------------
@@ -13,7 +13,7 @@
 
 ---
 
-<a href="../src/run_drop.py#L133"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../src/run_drop.py#L149"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `main`
 
@@ -21,38 +21,23 @@
 main(argv)
 ```
 
-
-
-
-
-
----
-
-<a href="../src/run_drop.py#L15"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
-
-## <kbd>class</kbd> `RunStatus`
-An enumeration. 
-
-
-
+Main function 
 
 
 ---
 
-<a href="../src/run_drop.py#L20"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../src/run_drop.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `RunDROP`
 Main Class. Once per run. Manage all operations. 
 
-<a href="../src/run_drop.py#L24"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../src/run_drop.py#L26"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.__init__`
 
 ```python
 __init__(args)
 ```
-
-Constructor 
 
 
 
@@ -65,49 +50,44 @@ Constructor
 
 ---
 
-<a href="../src/run_drop.py#L129"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../src/run_drop.py#L60"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-### <kbd>method</kbd> `RunDROP.display_ch_hits`
+### <kbd>method</kbd> `RunDROP.load_run_info`
 
 ```python
-display_ch_hits()
+load_run_info()
 ```
 
-here or a separate toolbox class???  
+Load run_info tree, which contains one entry. 
+
+
+
+**Notes:**
+
+> Not yet possible to save str via uproot. Use numbering convension: 100*boardId + chID, 
 
 ---
 
-<a href="../src/run_drop.py#L125"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../src/run_drop.py#L79"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-### <kbd>method</kbd> `RunDROP.display_wfm`
-
-```python
-display_wfm(ch=None)
-```
-
-display waveform 
-
----
-
-<a href="../src/run_drop.py#L71"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
-
-### <kbd>method</kbd> `RunDROP.next`
+### <kbd>method</kbd> `RunDROP.process_batch`
 
 ```python
-next()
+process_batch(batch, writer: rq_writer.RQWriter)
 ```
 
-Iterates to the next event. One Waveform per events. Each call iterates by one event, but one event may contain multiple triggers. getNextTrigger() iterates one trigger at a time. Carefully Check the boardId order. 
+Process one batch at a time. Batch size is defined in the yaml file. 
 
 
 
-**Returns:**
+**Args:**
  
- - <b>`RunStatus`</b>:  NORMAL (0), SKIP (1), STOP (2) 
+- batch (high-level awkward array): a collection of raw events 
+- writer (RQWriter). If None, nothig to fill & write, but save to memory. 
 
 ---
 
-<a href="../src/run_drop.py#L45"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../src/run_drop.py#L47"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.sanity_check`
 
@@ -116,6 +96,18 @@ sanity_check()
 ```
 
 Collection of check before running 
+
+---
+
+<a href="../src/run_drop.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+### <kbd>method</kbd> `RunDROP.show_progress`
+
+```python
+show_progress()
+```
+
+print progress on screen 
 
 
 
