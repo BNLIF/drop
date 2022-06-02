@@ -6,7 +6,7 @@ A brief summary of Reduced Quality (RQ) variables in root file.
 Run Info.
 
 | Tables		| type			 |		Description			|
-|: ------------ 	|----------------------| -------------------------------------------|
+|:------------ 	|----------------------| -------------------------------------------|
 | n_boards      	| uint32 		 | number of digitizer boards			|
 | n_event_proc      	| uint32		 | number of events processed			|
 | n_trg_read 		| uint32      	  	 | number of triggers read from binary file	|
@@ -29,7 +29,7 @@ One per event
 Every event has `npulse` number of variables
 
 | Variable Name      | type		| Description					|
-|: ------------      |---------------	| -----------------				|
+|:------------      |---------------	| -----------------				|
 | npulse	     | uint32		| number of pulses				|
 | pulse_id	     | vector<uint32>	| unique pulse id, sorted   	   		|
 | pulse_start        | vector<uint32>	| the start index of a pulse			|
