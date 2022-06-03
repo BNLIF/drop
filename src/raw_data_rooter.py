@@ -30,7 +30,7 @@ from caen_reader import RawDataFile
 #-----------------------------------
 # Global Parameters are Captialized
 #-----------------------------------
-N_BOARDS = 3
+N_BOARDS = 1
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 DUMP_SIZE = 600 # number of triggers to accumulate in queue before dump
 INITIAL_BASEKTEL_CAPACITY=1000 # number of basket per file
@@ -96,21 +96,24 @@ class RawDataRooter():
 
     def find_active_ch_names(self):
         """
-        Find active ch names by reading a few.
+        Find active ch names by reading a few. Also find active boardId.
         """
-        ch_names = set()
+        self.ch_names = set()
+        self.boardId = set()
         raw_data_file = RawDataFile(self.args.if_path)
         for i in range(20):
             trg = raw_data_file.getNextTrigger()
             if trg is None:
                 print("Info: current active channels are:")
-                print(ch_names)
+                print(self.ch_names)
                 break
             for ch, val in trg.traces.items():
-                ch_names.add(ch)
-        self.ch_names = ch_names
+                self.ch_names.add( ch )
+                self.boardId.add( int(trg.boardId) )
         print("Info: current active channels are:")
         print(self.ch_names)
+        if len(self.boardId) != N_BOARDS:
+            print("WARNING: N_BOARDS does not match!")
         raw_data_file.close()
         return None
 
@@ -199,11 +202,8 @@ class RawDataRooter():
             self.event_queue[trg_id] = trg.traces
         # add ttt to the queue
         ttt = trg.triggerTimeTag
-        if N_BOARDS==1:
+        if boardId == min(self.boardId)
             self.event_queue[trg_id]['ttt']=ttt
-        else:
-            if boardId==1:
-                self.event_queue[trg_id]['ttt']=ttt
         return RunStatus.NORMAL
 
     def get_full_queue_id(self):
