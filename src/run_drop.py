@@ -72,7 +72,10 @@ class RunDROP():
         self.n_trg_read=a['n_trg_read'][0]
         self.n_event_proc = a['n_event_proc'][0]
         self.leftover_event_id = a['leftover_event_id'][0]
-        self.ch_id = sorted(a['active_ch_id'][0])
+        tmp = a['active_ch_id'][0]
+        if isscalar(tmp): # if only 1 active channels, tmp is a scalar and sort will fail
+            tmp = [tmp]
+        self.ch_id = sorted(tmp)
         self.ch_names = ["adc_b%d_ch%d" % (i // 100, i % 100) for i in self.ch_id]
         return None
 

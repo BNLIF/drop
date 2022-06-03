@@ -202,7 +202,7 @@ class RawDataRooter():
             self.event_queue[trg_id] = trg.traces
         # add ttt to the queue
         ttt = trg.triggerTimeTag
-        if boardId == min(self.boardId)
+        if boardId == min(self.boardId):
             self.event_queue[trg_id]['ttt']=ttt
         return RunStatus.NORMAL
 
