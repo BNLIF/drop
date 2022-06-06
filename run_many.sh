@@ -17,5 +17,12 @@ fi
 
 
 if [ $do_run_drop -eq 1 ]; then
-    echo "to do"
+    file_path=$1
+    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/rq/phase0
+
+    while read fpath; do
+	echo " "
+	echo "processing $fpath ..."
+	python src/run_drop.py -i ${fpath} -c yaml/config.yaml --output_dir=${output_dir}
+    done < $file_path
 fi
