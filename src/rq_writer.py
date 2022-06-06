@@ -81,7 +81,7 @@ class RQWriter:
             'roi2_height_adc': type_float,
             'roi0_area_adc': type_float,
             'roi1_area_adc': type_float,
-            'roi2_height_adc': type_float,
+            'roi2_area_adc': type_float,
 
         }
         ch_type = ak.zip(ch_info).type
