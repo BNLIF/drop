@@ -45,7 +45,8 @@ class EventDisplay():
         self.cmap=plt.get_cmap('tab20')
         self.fig_width=8
         self.fig_height=4
-
+        self.xlim = None
+        
     def grab_events(self, wanted_event_id):
         """
         Grab raw data matching event_id. Process them using RunDrop.
@@ -160,6 +161,7 @@ class EventDisplay():
         return None
 
     def __display_ch_waveform(self, i, ch, no_show=False):
+        plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         a = self.wfm_list[i].amplitude[ch]
         plt.plot(a, label=ch[4:]) # remove adc_ from ch names
@@ -168,6 +170,8 @@ class EventDisplay():
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
+	if self.xlim is not None:
+            plt.xlim(self.xlim)
         plt.xlabel('Samples')
         plt.ylabel('ADC')
         plt.grid(linewidth=0.5, alpha=0.5)
@@ -175,6 +179,7 @@ class EventDisplay():
             plt.show()
 
     def __display_ch_raw_waveform(self, i, ch, no_show=False):
+        plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         a = self.wfm_list[i].raw_data[ch].to_numpy()
         plt.plot(a, label=ch[4:])
@@ -182,6 +187,8 @@ class EventDisplay():
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
+        if self.xlim is not None:
+            plt.xlim(self.xlim)
         plt.xlabel('Samples')
         plt.ylabel('ADC')
         plt.grid(linewidth=0.5, alpha=0.5)
