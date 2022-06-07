@@ -35,7 +35,7 @@ class Waveform():
             self.roi_start = config['roi_start']
             self.roi_end = config['roi_end']
             self.pre_roi_length = config['pre_roi_length']
-            self.trigger_position() # art of finding trigger position
+            self.find_trigger_position() # art of finding trigger position
         self.ch_names = None
         self.ch_id = None
         self.n_boards = None
@@ -65,7 +65,7 @@ class Waveform():
         self.event_id = val.event_id
         self.event_ttt = val.event_ttt
 
-    def trigger_position(self):
+    def find_trigger_position(self):
         """
         finding trigger position (t0)
         """
