@@ -30,9 +30,9 @@ from caen_reader import RawDataFile
 #-----------------------------------
 # Global Parameters are Captialized
 #-----------------------------------
-N_BOARDS = 1
+N_BOARDS = 2
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
-DUMP_SIZE = 600 # number of triggers to accumulate in queue before dump
+DUMP_SIZE = 1000 # number of triggers to accumulate in queue before dump
 INITIAL_BASEKTEL_CAPACITY=1000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
 
@@ -259,13 +259,16 @@ class RawDataRooter():
         for ch in self.ch_names:
             ch_str = re.findall(r'\d+', ch)
             ch_id.append( int(ch_str[0])*100+int(ch_str[1]) )
+        # uproot does not like [[1]] when saving, but [1] or [[1,2]] is okay
+        if len(ch_id)==1:
+            ch_id=ch_id[0]
 
         if self.event_queue:
             leftover_event_id = self.event_queue.keys()
         else:
             leftover_event_id = -1
         data = {
-            'active_ch_id': ch_id,
+            'active_ch_id': [ch_id],
             'n_boards': [N_BOARDS],
             'n_trg_read': [self.n_trg_read],
             'n_event_proc': [self.tot_n_evt_proc],
@@ -292,7 +295,7 @@ class RawDataRooter():
         return None
 
     def show_progress(self):
-        if self.n_trg_read % 100 ==0:
+        if self.n_trg_read % DUMP_SIZE ==0:
             tot_n_evt_proc = len(self.dumped_event_id)
             print('read %d th trggers,' % self.n_trg_read, " dumped %d events" % tot_n_evt_proc)
         return None
