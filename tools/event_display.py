@@ -7,6 +7,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pylab as plt
+import matplotlib.patches as patches
 import matplotlib
 import uproot
 import awkward as ak
@@ -19,6 +20,7 @@ sys.path.append(src_path)
 
 from utilities import generate_colormap
 from run_drop import RunDROP
+from pulse_finder import PulseFinder
 
 class Args:
     start_id = 0
@@ -40,13 +42,19 @@ class EventDisplay():
         self.min_event_id = 999999999
         self.max_event_id = 0
 
+        # plotting logistics
+        self.save_fig_flag = False
+        self.save_fig_dir = './'
+
         # beautify
         # self.cmap = generate_colormap(16)
         self.cmap=plt.get_cmap('tab20')
         self.fig_width=8
         self.fig_height=4
         self.xlim = None
-        
+        self.ylim = None
+        self.dpi = None
+
     def grab_events(self, wanted_event_id):
         """
         Grab raw data matching event_id. Process them using RunDrop.
@@ -81,7 +89,7 @@ class EventDisplay():
             self.min_event_id = np.min([self.min_event_id, np.min(arr)])
             self.max_event_id = np.max([self.max_event_id, np.max(arr)])
 
-        self.wfm_list = [item for sublist in self.wfm_list for item in sublist]
+        self.wfm_list = [item for sublist in self.wfm_list for item in sublist] # flatten list
         self.pf_list = [item for sublist in self.pf_list for item in sublist]
         self.grabbed_event_id = [wfm.event_id for wfm in self.wfm_list]
         if not self.grabbed_event_id:
@@ -144,11 +152,22 @@ class EventDisplay():
             return None
 
     def __display_summed_waveform(self, i, no_show=False):
+        plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
-        plt.subplot(111)
+        ax = plt.subplot(111)
         a = self.wfm_list[i].amplitude['sum']
-        plt.plot(a, label='summed channel')
-        plt.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
+        plt.plot(a, label='summed channel');
+        plt.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline');
+        p = self.pf_list[i]
+        if p.n_pulses>0:
+            for j in range(len(p.start)):
+                xy = (p.start[j], 0)
+                h = p.height_adc[j]
+                w = p.end[j]-p.start[j]
+                rect = patches.Rectangle(xy, w, h, label='pulse', linewidth=1,
+                edgecolor='r', facecolor='none')
+                ax.add_patch(rect)
+
         plt.legend(loc=0)
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
@@ -156,6 +175,10 @@ class EventDisplay():
         plt.xlabel('Samples')
         plt.ylabel('ADC')
         plt.grid(linewidth=0.5, alpha=0.5)
+        if self.save_fig_flag==True:
+            no_show = True # turn off plt.show otherwise issue with savefig
+            fpath = self.save_fig_dir + '/wfm_sum_%d.png' % self.grabbed_event_id[i]
+            plt.savefig(fpath)
         if no_show==False:
             plt.show()
         return None
@@ -170,8 +193,10 @@ class EventDisplay():
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
-	if self.xlim is not None:
+        if self.xlim is not None:
             plt.xlim(self.xlim)
+        if self.ylim is not None:
+            plt.ylim(self.ylim)
         plt.xlabel('Samples')
         plt.ylabel('ADC')
         plt.grid(linewidth=0.5, alpha=0.5)
