@@ -32,7 +32,7 @@ from caen_reader import RawDataFile
 #-----------------------------------
 N_BOARDS = 3
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
-DUMP_SIZE = 600 # number of triggers to accumulate in queue before dump
+DUMP_SIZE = 1000 # number of triggers to accumulate in queue before dump
 INITIAL_BASEKTEL_CAPACITY=5000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
 
@@ -141,6 +141,7 @@ class RawDataRooter():
 
         # duplicated trigger appearing after event dumped to file
         if trg_id in self.dumped_event_id:
+            self.skipped_event_id = trg_id
             return RunStatus.SKIP
 
         # add to event queue
