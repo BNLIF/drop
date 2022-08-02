@@ -30,7 +30,7 @@ from caen_reader import RawDataFile
 #-----------------------------------
 # Global Parameters are Captialized
 #-----------------------------------
-N_BOARDS = 3
+N_BOARDS = 2
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 DUMP_SIZE = 1000 # number of triggers to accumulate in queue before dump
 INITIAL_BASEKTEL_CAPACITY=5000 # number of basket per file
@@ -61,10 +61,16 @@ class RawDataRooter():
         self.end_id = int(args.end_id)
         self.raw_data_file = RawDataFile(args.if_path)
         if args.output_dir=="":
-            self.of_path = args.if_path +'.root'
+            if args.if_path[-4:]=='.bin':
+                self.of_path = args.if_path[:-4] +'.root'
+            else:
+                self.of_path = args.if_path +'.root'
         else:
             fname = path.basename( args.if_path)
-            self.of_path = args.output_dir + '/' + fname + '.root'
+            if fname[-4:]=='.bin':
+                self.of_path = args.output_dir + '/' + fname[:-4] + '.root'
+            else:
+                self.of_path = args.output_dir + '/' + fname + '.root'
 
         # useful variables
         self.n_trg_read = 0 # number of trigger read from binary (updated in next())
