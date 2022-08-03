@@ -8,6 +8,7 @@ if [ $do_raw_data_rooter -eq 1 ]; then
     output_dir=/media/disk_a/CERNBOX/WbLS-DATA/raw_root/phase0
 
     while read fpath; do
+	case "$fpath" in \#*) continue ;; esac
 	echo " "
 	echo "processing $fpath ..."
 	python src/raw_data_rooter.py --if_path=${fpath} --output_dir=${output_dir}
