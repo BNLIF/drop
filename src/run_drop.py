@@ -116,7 +116,8 @@ class RunDROP():
             # waveform
             wfm.reset()
             wfm.set_raw_data(batch[i])
-            wfm.do_baseline_subtraction()
+            wfm.subtract_flat_baseline()
+            #wfm.find_ma_baseline()
             wfm.sum_channels()
             wfm.integrate_waveform()
             wfm.find_roi_height()

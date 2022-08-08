@@ -27,7 +27,6 @@ class PulseFinder():
             'threshold': float(config['scipy_find_peaks']['threshold']),
             'height': float(config['scipy_find_peaks']['height'])
         }
-
         self.reset()
 
     def reset(self):
@@ -61,8 +60,12 @@ class PulseFinder():
         return None
 
     def find_pulses(self):
-        """Main function of PulseFinder. As the name suggests, find pulses. Only
-        run this after baseline subtraction.
+        """
+        As the name suggests, find pulses. A pulse is defined from a start sample
+        to an end sample. Assign unique pulse id starting from 0.
+
+        This function assume pulse is postively polarized, only run this after
+        baseline subtraction, and flip polarity. See Waveform::subtract_flat_baseline.
         """
         if not bool(self.peaks):
             self.scipy_find_peaks()
@@ -71,30 +74,37 @@ class PulseFinder():
 
         self.n_pulses = len(peaks_sum)
         amp = self.wfm.amplitude['sum'] # amplitude in adc
-        amp_int = self.wfm.amplitude_int['sum'] # integrated amplitude in adc*ns
         if self.n_pulses>0:
             self.id = arange(self.n_pulses, dtype=uint32)
             self.start =peaks_sum-self.pre_pulse
             self.end = peaks_sum+self.post_pulse
             place(self.start, self.start<0, 0)
             place(self.end, self.end>=len(amp), len(amp)-1)
-            self.area_adc = amp_int[self.end]-amp_int[self.start]
 
-            # todo: vectorize the loop
-            for i in self.id:
-                start = self.start[i]
-                end = self.end[i]
-                pmax = np.max(amp[start:end])
-                self.height_adc.append(pmax)
-                coin = 0
-                for ch, val in self.peaks.items():
-                    if ch=='sum':
-                        continue
-                    mask = logical_and(val>=start, val<end)
-                    if len(val[mask])>0:
-                        coin +=1
-                self.coincidence.append(coin)
-        # todo: adjust credential if it's a spe
+    def calc_pulse_info(self):
+        """
+        Calculate pulse info, such as ex area, peak height, coincidence, etc.
+        """
+
+        if self.n_pulses<=0:
+            return None
+
+        amp_int = self.wfm.amplitude_int['sum'] # integrated amplitude in adc*ns
+        self.area_adc = amp_int[self.end]-amp_int[self.start]
+        for i in self.id:
+            start = self.start[i]
+            end = self.end[i]
+            pmax = np.max(amp[start:end])
+            self.height_adc.append(pmax)
+            coin = 0
+            for ch, val in self.peaks.items():
+                if ch=='sum':
+                    continue
+                mask = logical_and(val>=start, val<end)
+                if len(val[mask])>0:
+                    coin +=1
+            self.coincidence.append(coin)
+        return None
 
 
     def is_spe(self, ch='sum') -> bool:
