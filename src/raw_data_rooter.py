@@ -33,7 +33,7 @@ from caen_reader import RawDataFile
 N_BOARDS = 2
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 DUMP_SIZE = 1000 # number of triggers to accumulate in queue before dump
-INITIAL_BASEKTEL_CAPACITY=1000 # number of basket per file
+INITIAL_BASEKTEL_CAPACITY=5000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
 
 if DUMP_SIZE<=10:
@@ -61,10 +61,16 @@ class RawDataRooter():
         self.end_id = int(args.end_id)
         self.raw_data_file = RawDataFile(args.if_path)
         if args.output_dir=="":
-            self.of_path = args.if_path +'.root'
+            if args.if_path[-4:]=='.bin':
+                self.of_path = args.if_path[:-4] +'.root'
+            else:
+                self.of_path = args.if_path +'.root'
         else:
             fname = path.basename( args.if_path)
-            self.of_path = args.output_dir + '/' + fname + '.root'
+            if fname[-4:]=='.bin':
+                self.of_path = args.output_dir + '/' + fname[:-4] + '.root'
+            else:
+                self.of_path = args.output_dir + '/' + fname + '.root'
 
         # useful variables
         self.n_trg_read = 0 # number of trigger read from binary (updated in next())
@@ -101,7 +107,7 @@ class RawDataRooter():
         self.ch_names = set()
         self.boardId = set()
         raw_data_file = RawDataFile(self.args.if_path)
-        for i in range(20):
+        for i in range(100):
             trg = raw_data_file.getNextTrigger()
             if trg is None:
                 print("Info: current active channels are:")
@@ -141,6 +147,7 @@ class RawDataRooter():
 
         # duplicated trigger appearing after event dumped to file
         if trg_id in self.dumped_event_id:
+            self.skipped_event_id = trg_id
             return RunStatus.SKIP
 
         # add to event queue

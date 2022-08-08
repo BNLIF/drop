@@ -1,4 +1,3 @@
-
 from numpy import nan, zeros, fromfile, dtype
 import numpy as np
 from os import path
@@ -44,8 +43,17 @@ class RawDataFile:
             return None
 
         # Check to make sure the event starts with the key value (0xa0000000), otherwise it's ill-formed
-        sanity = 1 if (i0 & 0xa0000000 == 0xa0000000) else 0
-        if sanity == 0:
+        #sanity = 1 if (i0 & 0xa0000000 == 0xa0000000) else 0
+        if (i0 & 0xF0000000 == 0xa0000000):
+            sanity = 1 # normal if the left 4 bits are 1010
+        elif (i0 == 0xffffffff):
+            sanity = 2 # 0xffffffff -> extra 4 bytes (from LabVIEW; origin unknown) 
+            i0 = i1
+            i1 = i2
+            i2 = i3
+            i3 = fromfile(self.file, dtype='>u4', count=1)[0]
+        else:
+            sanity = 0
             raise IOError('Read did not pass sanity check')
 
         # extract the event size from the first header long-word

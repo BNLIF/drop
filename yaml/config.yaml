@@ -14,8 +14,8 @@ pre_pulse: 5
 post_pulse: 5
 
 # Waveform: ROI
-roi_start: [320, 275, 0]
-roi_end: [345, 300, 499]
+roi_start: [320, 260, 0]
+roi_end: [360, 300, 499]
 pre_roi_length: 200
 
 # PulseFinder: scipy peak finding
