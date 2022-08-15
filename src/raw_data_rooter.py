@@ -16,7 +16,7 @@ Algotrhim in a nutshell:
 
 import argparse
 import sys
-from numpy import array, isscalar, zeros
+from numpy import array, isscalar, zeros, uint32, uint16, uint64
 import numpy as np
 from os import path
 from enum import Enum
@@ -26,14 +26,13 @@ from os.path import splitext
 import uproot
 from caen_reader import RawDataFile
 
-
 #-----------------------------------
 # Global Parameters are Captialized
 #-----------------------------------
-N_BOARDS = 2
+N_BOARDS = 3
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
-DUMP_SIZE = 1000 # number of triggers to accumulate in queue before dump
-INITIAL_BASEKTEL_CAPACITY=5000 # number of basket per file
+DUMP_SIZE = 3000 # number of triggers to accumulate in queue before dump
+INITIAL_BASKET_CAPACITY=1000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
 
 if DUMP_SIZE<=10:
@@ -80,7 +79,7 @@ class RawDataRooter():
         self.dump_counter = 0 # number of dumps
 
         # self.sanity_check()
-        self.find_active_ch_names()
+        self.preview_file()
         self.reset_event_queue()
 
     def sanity_check(self):
@@ -100,12 +99,16 @@ class RawDataRooter():
         raw_data_file.close()
         return None
 
-    def find_active_ch_names(self):
+    def preview_file(self):
         """
-        Find active ch names by reading a few. Also find active boardId.
+        Preview the binary file to get necessary info to setup the processing:
+            - Find active ch names by reading a few.
+            - Find active boardId.
+            - Find number of samples.
         """
         self.ch_names = set()
         self.boardId = set()
+        n_samples = set()
         raw_data_file = RawDataFile(self.args.if_path)
         for i in range(100):
             trg = raw_data_file.getNextTrigger()
@@ -116,6 +119,13 @@ class RawDataRooter():
             for ch, val in trg.traces.items():
                 self.ch_names.add( ch )
                 self.boardId.add( int(trg.boardId) )
+                n_samples.add( len(val) )
+
+        if len(n_samples) != 1:
+            sys.exit("Something wrong. All channels of any triggers must have the same n_samples.")
+        else:
+            self.n_samples = n_samples.pop()
+
         print("Info: current active channels are:")
         print(self.ch_names)
         if len(self.boardId) != N_BOARDS:
@@ -165,19 +175,17 @@ class RawDataRooter():
 
             # dummy channels traces
             ch_names = list(self.ch_names)
-            val = np.zeros(2) # dummy
-            a = {}
+            ch_var = zeros([DUMP_SIZE//N_BOARDS, self.n_samples], dtype=uint16) # dummy var, data structure
+            vars_type = {}
             for ch in ch_names:
-                a[ch] = ak.Array([val, []])
-            a = ak.zip(a)
-            a = ak.values_astype(a, np.uint16)
-
-            # dummy event info
-            event = {'id': 'uint32', 'ttt': 'uint32'}
+                b_name = 'adc_' + ch # branch name
+                vars_type[b_name] = ak.Array(ch_var).type
+            vars_type['event_id'] = uint32
+            vars_type['event_ttt'] = uint64
 
             # make tree
-            self.file.mktree("daq", {'adc': a.type, 'event': event },
-            initial_basket_capacity=INITIAL_BASEKTEL_CAPACITY)
+            self.file.mktree("daq", vars_type,
+            initial_basket_capacity=INITIAL_BASKET_CAPACITY)
             # self.file['daq'].show()
         else:
             sys.exit('Sorry, requested output file format is not yet implmented.')
@@ -213,6 +221,7 @@ class RawDataRooter():
             self.event_queue[trg_id]['ttt']=ttt
         return RunStatus.NORMAL
 
+
     def get_full_queue_id(self):
         """
         Return a set of event_id in queue that have all info filled
@@ -230,27 +239,32 @@ class RawDataRooter():
         Dump fully filled events from queue to tree
         """
         # get rows from queue
-        i_set = self.get_full_queue_id()
-        if len(i_set)==0:
+        id_set = self.get_full_queue_id()
+        n_evts = len(id_set)
+
+        if n_evts==0:
             return None
         # create a basket
         basket = {}
         for ch in self.ch_names:
-            basket[ch] = []
-        info_basket = {'id': [], 'ttt': []}
+            b_name = 'adc_' + ch
+            basket[b_name] = zeros([n_evts, self.n_samples])
+        basket['event_id'] = zeros(n_evts, dtype=uint32)
+        basket['event_ttt'] = zeros(n_evts, dtype=uint64)
+
         # fill basket
-        for i in i_set:
-            ev = self.event_queue[i]
-            info_basket['id'].append(i)
-            info_basket['ttt'].append(ev['ttt'])
+        for i, ID in enumerate(id_set):
+            ev = self.event_queue[ID]
+            basket['event_id'][i]=ID
+            basket['event_ttt'][i]=ev['ttt']
             for ch in self.ch_names:
-                basket[ch].append(ev[ch])
-        a = ak.zip(basket)
-        self.file["daq"].extend({"adc": a, 'event': info_basket})
+                b_name = 'adc_' + ch
+                basket[b_name][i] = ev[ch]
+        self.file["daq"].extend(basket)
         # remove events from queue
-        for i in i_set:
-            del self.event_queue[i]
-            self.dumped_event_id.add(i) # keep a record of deleted event_id
+        for ID in id_set:
+            del self.event_queue[ID]
+            self.dumped_event_id.add(ID) # keep a record of deleted event_id
         self.tot_n_evt_proc = len(self.dumped_event_id)
         # keep track of num. of dumps
         self.dump_counter += 1
