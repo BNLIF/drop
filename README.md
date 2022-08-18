@@ -51,7 +51,7 @@ To convert the raw data from binary file to root file, check out the rooter:
 ```bash
 python src/raw_data_rooter.py --help
 ```
-Checkout the global parameters (ALL CAP) defined at the beginning of the script.
+The rooter is fairly fast. Please check the global parameters (ALL CAP) defined at the beginning of this script; they may not affect the output root file, but may affect the processing speed and the accuracy of the print out. 
 
 
 In your virtual env (recommended), check out the help manual. 
