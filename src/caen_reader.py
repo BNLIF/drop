@@ -1,4 +1,4 @@
-from numpy import nan, zeros, fromfile, dtype
+from numpy import nan, zeros, fromfile, dtype, uint32, uint64
 import numpy as np
 from os import path
 import matplotlib.pylab as plt
@@ -9,17 +9,24 @@ import matplotlib.pylab as plt
 
 
 class RawDataFile:
-    def __init__(self, fileName, DAQ='WaveDump'):
+    def __init__(self, fileName, n_boards, ETTT_flag=False, DAQ_Software='ToolDAQ'):
         """
         Initializes the dataFile instance to include the fileName, access time,
         and the number of boards in the file. Also opens the file for reading.
+
+        DAQ_Software: options: LabVIEW, ToolDAQ
+
         """
         self.fileName = path.abspath(fileName)
         self.file = open(self.fileName, 'rb')
+        self.ETTT_flag=ETTT_flag # Extended TTT is in use?
         self.recordLen = 0
-        self.oldTimeTag = 0.
-        self.timeTagRollover = 0
-        self.DAQ = DAQ
+        self.oldTimeTag = {}
+        self.timeTagRollover = {}
+        for i in range(n_boards):
+            self.oldTimeTag[i+1]=0
+            self.timeTagRollover[i+1]=0
+        self.DAQ_Software = DAQ_Software
 
     def getNextTrigger(self):
 
@@ -38,7 +45,10 @@ class RawDataFile:
         # Read the 4 long-words of the event header
 
         try:
-            i0, i1, i2, i3 = fromfile(self.file, dtype='>u4', count=4)
+            if self.DAQ_Software=='LabVIEW':
+                i0, i1, i2, i3 = fromfile(self.file, dtype='>u4', count=4)
+            else:
+                i0, i1, i2, i3 = fromfile(self.file, dtype='<u4', count=4)
         except ValueError:
             return None
 
@@ -47,11 +57,14 @@ class RawDataFile:
         if (i0 & 0xF0000000 == 0xa0000000):
             sanity = 1 # normal if the left 4 bits are 1010
         elif (i0 == 0xffffffff):
-            sanity = 2 # 0xffffffff -> extra 4 bytes (from LabVIEW; origin unknown) 
+            sanity = 2 # 0xffffffff -> extra 4 bytes (from LabVIEW; origin unknown)
             i0 = i1
             i1 = i2
             i2 = i3
-            i3 = fromfile(self.file, dtype='>u4', count=1)[0]
+            if self.DAQ_Software=='LabVIEW':
+                i3 = fromfile(self.file, dtype='>u4', count=1)[0]
+            else:
+                i3 = fromfile(self.file, dtype='<u4', count=1)[0]
         else:
             sanity = 0
             raise IOError('Read did not pass sanity check')
@@ -74,6 +87,9 @@ class RawDataFile:
         # determine the number of channels that are in the event by summing whichChan
         numChannels = int(sum(whichChan))
 
+        if numChannels<=0:
+            return None
+
         # Test for zero-length encoding by looking at one bit in the second header long-word
         zLE = True if i1 & 0x01000000 != 0 else False
 
@@ -81,20 +97,42 @@ class RawDataFile:
         eventCounterMask = 0x00ffffff
         trigger.eventCounter = i2 & eventCounterMask
 
-        # The trigger time-tag (timestamp) is the entire fourth long-word
-        trigger.triggerTimeTag = i3
+        # The trigger time-tag (timestamp) is the 31-bit of 4th world
+        pattern_bits = i1 & 0xFFFF00
+        rollover_bit = i3 >> 31
+        if self.ETTT_flag:
+            ttt = pattern_bits * 2**32 + i3
+        else:
+            rollover_bit = i3 >> 31
+            if rollover_bit == 1: # rollover already occured
+                ttt = i3 & 0x7FFFFFFF
+            else:
+                ttt = i3
 
-        # Since the trigger time tag is only 32 bits, it rolls over frequently. This checks for the roll-over
 
-        if i3 < self.oldTimeTag:
-            self.timeTagRollover += 1
-            self.oldTimeTag = float(i3)
+        # Since the trigger time tag may rolls over
+        if ttt < self.oldTimeTag[boardId]:
+            self.timeTagRollover[boardId] += 1
+            self.oldTimeTag[boardId] = uint64(ttt)
             # print('Trigger Time Rollover')
         else:
-            self.oldTimeTag = float(i3)
+            self.oldTimeTag[boardId] = uint64(ttt)
 
         # correcting triggerTimeTag for rollover
-        trigger.triggerTimeTag += self.timeTagRollover*(2**31)
+        if self.ETTT_flag:
+            trigger.triggerTimeTag =  ttt + self.timeTagRollover[boardId]*(2**48)
+        else:
+            trigger.triggerTimeTag = ttt + self.timeTagRollover[boardId]*(2**31)
+
+        print(
+        'eventCounter:', trigger.eventCounter,
+        'boardId:', trigger.boardId,
+         'ttt (ns):', trigger.triggerTimeTag*8,
+         'ttt (s):', trigger.triggerTimeTag*8/1e9,
+         'pattern_bits:', pattern_bits,
+         'bit_32th:', rollover_bit,
+         '\n')
+
 
         # convert from ticks to us since the beginning of the file
         trigger.triggerTime = trigger.triggerTimeTag * 8e-3
@@ -102,7 +140,7 @@ class RawDataFile:
         # Calculate length of each trace, using eventSize (in long words) and removing the 4 long words from the header
         size = int(4 * eventSize - 16)
         self.recordLen = size//(2*numChannels) # Xin: save the length of traces
-        
+
         # looping over the entries in the whichChan list, only reading data if the entry is 1
         for ind, k in enumerate(whichChan):
             if k == 1:
@@ -112,7 +150,10 @@ class RawDataFile:
                 # If the data are not zero-length encoded (default)
                 if not zLE:
                     # create a data-type of unsigned 16bit integers with the correct ordering
-                    dt = dtype('>H') # > Xin: > is the correct order for us.
+                    if self.DAQ_Software=='LabVIEW':
+                        dt = dtype('>H')
+                    else:
+                        dt = dtype('<H') # > Xin: > is the correct order for us.
 
                     # Use numpy's fromfile to read binary data and convert into a numpy array all at once
                     trace = fromfile(self.file, dtype=dt, count=size//(2*numChannels))
@@ -180,7 +221,7 @@ class RawTrigger:
         """
         self.traces = {}
         self.filePos = 0
-        self.triggerTimeTag = 0.
+        self.triggerTimeTag = uint64(0)
         self.triggerTime = 0.
         self.eventCounter = 0
 
