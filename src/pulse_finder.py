@@ -3,30 +3,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from waveform import Waveform
+from yaml_reader import YamlReader
 
 class PulseFinder():
     """
     Finding pulses.
     """
-    def __init__(self, config: dict, wfm: Waveform):
+    def __init__(self, cfg: YamlReader, wfm: Waveform):
         """Constructor
 
         Args:
-            config (dict): yaml file config in dictionary
+            cfg (YamlReader): configurations passed in by yaml file
             wfm (Waveform): waveform by Waveform class
 
         Notes:
             Initializes variables. When no pulse found, initial value are used. So
             better to have consistent initial type.
         """
-        # save config param for latter access
-        self.pre_pulse = int(config['pre_pulse'])
-        self.post_pulse = int(config['post_pulse'])
-        self.scipy_param = {
-            'distance': int(config['scipy_find_peaks']['distance']),
-            'threshold': float(config['scipy_find_peaks']['threshold']),
-            'height': float(config['scipy_find_peaks']['height'])
-        }
+        self.cfg = cfg
         self.reset()
 
     def reset(self):
@@ -47,14 +41,14 @@ class PulseFinder():
         """
         Scipy find_peaks functions
         """
-        par = self.scipy_param
-        for ch, val in self.wfm.amplitude.items():
-            a = self.wfm.amplitude[ch]
-            std = self.wfm.base_std[ch]
+        pars = self.cfg.scipy_pf_pars
+        for ch, val in self.wfm.amp_mV.items():
+            a = self.wfm.amp_mV[ch]
+            std = self.wfm.flat_base_std[ch]
             peaks, _ = find_peaks(a,
-                distance=par['distance'],
-                threshold=par['threshold']*std,
-                height=par['height']*std
+                distance=pars.distance,
+                threshold=pars.threshold*std,
+                height=pars.height*std
             )
             self.peaks[ch] = peaks #peak position
         return None
@@ -73,11 +67,11 @@ class PulseFinder():
         peaks_sum = sort(self.peaks['sum'])
 
         self.n_pulses = len(peaks_sum)
-        amp = self.wfm.amplitude['sum'] # amplitude in adc
+        amp = self.wfm.amp_mV['sum'] # amp_mV in adc
         if self.n_pulses>0:
             self.id = arange(self.n_pulses, dtype=uint32)
-            self.start =peaks_sum-self.pre_pulse
-            self.end = peaks_sum+self.post_pulse
+            self.start =peaks_sum-self.cfg.pre_pulse
+            self.end = peaks_sum+self.cfg.post_pulse
             place(self.start, self.start<0, 0)
             place(self.end, self.end>=len(amp), len(amp)-1)
 
@@ -89,7 +83,7 @@ class PulseFinder():
         if self.n_pulses<=0:
             return None
 
-        amp_int = self.wfm.amplitude_int['sum'] # integrated amplitude in adc*ns
+        amp_int = self.wfm.amp_mV_int['sum'] # integrated amplitude in adc*ns
         self.area_adc = amp_int[self.end]-amp_int[self.start]
         for i in self.id:
             start = self.start[i]
