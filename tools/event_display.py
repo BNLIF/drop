@@ -15,26 +15,31 @@ import re
 
 # Note: run setup.sh to get environemtal variables
 src_path = os.environ['SOURCE_DIR']
-yaml_path = os.environ['YAML_DIR']
+YAML_DIR = os.environ['YAML_DIR']
 sys.path.append(src_path)
 
 from utilities import generate_colormap
 from run_drop import RunDROP
 from pulse_finder import PulseFinder
+from yaml_reader import ADC_RATE_HZ
 
 class Args:
     start_id = 0
     end_id = 99999999
     output_dir=""
     if_path=""
-    yaml= '%s/config.yaml' % yaml_path
+    yaml= ''
 
 
 class EventDisplay():
-    def __init__(self, raw_data_path):
+    def __init__(self, raw_data_path, yaml_path=None):
 
-        self.args = Args()
+        self.args = Args() # arguments needed to run DROP
         self.args.if_path=raw_data_path
+        if yaml_path is None:
+            self.args.yaml = '%s/config.yaml' % YAML_DIR
+        else:
+            self.args.yaml = yaml_path
         self.run = RunDROP(self.args)
         self.grabbed_event_id = []
 
@@ -48,12 +53,18 @@ class EventDisplay():
 
         # beautify
         # self.cmap = generate_colormap(16)
-        self.cmap=plt.get_cmap('tab20')
+        #self.cmap=plt.get_cmap('tab20')
+        self.user_ch_colors =['b', 'g', 'r', 'c', 'm', 'y',
+        'tab:blue', 'tab:orange', 'lime', 'lightcoral', 'tab:purple', 'tab:brown',
+        'tab:pink', 'tab:gray', 'navy', 'gold']
         self.fig_width=8
         self.fig_height=4
         self.xlim = None
         self.ylim = None
         self.dpi = None
+
+        # how many new figure?
+        self.plot_counter = 0
 
     def grab_events(self, wanted_event_id):
         """
@@ -129,7 +140,7 @@ class EventDisplay():
             if ch == 'sum' or ch == 'summed':
                 self.__display_summed_waveform(i, no_show)
             elif ch == 'all':
-                if baseline_subtracted==True:
+                if baseline_subtracted==False:
                     self.__display_all_ch_raw_waveform(i, no_show)
                 else:
                     self.__display_all_ch_waveform(i, no_show)
@@ -152,44 +163,66 @@ class EventDisplay():
             return None
 
     def __display_summed_waveform(self, i, no_show=False):
-        plt.clf()
+        #plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
-        ax = plt.subplot(111)
-        a = self.wfm_list[i].amp_mV['sum']
-        plt.plot(a, label='summed channel');
-        plt.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline');
-        p = self.pf_list[i]
-        if p.n_pulses>0:
-            for j in range(len(p.start)):
-                xy = (p.start[j], 0)
-                h = p.height_adc[j]
-                w = p.end[j]-p.start[j]
-                rect = patches.Rectangle(xy, w, h, label='pulse', linewidth=1,
-                edgecolor='r', facecolor='none')
-                ax.add_patch(rect)
+        self.plot_counter += 1
+        ax1 = plt.subplot(111)
 
-        plt.legend(loc=0)
+
+        a = self.wfm_list[i].amp_pe['sum']
+        a_int = np.cumsum(a)*(1e9/ADC_RATE_HZ) # amp_mV_int does not exist
+        left_ylabel = "PE / 2ns"
+        right_ylabel = 'PE'
+
+        t = np.arange(0, len(a)*2, 2)
+        ax1.plot(t, a, label='summed channel');
+        ax1.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline');
+        ax1.legend(loc='upper left')
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
-        plt.xlabel('Samples')
-        plt.ylabel('ADC')
+        plt.xlabel('Time [ns]')
+        plt.ylabel(left_ylabel)
         plt.grid(linewidth=0.5, alpha=0.5)
-        if self.save_fig_flag==True:
-            no_show = True # turn off plt.show otherwise issue with savefig
-            fpath = self.save_fig_dir + '/wfm_sum_%d.png' % self.grabbed_event_id[i]
-            plt.savefig(fpath)
+
+        ax2 = ax1.twinx()
+        ax2.plot(t, a_int, color='k', label='accumulated', linewidth=1)
+        ax2.legend(loc='center right')
+        ax2.set_ylabel(right_ylabel)
+        p = self.pf_list[i]
+        if p.n_pulses>0:
+            for j in range(len(p.start)):
+                xy = (p.start[j]*(1e9/ADC_RATE_HZ), 0)
+                h = p.height_pe[j]
+                w = (p.end[j]-p.start[j])*(1e9/ADC_RATE_HZ)
+                rect = patches.Rectangle(xy, w, h, label='pulse', linewidth=0.5,
+                edgecolor='r', facecolor='none')
+                ax1.add_patch(rect)
+
         if no_show==False:
             plt.show()
         return None
 
     def __display_ch_waveform(self, i, ch, no_show=False):
-        plt.clf()
+        # plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
-        a = self.wfm_list[i].amp_mV[ch]
-        plt.plot(a, label=ch[4:]) # remove adc_ from ch names
-        plt.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
-        plt.legend(loc=0)
+        self.plot_counter += 1
+        ax1 = plt.subplot(111)
+
+        if ch in self.run.cfg.non_signal_channels:
+            a = self.wfm_list[i].amp_mV[ch]
+            left_ylabel="mV / 2ns"
+            right_ylabel="mV * ns"
+        else:
+            a = self.wfm_list[i].amp_pe[ch]
+            left_ylabel="PE / 2ns"
+            right_ylabel="PE"
+        a_int = np.cumsum(a)*(1e9/ADC_RATE_HZ) # amp_mV_int does not exist
+
+        t = np.arange(0, len(a)*2, 2)
+        ax1.plot(t, a, label=ch[4:]) # remove adc_ from ch names
+        ax1.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
+        ax1.legend(loc='upper left')
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
@@ -197,15 +230,21 @@ class EventDisplay():
             plt.xlim(self.xlim)
         if self.ylim is not None:
             plt.ylim(self.ylim)
-        plt.xlabel('Samples')
-        plt.ylabel('ADC')
+        plt.xlabel('Time [ns]')
+        plt.ylabel(left_ylabel)
         plt.grid(linewidth=0.5, alpha=0.5)
+
+        ax2 = ax1.twinx()
+        ax2.plot(t, a_int, color='k', label='accumulated', linewidth=1)
+        ax2.legend(loc='center right')
+        plt.ylabel(right_ylabel)
         if no_show==False:
             plt.show()
 
     def __display_ch_raw_waveform(self, i, ch, no_show=False):
-        plt.clf()
+        #plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
+        self.plot_counter += 1
         a = self.wfm_list[i].raw_data[ch].to_numpy()
         plt.plot(a, label=ch[4:])
         plt.legend(loc=0)
@@ -235,22 +274,26 @@ class EventDisplay():
 
         active_board_id = self.__get_active_board_id()
         n_boards = self.run.n_boards
+
         fig, axes = plt.subplots(n_boards, 1, figsize=[8,4*n_boards], sharex=True)
 
         for b, b_id in enumerate(active_board_id):
             for ch in self.run.ch_names:
+                if ch in self.run.cfg.non_signal_channels:
+                    continue
                 if int(ch[5]) == b_id:
                     #ch_id is the end digit
                     ch_id = int(re.match('.*?([0-9]+)$', ch).group(1))
-                    a = self.wfm_list[i].amp_mV[ch]
-                    axes[b].plot(a, label=ch[7:], color=self.cmap.colors[ch_id])
-            axes[b].plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
+                    a = self.wfm_list[i].amp_pe[ch]
+                    t = np.arange(0, len(a)*2, 2)
+                    axes[b].plot(t, a, label=ch[7:], linewidth=1, color=self.user_ch_colors[ch_id])
+                    axes[b].plot(np.zeros(len(a)), '--', color='gray', linewidth=1)
             if b==0:
                 axes[b].set_title('event_id=%d' % self.grabbed_event_id[i])
-            axes[b].set_xlabel('Samples')
-            axes[b].set_ylabel('ADC')
+            axes[b].set_xlabel('Time [ns]')
+            axes[b].set_ylabel("PE / 2ns")
             axes[b].grid(linewidth=0.5, alpha=0.5)
-            axes[b].legend(loc=0, title="board_id: %d" % b_id, ncol=2)
+            axes[b].legend(loc='best', title="board_id: %d" % b_id, ncol=2, fontsize=8)
         if no_show==False:
             plt.show()
 
@@ -262,11 +305,13 @@ class EventDisplay():
 
         for b, b_id in enumerate(active_board_id):
             for ch in self.run.ch_names:
+                if ch in self.run.cfg.non_signal_channels:
+                    continue
                 if int(ch[5]) == b_id:
                     #ch_id is the end digit
                     ch_id = int(re.match('.*?([0-9]+)$', ch).group(1))
                     a = self.wfm_list[i].raw_data[ch].to_numpy()
-                    axes[b].plot(a, label=ch[7:], color=self.cmap.colors[ch_id])
+                    axes[b].plot(a, label=ch[7:], color=self.user_ch_colors[ch_id])
             if b==0:
                 axes[b].set_title('event_id=%d' % self.grabbed_event_id[i])
             axes[b].set_xlabel('Samples')
@@ -306,7 +351,7 @@ class EventDisplay():
 
 
         ch_to_pmt_map_v0 = {
-        'adc_b1_ch0': 0, 'adc_b1_ch1': 1, 'adc_b1_ch2': 2, 'adc_b1_ch3': 3,
+        'adc_b1_ch0': None, 'adc_b1_ch1': 1, 'adc_b1_ch2': 2, 'adc_b1_ch3': 3,
         'adc_b1_ch4': 4, 'adc_b1_ch5': 5, 'adc_b1_ch6': 6, 'adc_b1_ch7': 7,
         'adc_b1_ch8': 8, 'adc_b1_ch9': 9, 'adc_b1_ch10': 10, 'adc_b1_ch11': 11,
         'adc_b1_ch12': 12, 'adc_b1_ch13': 13, 'adc_b1_ch14': 14, 'adc_b1_ch15': 15,
@@ -314,7 +359,7 @@ class EventDisplay():
         'adc_b2_ch0': 16, 'adc_b2_ch1': 17, 'adc_b2_ch2': 18, 'adc_b2_ch3': 19,
         'adc_b2_ch4': 20, 'adc_b2_ch5': 21, 'adc_b2_ch6': 22, 'adc_b2_ch7': 23,
         'adc_b2_ch8': 24, 'adc_b2_ch9': 25, 'adc_b2_ch10': 26, 'adc_b2_ch11': 27,
-        'adc_b2_ch12': 28, 'adc_b2_ch13': 29, 'adc_b2_ch14': 30, 'adc_b2_ch15': 31,
+        'adc_b2_ch12': 28, 'adc_b2_ch13': 29, 'adc_b2_ch14': 30, 'adc_b2_ch15': None,
 
         'adc_b3_ch0': 32, 'adc_b3_ch1': 33, 'adc_b3_ch2': 34, 'adc_b3_ch3': 35,
         'adc_b3_ch4': 36, 'adc_b3_ch5': 37, 'adc_b3_ch6': 38, 'adc_b3_ch7': 39,
@@ -327,7 +372,7 @@ class EventDisplay():
         return None
 
 
-    def get_pmt_hit_pattern(self, event_id, start, end):
+    def get_pmt_hit_pattern(self, event_id, start_ns, end_ns):
         """
         WORK IN PROGRESS. THIS FUNCTION HAS NOT BEEN TESTED.
 
@@ -349,7 +394,7 @@ class EventDisplay():
             print('ERROR: event_id must be int')
             return None
 
-        if start >= end or start <0:
+        if start_ns >= end_ns or start_ns <0:
             print("ERROR: start=%d and end=%d does not make sense." % (start, end))
             return None
 

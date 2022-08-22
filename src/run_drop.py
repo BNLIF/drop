@@ -48,8 +48,8 @@ class RunDROP():
         Collection of check before running
         '''
         # check ROI in config
-        roi_start = np.array(self.cfg.roi_start)
-        roi_end = np.array(self.cfg.roi_end)
+        roi_start = np.array(self.cfg.roi_start_ns)
+        roi_end = np.array(self.cfg.roi_end_ns)
         if len(roi_start) != len(roi_end):
             sys.exit('Different list length between roi_start and roi_end.')
         if np.any(roi_end<=roi_start):
@@ -101,6 +101,7 @@ class RunDROP():
         wfm.ch_names = self.ch_names
         wfm.ch_id = self.ch_id
         wfm.n_boards = self.n_boards
+        wfm.load_spe_csv_file()
 
         # create PulseFinder
         pf = PulseFinder(self.cfg, wfm)
@@ -117,6 +118,9 @@ class RunDROP():
             wfm.set_raw_data(batch[i])
             wfm.subtract_flat_baseline()
             #wfm.find_ma_baseline()
+            wfm.do_spe_normalization()
+            wfm.define_trigger_position()
+            wfm.correct_daisy_chain_trg_delay()
             wfm.sum_channels()
             wfm.integrate_waveform()
             wfm.find_roi_height()
@@ -125,6 +129,7 @@ class RunDROP():
             pf.reset()
             pf.wfm = wfm
             pf.find_pulses()
+            pf.calc_pulse_info()
             # fill rq event structure
             if writer is None:
                 self.wfm_list.append(wfm)
