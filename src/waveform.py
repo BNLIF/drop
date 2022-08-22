@@ -123,11 +123,11 @@ class Waveform():
         arr_corr = arr.copy()
         dT_ns = 48 # externally calibrated
         dS = dT_ns//2
-        if "_b1" in ch:
+        if "_b1" in ch_name:
             arr_corr=arr[:, dS*2:]
-        elif "_b2" in ch:
+        elif "_b2" in ch_name:
             arr_corr=arr[:, dS:-dS]
-        elif "_b3" in ch:
+        elif "_b3" in ch_name:
             arr_corr=arr[:, 0:-dS*2]
         else:
             print("ERROR")
