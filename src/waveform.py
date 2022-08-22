@@ -132,7 +132,7 @@ class Waveform():
         else:
             print("ERROR")
             return None
-        return adc_corr
+        return arr_corr
 
     def integrate_waveform(self):
         """
