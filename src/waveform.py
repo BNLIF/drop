@@ -92,7 +92,7 @@ class Waveform():
             if self.cfg.apply_high_pass_filter:
                 cutoff_Hz = self.cfg.high_pass_cutoff_Hz
                 amp = digitial_butter_highpass_filter(amp, cutoff_Hz)
-            self.amp_mV[ch] = amp
+            self.amp_mV[ch] = self.correct_trg_delay(amp, ch)
         return None
 
     def calc_amp_pe(self):
@@ -112,6 +112,27 @@ class Waveform():
         self.flat_base['sum'] = med
         self.flat_base_std['sum'] = std
         return None
+
+    def correct_trg_delay(self, arr, ch_name):
+        """
+        Shift a channel's waveform based on which board it is
+        boardId is baked into ch_name.
+        arr: array
+        ch_name: str
+        """
+        arr_corr = arr.copy()
+        dT_ns = 48 # externally calibrated
+        dS = dT_ns//2
+        if "_b1" in ch:
+            arr_corr=arr[:, dS*2:]
+        elif "_b2" in ch:
+            arr_corr=arr[:, dS:-dS]
+        elif "_b3" in ch:
+            arr_corr=arr[:, 0:-dS*2]
+        else:
+            print("ERROR")
+            return None
+        return adc_corr
 
     def integrate_waveform(self):
         """

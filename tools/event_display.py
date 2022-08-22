@@ -155,7 +155,7 @@ class EventDisplay():
         plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         ax = plt.subplot(111)
-        a = self.wfm_list[i].amplitude['sum']
+        a = self.wfm_list[i].amp_mV['sum']
         plt.plot(a, label='summed channel');
         plt.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline');
         p = self.pf_list[i]
@@ -186,7 +186,7 @@ class EventDisplay():
     def __display_ch_waveform(self, i, ch, no_show=False):
         plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
-        a = self.wfm_list[i].amplitude[ch]
+        a = self.wfm_list[i].amp_mV[ch]
         plt.plot(a, label=ch[4:]) # remove adc_ from ch names
         plt.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
         plt.legend(loc=0)
@@ -242,7 +242,7 @@ class EventDisplay():
                 if int(ch[5]) == b_id:
                     #ch_id is the end digit
                     ch_id = int(re.match('.*?([0-9]+)$', ch).group(1))
-                    a = self.wfm_list[i].amplitude[ch]
+                    a = self.wfm_list[i].amp_mV[ch]
                     axes[b].plot(a, label=ch[7:], color=self.cmap.colors[ch_id])
             axes[b].plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
             if b==0:
@@ -360,7 +360,7 @@ class EventDisplay():
         pmt_pos_z = self.pmt_pos['z']
 
         # calcualte integral from start to end
-        a_int = self.wfm_list[i].amplitude_int
+        a_int = self.wfm_list[i].amp_mV_int
         roi = {}
         roi_max = 1
         for ch in self.run.ch_names:
