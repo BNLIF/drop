@@ -158,6 +158,7 @@ class Waveform():
         for i in range(len(self.cfg.roi_start)):
             start=self.cfg.roi_start[i]
             end=self.cfg.roi_end[i]
+
             # pre_roi = start-self.cfg.pre_roi_length
             roi_a={}
             for ch, val in self.amp_mV_int.items():
