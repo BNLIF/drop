@@ -30,6 +30,7 @@ from caen_reader import RawDataFile
 # Global Parameters are Captialized
 #-----------------------------------
 N_BOARDS = 3
+DAQ_SOFTWARE = "ToolDaq"
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 DUMP_SIZE = 3000 # number of triggers to accumulate in queue before dump
 INITIAL_BASKET_CAPACITY=1000 # number of basket per file
@@ -58,7 +59,7 @@ class RawDataRooter():
         self.args = args # save a copy
         self.start_id = int(args.start_id)
         self.end_id = int(args.end_id)
-        self.raw_data_file = RawDataFile(args.if_path)
+        self.raw_data_file = RawDataFile(args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
         if args.output_dir=="":
             if args.if_path[-4:]=='.bin':
                 self.of_path = args.if_path[:-4] +'.root'
@@ -87,7 +88,7 @@ class RawDataRooter():
         Werid thing may happen. Check.:
         '''
         # Check a few triggers first from binary file
-        raw_data_file = RawDataFile(self.args.if_path)
+        raw_data_file = RawDataFile(self.args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
         for i in range(N_BOARDS):
             trg = raw_data_file.getNextTrigger()
             if i==0:
@@ -109,7 +110,7 @@ class RawDataRooter():
         self.ch_names = set()
         self.boardId = set()
         n_samples = set()
-        raw_data_file = RawDataFile(self.args.if_path)
+        raw_data_file = RawDataFile(self.args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
         for i in range(100):
             trg = raw_data_file.getNextTrigger()
             if trg is None:
