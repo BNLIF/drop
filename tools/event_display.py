@@ -43,6 +43,8 @@ class EventDisplay():
         self.run = RunDROP(self.args)
         self.grabbed_event_id = []
 
+        self.user_summed_channel_list=None
+
         # useful to give user hints
         self.min_event_id = 999999999
         self.max_event_id = 0
@@ -65,6 +67,27 @@ class EventDisplay():
 
         # how many new figure?
         self.plot_counter = 0
+
+    def set_user_summed_channel_list(self, user_list: list):
+        self.user_summed_channel_list = []
+        if isinstance(user_list, list):
+            for item in user_list:
+                if isinstance(item, int):
+                    chid = item%100
+                    boardId = item//100
+                    ch_str = 'adc_b%d_ch%d' % (boardId, chid)
+                    self.user_summed_channel_list.append(ch_str)
+                elif isinstance(item, str):
+                    if item[0:4]=='adc_':
+                        self.user_summed_channel_list.append(item)
+                    elif 'ch' in item:
+                        self.user_summed_channel_list.append('adc_'+item)
+                    else:
+                        print('ERROR: not recognized element in user_list')
+                else:
+                    print('ERROR: not recognized type in user_list')
+        else:
+            print("ERROR: user_list must be a list")
 
     def grab_events(self, wanted_event_id):
         """
@@ -168,7 +191,17 @@ class EventDisplay():
         self.plot_counter += 1
         ax1 = plt.subplot(111)
 
-        a = self.wfm_list[i].amp_pe['sum']
+        user_list = self.user_summed_channel_list
+        if user_list is None:
+            a = self.wfm_list[i].amp_pe['sum']
+        elif isinstance(user_list, list):
+            if len(user_list)>0:
+                a = 0
+                for ch in self.wfm_list[i].amp_pe:
+                    if ch in user_list:
+                        a += self.wfm_list[i].amp_pe[ch]
+        else:
+            print('ERROR: bad user_summed_channel_list!')
         a_int = np.cumsum(a)*(1e9/ADC_RATE_HZ) # amp_mV_int does not exist
         left_ylabel = "PE / 2ns"
         right_ylabel = 'PE'
