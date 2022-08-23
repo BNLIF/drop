@@ -90,7 +90,7 @@ class PulseFinder():
             pk = peaks[i]
             pk_l = pk
             pk_r = pk
-            for j in range(5):
+            for j in range(8):
                 pk_l -= 1
                 left_thresh = self.base_med_pe['sum']
                 if a[pk_l]<=left_thresh or pk_l<=0:

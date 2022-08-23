@@ -168,7 +168,6 @@ class EventDisplay():
         self.plot_counter += 1
         ax1 = plt.subplot(111)
 
-
         a = self.wfm_list[i].amp_pe['sum']
         a_int = np.cumsum(a)*(1e9/ADC_RATE_HZ) # amp_mV_int does not exist
         left_ylabel = "PE / 2ns"
@@ -341,16 +340,15 @@ class EventDisplay():
          342.9 , -171.45,  -57.15, 57.15,  171.45],
          'z': [-669.925]*30
         }
-        side_position_18pmt = {
+        side_position_16pmt = {
         "x": [0.] * 18,
         "y": [0.] * 18,
         "z": [200.] * 18
         }
 
-        self.pmt_pos  = self.__merge_dict(bottom_position_30pmt, side_position_18pmt)
+        self.pmt_pos  = self.__merge_dict(bottom_position_30pmt, side_position_16pmt)
 
-
-        ch_to_pmt_map_v0 = {
+        self.ch_to_bt_pmt_map = {
         'adc_b1_ch0': None, 'adc_b1_ch1': 1, 'adc_b1_ch2': 2, 'adc_b1_ch3': 3,
         'adc_b1_ch4': 4, 'adc_b1_ch5': 5, 'adc_b1_ch6': 6, 'adc_b1_ch7': 7,
         'adc_b1_ch8': 8, 'adc_b1_ch9': 9, 'adc_b1_ch10': 10, 'adc_b1_ch11': 11,
@@ -360,26 +358,21 @@ class EventDisplay():
         'adc_b2_ch4': 20, 'adc_b2_ch5': 21, 'adc_b2_ch6': 22, 'adc_b2_ch7': 23,
         'adc_b2_ch8': 24, 'adc_b2_ch9': 25, 'adc_b2_ch10': 26, 'adc_b2_ch11': 27,
         'adc_b2_ch12': 28, 'adc_b2_ch13': 29, 'adc_b2_ch14': 30, 'adc_b2_ch15': None,
-
-        'adc_b3_ch0': 32, 'adc_b3_ch1': 33, 'adc_b3_ch2': 34, 'adc_b3_ch3': 35,
-        'adc_b3_ch4': 36, 'adc_b3_ch5': 37, 'adc_b3_ch6': 38, 'adc_b3_ch7': 39,
-        'adc_b3_ch8': 40, 'adc_b3_ch9': 41, 'adc_b3_ch10': 42, 'adc_b3_ch11': 43,
-        'adc_b3_ch12': 44, 'adc_b3_ch13': 45, 'adc_b3_ch14': 46, 'adc_b3_ch15': 47,
         }
 
-        self.active_pmt_id = ch_to_pmt_map_v0
-
+        self.ch_to_side_pmt_map = {}
         return None
 
 
-    def get_pmt_hit_pattern(self, event_id, start_ns, end_ns):
+    def get_bottom_pmt_hit_pattern(self, event_id, start_ns=0, end_ns=100):
         """
         WORK IN PROGRESS. THIS FUNCTION HAS NOT BEEN TESTED.
 
         Args:
             event_id (int): the event you want
-            start (int): the first sample to include
-            end (int): The end sample. Open end conv, ex: [start, end).
+            start_ns (int): the first ns to include
+            end_ns (int): The end ns. Open end conv, ex: [start_ns, end_ns
+            ).
         """
         if isinstance(event_id, int):
             if event_id in self.grabbed_event_id:
@@ -395,8 +388,11 @@ class EventDisplay():
             return None
 
         if start_ns >= end_ns or start_ns <0:
-            print("ERROR: start=%d and end=%d does not make sense." % (start, end))
+            print("ERROR: start=%d and end=%d does not make sense." % (start_ns, end_ns))
             return None
+
+        start = start_ns//2
+        end = end_ns//2
 
         # get pmt coordinates
         self.set_bottom_pmt_positions()
@@ -404,30 +400,40 @@ class EventDisplay():
         pmt_pos_y = self.pmt_pos['y']
         pmt_pos_z = self.pmt_pos['z']
 
-        # calcualte integral from start to end
-        a_int = self.wfm_list[i].amp_mV_int
-        roi = {}
-        roi_max = 1
+        # select channels to bottom pmt
+        bt_pmt_ch = []
         for ch in self.run.ch_names:
+            if ch in self.run.cfg.non_signal_channels:
+                continue
+            if '_b3' in ch:
+                continue
+            bt_pmt_ch.append(ch)
+
+
+        # calcualte integral from start to end
+        a_int = self.wfm_list[i].amp_pe_int
+        area = {}
+        area_max = 1
+        for ch in bt_pmt_ch:
             val = a_int[ch][end]-a_int[ch][start]
-            roi[ch] = val
-            roi_max = np.max([val, roi_max])
+            area[ch] = val
+            area_max = np.max([val, area_max])
 
         # define color
         cmap = plt.cm.jet
-        norm = matplotlib.colors.Normalize(vmin=0, vmax=roi_max)
+        norm = matplotlib.colors.Normalize(vmin=0, vmax=area_max)
 
         # draw active PMT whose color scale with integral
         draw_area = 94
         fig, ax = plt.subplots(figsize=[5,5])
-        for ch in self.run.ch_names:
-            pmt_id = self.active_pmt_id[ch]
+        for ch in bt_pmt_ch:
+            pmt_id = self.ch_to_bt_pmt_map[ch]
             x=pmt_pos_x[pmt_id]
             y=pmt_pos_y[pmt_id]
             z=pmt_pos_z[pmt_id]
             if z>0:
                 continue
-            plt.scatter(x,y,color=cmap(norm(roi[ch])), s=draw_area, marker='o')
+            plt.scatter(x,y,color=cmap(norm(area[ch])), s=draw_area, marker='o')
         circle1 = plt.Circle((0, 0), radius=500.38, color='gray', fill=False)
         ax.add_patch(circle1)
 
@@ -445,7 +451,7 @@ class EventDisplay():
         sm.set_array([])  # only needed for matplotlib < 3.1
 
         # draw paddle
-        plt.scatter(-75,-75, color='black', s=draw_area, marker='x')
+        plt.scatter(75, 75, color='black', s=draw_area, marker='x')
 
         plt.xlabel('x [mm]')
         plt.ylabel('y [mm]')
