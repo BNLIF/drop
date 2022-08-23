@@ -35,9 +35,8 @@ class RunDROP():
         self.end_id = int(args.end_id)
         self.if_path = args.if_path # save a copy of input file path
         # config
-        self.config  = YamlReader(args.yaml).data
-        self.batch_size = int(self.config ['batch_size'])
-        self.post_trigger = float(self.config['post_trigger'])
+        self.cfg  = YamlReader(args.yaml)
+
         # variable
         self.batch_id = 0
         self.batch = None
@@ -49,8 +48,8 @@ class RunDROP():
         Collection of check before running
         '''
         # check ROI in config
-        roi_start = np.array(self.config['roi_start'])
-        roi_end = np.array(self.config['roi_end'])
+        roi_start = np.array(self.cfg.roi_start_ns)
+        roi_end = np.array(self.cfg.roi_end_ns)
         if len(roi_start) != len(roi_end):
             sys.exit('Different list length between roi_start and roi_end.')
         if np.any(roi_end<=roi_start):
@@ -98,13 +97,14 @@ class RunDROP():
             writer.reset()
 
         # create waveform, PulseFinder,
-        wfm = Waveform(self.config)
-        wfm.set_ch_names(self.ch_names)
-        wfm.set_ch_id(self.ch_id)
-        wfm.set_n_boards(self.n_boards)
+        wfm = Waveform(self.cfg)
+        wfm.ch_names = self.ch_names
+        wfm.ch_id = self.ch_id
+        wfm.n_boards = self.n_boards
+        wfm.load_spe_csv_file()
 
         # create PulseFinder
-        pf = PulseFinder(self.config, wfm)
+        pf = PulseFinder(self.cfg, wfm)
 
         # loop over events in this batch
         for i in range(len(batch)):
@@ -118,6 +118,9 @@ class RunDROP():
             wfm.set_raw_data(batch[i])
             wfm.subtract_flat_baseline()
             #wfm.find_ma_baseline()
+            wfm.do_spe_normalization()
+            wfm.define_trigger_position()
+            wfm.correct_daisy_chain_trg_delay()
             wfm.sum_channels()
             wfm.integrate_waveform()
             wfm.find_roi_height()
@@ -126,6 +129,7 @@ class RunDROP():
             pf.reset()
             pf.wfm = wfm
             pf.find_pulses()
+            pf.calc_pulse_info()
             # fill rq event structure
             if writer is None:
                 self.wfm_list.append(wfm)
@@ -142,7 +146,7 @@ class RunDROP():
         """
         print progress on screen
         """
-        pct = float(self.batch_size*self.batch_id/self.n_event_proc*100)
+        pct = float(self.cfg.batch_size*self.batch_id/self.n_event_proc*100)
         first_ev_id = self.batch[0].event_id
         last_ev_id = self.batch[-1].event_id
         print('processed event_id [%d ... %d]' % (first_ev_id, last_ev_id), end=' ')
