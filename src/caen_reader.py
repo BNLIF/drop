@@ -7,15 +7,17 @@ import matplotlib.pylab as plt
 # ============= Data File Class ===============
 # =============================================
 
-
 class RawDataFile:
     def __init__(self, fileName, n_boards, ETTT_flag=False, DAQ_Software='ToolDAQ'):
         """
         Initializes the dataFile instance to include the fileName, access time,
         and the number of boards in the file. Also opens the file for reading.
 
-        DAQ_Software: options: LabVIEW, ToolDAQ
-
+        Args:
+            fileName: str. the path to binary file.
+            n_boards: int, number of boards
+            ETTT_flag: bool (default: False)
+            DAQ_Software: str. (options: LabVIEW, ToolDAQ, defalt to ToolDAQ)
         """
         self.fileName = path.abspath(fileName)
         self.file = open(self.fileName, 'rb')
@@ -27,47 +29,52 @@ class RawDataFile:
             self.oldTimeTag[i+1]=0
             self.timeTagRollover[i+1]=0
         self.DAQ_Software = DAQ_Software
+        self.trigger_counter=0
+        self.expected_first_4_bytes=0xa0000fa4 #0xa0000fa4: when all 3 boards, 48 channels are active
+
+    def get_next_n_words(self, n_words=4):
+        """ a word is 4 byte """
+        if self.DAQ_Software=='LabVIEW':
+            order_type='>u4'
+        else:
+            order_type='<u4'
+        w = fromfile(self.file, dtype=order_type, count=n_words)
+        return w
 
     def getNextTrigger(self):
-
         """
         This function returns  the next trigger from the dataFile. It reads the control words into h[0-3], unpacks them,
         and then reads the next event. It returns a RawTrigger object, which includes the fileName, location in the
         file, and a dictionary of the traces
         :raise:IOError if the header does not pass a sanity check: (sanity = 1 if (i0 & 0xa0000000 == 0xa0000000) else 0
         """
-
         # Instantize a RawTrigger object
         trigger = RawTrigger()
         # Fill the file position
         trigger.filePos = self.file.tell()
-
         # Read the 4 long-words of the event header
-
         try:
-            if self.DAQ_Software=='LabVIEW':
-                i0, i1, i2, i3 = fromfile(self.file, dtype='>u4', count=4)
-            else:
-                i0, i1, i2, i3 = fromfile(self.file, dtype='<u4', count=4)
+            i0, i1, i2, i3 = self.get_next_n_words(4)
         except ValueError:
             return None
 
         # Check to make sure the event starts with the key value (0xa0000000), otherwise it's ill-formed
-        #sanity = 1 if (i0 & 0xa0000000 == 0xa0000000) else 0
         if (i0 & 0xF0000000 == 0xa0000000):
             sanity = 1 # normal if the left 4 bits are 1010
-        elif (i0 == 0xffffffff):
-            sanity = 2 # 0xffffffff -> extra 4 bytes (from LabVIEW; origin unknown)
-            i0 = i1
-            i1 = i2
-            i2 = i3
-            if self.DAQ_Software=='LabVIEW':
-                i3 = fromfile(self.file, dtype='>u4', count=1)[0]
-            else:
-                i3 = fromfile(self.file, dtype='<u4', count=1)[0]
         else:
-            sanity = 0
-            raise IOError('Read did not pass sanity check')
+            sanity = 2 # bad
+            print('Info: Read did not pass sanity check')
+            print('Info: Last read headers:')
+            print(bin(i0), bin(i1), bin(i2), bin(i3))
+            print("Start skipping...4 bytes at a time...until the next good first 4-bytes...")
+            while (True):
+                try:
+                    i0 = self.get_next_n_words(1)[0]
+                    if i0 == self.expected_first_4_bytes:
+                       i1, i2, i3 = self.get_next_n_words(3)
+                       break
+                except ValueError:
+                    return None
 
         # extract the event size from the first header long-word
         eventSize = i0 - 0xa0000000
@@ -109,7 +116,6 @@ class RawDataFile:
             else:
                 ttt = i3
 
-
         # Since the trigger time tag may rolls over
         if ttt < self.oldTimeTag[boardId]:
             self.timeTagRollover[boardId] += 1
@@ -123,16 +129,6 @@ class RawDataFile:
             trigger.triggerTimeTag =  ttt + self.timeTagRollover[boardId]*(2**48)
         else:
             trigger.triggerTimeTag = ttt + self.timeTagRollover[boardId]*(2**31)
-
-        print(
-        'eventCounter:', trigger.eventCounter,
-        'boardId:', trigger.boardId,
-         'ttt (ns):', trigger.triggerTimeTag*8,
-         'ttt (s):', trigger.triggerTimeTag*8/1e9,
-         'pattern_bits:', pattern_bits,
-         'bit_32th:', rollover_bit,
-         '\n')
-
 
         # convert from ticks to us since the beginning of the file
         trigger.triggerTime = trigger.triggerTimeTag * 8e-3
@@ -198,6 +194,7 @@ class RawDataFile:
                 # create a dictionary entry for the trace using traceName as the key
                 trigger.traces[traceName] = trace
 
+        self.trigger_counter += 1
         return trigger
 
     def close(self):

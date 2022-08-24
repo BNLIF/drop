@@ -5,8 +5,7 @@ do_run_drop=0
 
 if [ $do_raw_data_rooter -eq 1 ]; then
     file_path=$1
-    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/raw_root/phase0
-
+    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/raw_root/muon/
     while read fpath; do
 	case "$fpath" in \#*) continue ;; esac
 	echo " "
