@@ -1,7 +1,11 @@
 # General DAQ config setting on LabVIEW
-batch_size: 1000 # int
-daq_length: 500 # Xin: daq_length set on labVIEW. Not the recorded num. of samples.
-post_trigger: 0.5
+batch_size: 1000 # int, how many events to process at a time
+post_trigger: 0.5 # float, between 0 and 1
+daisy_chain: True # bool
+dgtz_dynamic_range_mV: 2000 # Digitizer dynamic range in mV. 2000 or 500
+non_signal_channels: ['b1_ch0', 'b2_ch15'] # some channels are used for paddles, exclude them for reconstructing variables
+bottom_pmt_channels: [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214]
+side_pmt_channels: [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315]
 
 # Waveform: digiter filter
 apply_high_pass_filter: False
@@ -10,17 +14,18 @@ high_pass_cutoff_Hz: 5e6
 # Waveform: Baseline subtraction
 moving_avg_length: 10
 sigma_above_baseline: 3.0
-pre_pulse: 5
+pre_pulse: 1
 post_pulse: 5
 
-# Waveform: ROI
-roi_start: [320, 260, 0]
-roi_end: [360, 300, 499]
-pre_roi_length: 200
+# Waveform: ROI with respect to trigger position
+roi_start_ns: [-180, -10, 150]
+roi_end_ns: [-100, 70, 230]
 
 # PulseFinder: scipy peak finding
 pulse_finder_algo: 0
-scipy_find_peaks:
-  distance: 5
-  threshold: 1
+scipy_peak_finder_parameters:
+  distance: 15
+  threshold: 2
   height: 2 # None
+  prominence: 1 #
+coincidence_threshold_pe: 0.3 # if a channel-pulse height is above threshold, it's counted toward coincidence
