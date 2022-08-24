@@ -69,25 +69,9 @@ class EventDisplay():
         self.plot_counter = 0
 
     def set_user_summed_channel_list(self, user_list: list):
-        self.user_summed_channel_list = []
-        if isinstance(user_list, list):
-            for item in user_list:
-                if isinstance(item, int):
-                    chid = item%100
-                    boardId = item//100
-                    ch_str = 'adc_b%d_ch%d' % (boardId, chid)
-                    self.user_summed_channel_list.append(ch_str)
-                elif isinstance(item, str):
-                    if item[0:4]=='adc_':
-                        self.user_summed_channel_list.append(item)
-                    elif 'ch' in item:
-                        self.user_summed_channel_list.append('adc_'+item)
-                    else:
-                        print('ERROR: not recognized element in user_list')
-                else:
-                    print('ERROR: not recognized type in user_list')
-        else:
-            print("ERROR: user_list must be a list")
+        user_list = self.run.cfg.get_ch_names(user_list)
+        self.user_summed_channel_list = user_list
+        return None
 
     def grab_events(self, wanted_event_id):
         """
@@ -133,11 +117,12 @@ class EventDisplay():
 
     def display_waveform(self, event_id, ch, baseline_subtracted=True, no_show=False):
         """
-        Plot waveform, for selected channel(s), summed channel, or all channels
+        Plot waveform, for individual channel, all channels, summed channel,
+        or selected summed channels.
 
         Args:
             event_id (int): the event you want to see
-            ch (str or list): the channel(s) you want to see. If ch is str type,
+            ch (str): the channel(s) you want to see. If ch is str type,
                 for example, `b1_ch10`, plot that individual channel. if `ch=sum`,
                 plot the summed channel; if `ch=all` for plot all channels at once.
                 if ch is a list, plot that list.
