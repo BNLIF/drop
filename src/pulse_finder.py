@@ -33,9 +33,10 @@ class PulseFinder():
         self.id = None # type: ndarray
         self.start = None
         self.end = None
-        self.area_pe = array([]) # type: ndarray
-        self.height_pe = [] #type: list
-        self.coincidence =  [] #type: list
+        self.area_pe = {}
+        self.height_pe = {}
+        self.coincidence = []
+        self.sba = [] # side-bottom-asymmetry
         self.wfm = None
 
     def scipy_find_peaks(self):
@@ -107,25 +108,33 @@ class PulseFinder():
         """
         Calculate pulse info, such as ex area, peak height, coincidence, etc.
         """
-
         if self.n_pulses<=0:
             return None
 
-        a = self.wfm.amp_pe['sum']
-        a_int = self.wfm.amp_pe_int['sum'] # integrated amplitude in adc*ns
-        self.area_pe = a_int[self.end]-a_int[self.start]
+        # calcualte channel x pulse level variables (one per ch per pulse)
+        # pulse area, height
+        for ch in self.wfm.amp_pe.keys():
+            a = self.wfm.amp_pe[ch]
+            a_int = self.wfm.amp_pe_int[ch]
+            self.area_pe[ch] = a_int[self.end]-a_int[self.start]
+            self.height_pe[ch] = zeros(len(self.id))
+            for i in self.id:
+                start = self.start[i]
+                end = self.end[i]
+                self.height_pe[ch][i]=np.max(a[start:end])
+
+        # calcualte pulse level variables (one per pulse)
         for i in self.id:
-            start = self.start[i]
-            end = self.end[i]
-            pmax = np.max(a[start:end])
-            self.height_pe.append(pmax)
             coin = 0
-            for ch, val in self.peaks.items():
-                if ch=='sum':
-                    continue
-                mask = logical_and(val>=start, val<end)
-                if len(val[mask])>0:
-                    coin +=1
+            for ch, val in self.height_pe.items():
+                if 'adc_' in ch:
+                    if ch in self.cfg.non_signal_channels:
+                        continue
+                    if val>=self.cfg.coincidence_threshold_pe:
+                        coin +=1
+            SBA = (self.area_pe['sum_side'][i]-self.area_pe['sum_bt'][i])
+            SBA = SBA / (self.area_pe['sum_side'][i]+self.area_pe['sum_bt'][i])
+            self.sba =  SBA # side-to-bottom asymmetry
             self.coincidence.append(coin)
         return None
 

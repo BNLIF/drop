@@ -33,22 +33,23 @@ class RQWriter:
 
         # channel level variables
         self.ch_id = [] # boardId*100 + chID
-        self.roi0_height_adc = []
-        self.roi1_height_adc = []
-        self.roi2_height_adc = []
-        self.roi0_area_adc = []
-        self.roi1_area_adc = []
-        self.roi2_area_adc = []
-
+        self.roi0_height_pe = []
+        self.roi1_height_pe = []
+        self.roi2_height_pe = []
+        self.roi0_area_pe = []
+        self.roi1_area_pe = []
+        self.roi2_area_pe = []
 
         # PulseFinder variables
         self.n_pulses=[]
         self.pulse_id = []
         self.pulse_start = []
         self.pulse_end = []
-        self.pulse_area_adc = []
-        self.pulse_height_adc = []
         self.pulse_coincidence = []
+
+        # channel x pulse variables
+        self.pulse_area_pe = {}
+        self.pulse_height_pe = {}
         return None
 
     def create_output(self):
@@ -70,18 +71,18 @@ class RQWriter:
         'id': type_uint,
         'start': type_uint,
         'end': type_uint,
-        'area_adc': type_float,
-        'height_adc': type_float,
+        'area_pe': type_float,
+        'height_pe': type_float,
         'coincidence': type_uint
         }
         ch_info = {
             'id': type_uint,
-            'roi0_height_adc': type_float,
-            'roi1_height_adc': type_float,
-            'roi2_height_adc': type_float,
-            'roi0_area_adc': type_float,
-            'roi1_area_adc': type_float,
-            'roi2_area_adc': type_float,
+            'roi0_height_pe': type_float,
+            'roi1_height_pe': type_float,
+            'roi2_height_pe': type_float,
+            'roi0_area_pe': type_float,
+            'roi1_area_pe': type_float,
+            'roi2_area_pe': type_float,
 
         }
         ch_type = ak.zip(ch_info).type
@@ -131,31 +132,31 @@ class RQWriter:
         roi2_a = zeros(len(wfm.ch_id))
         for i, ch_id in enumerate(wfm.ch_id):
             ch_name = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
-            roi0_h[i] = wfm.roi_height_adc[0][ch_name]
-            roi1_h[i] = wfm.roi_height_adc[1][ch_name]
-            roi2_h[i] = wfm.roi_height_adc[2][ch_name]
-            roi0_a[i] = wfm.roi_area_adc[0][ch_name]
-            roi1_a[i] = wfm.roi_area_adc[1][ch_name]
-            roi2_a[i] = wfm.roi_area_adc[2][ch_name]
+            roi0_h[i] = wfm.roi_height_pe[0][ch_name]
+            roi1_h[i] = wfm.roi_height_pe[1][ch_name]
+            roi2_h[i] = wfm.roi_height_pe[2][ch_name]
+            roi0_a[i] = wfm.roi_area_pe[0][ch_name]
+            roi1_a[i] = wfm.roi_area_pe[1][ch_name]
+            roi2_a[i] = wfm.roi_area_pe[2][ch_name]
 
-        self.roi0_height_adc.append(roi0_h)
-        self.roi1_height_adc.append(roi1_h)
-        self.roi2_height_adc.append(roi2_h)
-        self.roi0_area_adc.append(roi0_a)
-        self.roi1_area_adc.append(roi1_a)
-        self.roi2_area_adc.append(roi2_a)
+        self.roi0_height_pe.append(roi0_h)
+        self.roi1_height_pe.append(roi1_h)
+        self.roi2_height_pe.append(roi2_h)
+        self.roi0_area_pe.append(roi0_a)
+        self.roi1_area_pe.append(roi1_a)
+        self.roi2_area_pe.append(roi2_a)
 
         # pulse level
         self.n_pulses.append(pf.n_pulses)
         self.pulse_id.append(pf.id.tolist())
         self.pulse_start.append(pf.start.tolist())
         self.pulse_end.append(pf.end.tolist())
-        self.pulse_area_adc.append(pf.area_adc.tolist()) # actually adc*ns
-        self.pulse_height_adc.append(pf.height_adc)
         self.pulse_coincidence.append(pf.coincidence)
 
         # pulse x channel level
-        # <Work in Progress>
+        self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
+        self.pulse_height_pe.append(pf.height_pe)
+        
         return None
 
     def close(self):
@@ -181,18 +182,18 @@ class RQWriter:
         'id': self.pulse_id,
         'start': self.pulse_start,
         'end': self.pulse_end,
-        'area_adc': self.pulse_area_adc,
-        'height_adc': self.pulse_height_adc,
+        'area_pe': self.pulse_area_pe,
+        'height_pe': self.pulse_height_pe,
         'coincidence': self.pulse_coincidence
         }
         ch_info = {
             'id': self.ch_id,
-            'roi0_height_adc': self.roi0_height_adc,
-            'roi1_height_adc': self.roi1_height_adc,
-            'roi2_height_adc': self.roi2_height_adc,
-            'roi0_area_adc': self.roi0_area_adc,
-            'roi1_area_adc': self.roi1_area_adc,
-            'roi2_area_adc': self.roi2_area_adc,
+            'roi0_height_pe': self.roi0_height_pe,
+            'roi1_height_pe': self.roi1_height_pe,
+            'roi2_height_pe': self.roi2_height_pe,
+            'roi0_area_pe': self.roi0_area_pe,
+            'roi1_area_pe': self.roi1_area_pe,
+            'roi2_area_pe': self.roi2_area_pe,
 
         }
         data = {

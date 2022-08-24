@@ -210,7 +210,7 @@ class EventDisplay():
         if p.n_pulses>0:
             for j in range(len(p.start)):
                 xy = (p.start[j]*(1e9/ADC_RATE_HZ), 0)
-                h = p.height_pe[j]
+                h = p.height_pe['sum'][j]
                 w = (p.end[j]-p.start[j])*(1e9/ADC_RATE_HZ)
                 rect = patches.Rectangle(xy, w, h, label='pulse', linewidth=0.5,
                 edgecolor='r', facecolor='none')
