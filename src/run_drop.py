@@ -10,6 +10,7 @@ from numpy import array, isscalar
 import numpy as np
 from enum import Enum
 import uproot
+import pandas as pd
 
 from yaml_reader import YamlReader
 from waveform import Waveform
@@ -41,6 +42,7 @@ class RunDROP():
         self.batch_id = 0
         self.batch = None
         self.load_run_info()
+        self.load_pmt_info()
         self.sanity_check()
 
     def sanity_check(self):
@@ -78,6 +80,24 @@ class RunDROP():
         self.ch_names = ["adc_b%d_ch%d" % (i // 100, i % 100) for i in self.ch_id]
         return None
 
+    def load_pmt_info(self):
+        """
+        PMT calibration results are saved in a csv file
+        The path to the csv file is specified in yaml config file
+        """
+        fpath = self.cfg.spe_fit_results_path
+        self.spe_mean = {}
+        try:
+            df = pd.read_csv(fpath)
+            self.spe_fit_results  = df.set_index('ch_id') # to be saved in root
+            df.set_index('ch_name', inplace=True)
+            ch_names = df.index()
+            for ch in ch_names:
+                self.spe_mean[ch] = float(df['spe_mean'][ch])
+        except:
+            print("WARNING: your spe_fit_results_path cannot be load properly!")
+            print('WARNING: Use 1.6 pC as spe_mean for all PMTs')
+
     def process_batch(self, batch, writer:RQWriter):
         '''
         Process one batch at a time. Batch size is defined in the yaml file.
@@ -101,7 +121,7 @@ class RunDROP():
         wfm.ch_names = self.ch_names
         wfm.ch_id = self.ch_id
         wfm.n_boards = self.n_boards
-        wfm.load_spe_csv_file()
+        wfm.spe_mean = self.spe_mean
 
         # create PulseFinder
         pf = PulseFinder(self.cfg, wfm)
@@ -187,8 +207,10 @@ def main(argv):
     'n_trg_read': [run.n_trg_read],
     'n_event_proc': [run.n_event_proc],
     'leftover_event_id': [run.leftover_event_id],
-    'ch_id': [run.ch_id]
+    'ch_id': [run.ch_id],
     })
+
+    writer.dump_pmt_info(run.)
 
     # remeber to close file
     writer.close()

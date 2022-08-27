@@ -30,6 +30,7 @@ class Waveform():
         self.ch_names = None
         self.ch_id = None
         self.n_boards = None
+        self.spe_mean = None
         self.reset()
         return None
 
@@ -115,9 +116,13 @@ class Waveform():
         for ch, val in self.amp_mV.items():
             if ch in self.cfg.non_signal_channels:
                 continue
-            self.amp_pe[ch] = val/50/self.spe_mean[ch]
-            self.flat_base_pe[ch] = self.flat_base_mV[ch]/50/self.spe_mean[ch]
-            self.flat_base_std_pe[ch] = self.flat_base_std_mV[ch]/50/self.spe_mean[ch]
+            if spe_mean is None:
+                spe_mean = 1.6
+            else:
+                spe_mean = self.spe_mean[ch]
+            self.amp_pe[ch] = val/50/spe_mean
+            self.flat_base_pe[ch] = self.flat_base_mV[ch]/50/spe_mean
+            self.flat_base_std_pe[ch] = self.flat_base_std_mV[ch]/50/spe_mean
         return None
 
     def correct_daisy_chain_trg_delay(self):
@@ -141,28 +146,6 @@ class Waveform():
                 print("ERROR in correct_trg_delay: invalid boardId")
                 return None
             self.amp_pe[ch] = a_corr
-
-    def load_spe_csv_file(self):
-        """
-        Right now it just assumes uniform 1.6pC for all ch
-        ToDo: actually load a csv file
-        """
-        fpath = self.cfg.spe_fit_results_path
-        self.spe_mean = {}
-        try:
-            df = pd.read_csv(fpath)
-            df.set_index('ch_name', inplace=True)
-            for ch in self.ch_names:
-                if ch in self.cfg.non_signal_channels:
-                    continue
-                self.spe_mean[ch] = float(df['spe_mean'][ch])
-        except:
-            print("WARNING: your spe_fit_results_path cannot be load properly!")
-            print('WARNING: Use 1.6 pC as spe_mean for all PMTs')
-            for ch in self.ch_names:
-                if ch in self.cfg.non_signal_channels:
-                    continue
-                self.spe_mean[ch] = 1.6
 
     def sum_channels(self):
         """

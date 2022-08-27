@@ -156,7 +156,7 @@ class RQWriter:
         # pulse x channel level
         self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
         self.pulse_height_pe.append(pf.height_pe)
-        
+
         return None
 
     def close(self):
@@ -170,6 +170,27 @@ class RQWriter:
         Write one per run/file. No need to loop.
         """
         self.file['run_info'] = rq
+
+    def dump_pmt_info(self, df: DataFrame):
+        """
+        uproot only accept dictionary
+        """
+        if df is None:
+            return None
+            
+        pmt_info = {
+            'ch_id': df['ch_id'].tolist(),
+            'ch_name:': df['ch_name'].tolist(),
+            'pmt_name': df['pmt_name'].tolist(),
+            'spe_mean': df['spe_mean'].tolist(),
+            'spe_width': df['spe_width'].tolist(),
+            'spe_mean_err': df['spe_mean_err'].tolist(),
+            'spe_width_err': df['spe_width_err'].tolist(),
+            'chi2': df['chi2'].tolist(),
+            'dof': df['dof'].tolist(),
+            'HV': df['HV'].tolist(),
+        }
+        self.file['pmt_info']=pmt_info
 
     def dump_event_rq(self):
         """
