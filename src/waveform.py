@@ -108,6 +108,10 @@ class Waveform():
         return None
 
     def do_spe_normalization(self):
+        """
+        Do SPE normalization for all signal channels
+        Muon paddle is considered non-signal channel, and hence not SPE normalized
+        """
         for ch, val in self.amp_mV.items():
             if ch in self.cfg.non_signal_channels:
                 continue
@@ -143,10 +147,22 @@ class Waveform():
         Right now it just assumes uniform 1.6pC for all ch
         ToDo: actually load a csv file
         """
-        spe_mean = {}
-        for ch in self.ch_names:
-            spe_mean[ch] = 1.6
-        self.spe_mean = spe_mean
+        fpath = self.cfg.spe_fit_results_path
+        self.spe_mean = {}
+        try:
+            df = pd.read_csv(fpath)
+            df.set_index('ch_name', inplace=True)
+            for ch in self.ch_names:
+                if ch in self.cfg.non_signal_channels:
+                    continue
+                self.spe_mean[ch] = float(df['spe_mean'][ch])
+        except:
+            print("WARNING: your spe_fit_results_path cannot be load properly!")
+            print('WARNING: Use 1.6 pC as spe_mean for all PMTs')
+            for ch in self.ch_names:
+                if ch in self.cfg.non_signal_channels:
+                    continue
+                self.spe_mean[ch] = 1.6
 
     def sum_channels(self):
         """

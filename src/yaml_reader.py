@@ -66,6 +66,7 @@ class YamlReader():
         self.non_signal_channels= self.get_ch_names( self.data['non_signal_channels'] )
         self.bottom_pmt_channels= self.get_ch_names( self.data['bottom_pmt_channels'] )
         self.side_pmt_channels= self.get_ch_names( self.data['side_pmt_channels'] )
+        self.spe_fit_results_path = self.data['spe_fit_results_path']
 
         self.daisy_chain = bool(self.data['daisy_chain'])
         self.apply_high_pass_filter = bool(self.data['apply_high_pass_filter'])
