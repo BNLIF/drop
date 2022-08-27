@@ -6,7 +6,7 @@ import numpy as np
 from scipy import signal
 from matplotlib.colors import ListedColormap
 from matplotlib.cm import hsv
-from yaml_reader import ADC_RATE_HZ
+from yaml_reader import SAMPLE_TO_NS
 
 
 def generate_colormap(n_colors=32):
@@ -51,7 +51,7 @@ def digitial_butter_highpass_filter(data, cutoff_Hz=3e6):
     Source: https://scipy-cookbook.readthedocs.io/items/ButterworthBandpass.html
     """
     order=5
-    fs_Hz = ADC_RATE_HZ # digitizer sampling rate
+    fs_Hz = 1e9/SAMPLE_TO_NS # digitizer sampling rate
     nyq = fs_Hz * 0.5
     Wn = cutoff_Hz/nyq
     b, a = signal.butter(order, Wn, btype='high', analog=False)

@@ -1,9 +1,9 @@
-from numpy import array, zeros, sort, arange, ndarray, uint32, uint16, place, logical_and, argsort
+from numpy import array, zeros, sort, arange, ndarray, uint32, uint16, place, logical_and, argsort, argmax
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from waveform import Waveform
-from yaml_reader import YamlReader
+from yaml_reader import YamlReader, SAMPLE_TO_NS
 
 class PulseFinder():
     """
@@ -33,10 +33,17 @@ class PulseFinder():
         self.id = None # type: ndarray
         self.start = None
         self.end = None
-        self.area_pe = {}
-        self.height_pe = {}
-        self.coincidence = []
+        self.area_sum_pe = []
+        self.area_bot_pe = []
+        self.area_side_pe = []
         self.sba = [] # side-bottom-asymmetry
+        self.ptime_ns = []
+        self.coincidence = []
+        self.area_max_frac = []
+        self.area_max_ch_id = []
+
+        self.area_ch_pe = []
+        self.height_ch_pe = []
         self.wfm = None
 
     def scipy_find_peaks(self):
@@ -104,37 +111,72 @@ class PulseFinder():
             self.start[i] = pk_l
             self.end[i] = pk_r
 
-    def calc_pulse_info(self):
+    def calc_pulse_ch_info(self):
         """
-        Calculate pulse info, such as ex area, peak height, coincidence, etc.
+        Calculate pulse x channel variables.
+        One per pulse per channel, excluding padles and summed channels.
         """
         if self.n_pulses<=0:
             return None
 
         # calcualte channel x pulse level variables (one per ch per pulse)
-        # pulse area, height
-        for ch in self.wfm.amp_pe.keys():
-            a = self.wfm.amp_pe[ch]
-            a_int = self.wfm.amp_pe_int[ch]
-            self.area_pe[ch] = a_int[self.end]-a_int[self.start]
-            self.height_pe[ch] = zeros(len(self.id))
-            for i in self.id:
-                start = self.start[i]
-                end = self.end[i]
-                self.height_pe[ch][i]=np.max(a[start:end])
+        # pulse area, height, coincidence
+        for i in self.id:
+            start = self.start[i] # start of pulse i in sample
+            end = self.end[i] # end of pulse i in sample
+            area_pe = {} # integral within start to end
+            height_pe = {} # pulse height within start to end
+            for ch in self.wfm.amp_pe.keys():
+                a = self.wfm.amp_pe[ch]
+                a_int = self.wfm.amp_pe_int[ch]
+                area_pe[ch] = a_int[end]-a_int[start]
+                height_pe[ch] = np.max(a[start:end])
+            self.height_ch_pe.append(height_pe)
+            self.area_ch_pe.append(area_pe)
+
+    def calc_pulse_info(self):
+        """
+        Calculate pulse variable
+        One per pulse
+        """
+        height_thresh = self.cfg.spe_height_threshold
+
 
         # calcualte pulse level variables (one per pulse)
         for i in self.id:
-            coin = 0
-            for ch, val in self.height_pe.items():
-                if 'adc_' in ch:
-                    if ch in self.cfg.non_signal_channels:
-                        continue
-                    if val>=self.cfg.coincidence_threshold_pe:
-                        coin +=1
-            SBA = (self.area_pe['sum_side'][i]-self.area_pe['sum_bt'][i])
-            SBA = SBA / (self.area_pe['sum_side'][i]+self.area_pe['sum_bt'][i])
-            self.sba =  SBA # side-to-bottom asymmetry
+            start = self.start[i] # start of pulse i in sample
+            end = self.end[i] # end of pulse i in sample
+            a_sum = self.wfm.amp_pe['sum']
+            a_sum_int = self.wfm.amp_pe_int['sum']
+            a_bot = self.wfm.amp_pe['sum_bot']
+            a_bot_int = self.wfm.amp_pe_int['sum_bot']
+            a_side = self.wfm.amp_pe['sum_side']
+            a_side_int = self.wfm.amp_pe_int['sum_side']
+            self.area_sum_pe.append(a_sum_int[end]-a_sum_int[start])
+            self.area_bot_pe.append(a_bot_int[end]-a_bot_int[start])
+            self.area_side_pe.append(a_side_int[end]-a_side_int[start])
+            self.ptime_ns.append(argmax(a_sum[start:end])*SAMPLE_TO_NS)
+            sba = (self.area_side_pe[-1]-self.area_bot_pe[-1])/self.area_sum_pe[-1]
+            self.sba.append( sba ) # side-to-bottom asymmetry
+
+            area_max_frac = 0
+            area_max_ch_id = 0
+            coin=0
+            for ch in self.wfm.amp_pe.keys():
+                if ch[0:4]=='adc_':
+                    a = self.wfm.amp_pe[ch]
+                    a_int = self.wfm.amp_pe_int[ch]
+                    area = a_int[end]-a_int[start]
+                    if self.height_ch_pe[i][ch]>height_thresh:
+                        coin += 1
+
+                    if area>area_max_frac:
+                        area_max_frac = area
+                        ch_id = self.wfm.ch_name_to_id_dict[ch]
+                        area_max_ch_id = ch_id
+            area_max_frac /= self.area_sum_pe[-1]
+            self.area_max_frac.append(area_max_frac)
+            self.area_max_ch_id.append(area_max_ch_id)
             self.coincidence.append(coin)
         return None
 

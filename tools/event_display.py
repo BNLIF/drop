@@ -21,7 +21,7 @@ sys.path.append(src_path)
 from utilities import generate_colormap
 from run_drop import RunDROP
 from pulse_finder import PulseFinder
-from yaml_reader import ADC_RATE_HZ
+from yaml_reader import SAMPLE_TO_NS
 
 class Args:
     start_id = 0
@@ -187,7 +187,7 @@ class EventDisplay():
                         a += self.wfm_list[i].amp_pe[ch]
         else:
             print('ERROR: bad user_summed_channel_list!')
-        a_int = np.cumsum(a)*(1e9/ADC_RATE_HZ) # amp_mV_int does not exist
+        a_int = np.cumsum(a)*(SAMPLE_TO_NS) # amp_mV_int does not exist
         left_ylabel = "PE / 2ns"
         right_ylabel = 'PE'
 
@@ -209,9 +209,9 @@ class EventDisplay():
         p = self.pf_list[i]
         if p.n_pulses>0:
             for j in range(len(p.start)):
-                xy = (p.start[j]*(1e9/ADC_RATE_HZ), 0)
+                xy = (p.start[j]*(SAMPLE_TO_NS), 0)
                 h = p.height_pe['sum'][j]
-                w = (p.end[j]-p.start[j])*(1e9/ADC_RATE_HZ)
+                w = (p.end[j]-p.start[j])*(SAMPLE_TO_NS)
                 rect = patches.Rectangle(xy, w, h, label='pulse', linewidth=0.5,
                 edgecolor='r', facecolor='none')
                 ax1.add_patch(rect)
@@ -234,7 +234,7 @@ class EventDisplay():
             a = self.wfm_list[i].amp_pe[ch]
             left_ylabel="PE / 2ns"
             right_ylabel="PE"
-        a_int = np.cumsum(a)*(1e9/ADC_RATE_HZ) # amp_mV_int does not exist
+        a_int = np.cumsum(a)*(SAMPLE_TO_NS) # amp_mV_int does not exist
 
         t = np.arange(0, len(a)*2, 2)
         ax1.plot(t, a, label=ch[4:]) # remove adc_ from ch names

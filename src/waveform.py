@@ -16,7 +16,7 @@ from utilities import generate_colormap, digitial_butter_highpass_filter
 import re
 import sys
 
-from yaml_reader import ADC_RATE_HZ, YamlReader
+from yaml_reader import SAMPLE_TO_NS, YamlReader
 
 EPS=1e-6
 
@@ -29,6 +29,7 @@ class Waveform():
             self.cfg = cfg
         self.ch_names = None
         self.ch_id = None
+        self.ch_name_to_id_dict= None
         self.n_boards = None
         self.spe_mean = None
         self.reset()
@@ -69,7 +70,7 @@ class Waveform():
                     n_samp = len(self.amp_mV[ch])
                     pre_trg_frac = 1.0-self.cfg.post_trigger
                     self.trg_pos = int(n_samp*pre_trg_frac)
-                    self.trg_time_ns = self.trg_pos*(1e9/ADC_RATE_HZ)
+                    self.trg_time_ns = self.trg_pos*(SAMPLE_TO_NS)
                     return None
         else:
             print('Sorry pal. Fan-out not yet implemented.')
@@ -113,13 +114,13 @@ class Waveform():
         Do SPE normalization for all signal channels
         Muon paddle is considered non-signal channel, and hence not SPE normalized
         """
+        if self.spe_mean is None:
+            sys.exit('ERROR: spe_mean not specified in Waveform. Unable to normalized.')
+
         for ch, val in self.amp_mV.items():
             if ch in self.cfg.non_signal_channels:
                 continue
-            if spe_mean is None:
-                spe_mean = 1.6
-            else:
-                spe_mean = self.spe_mean[ch]
+            spe_mean = self.spe_mean[ch]
             self.amp_pe[ch] = val/50/spe_mean
             self.flat_base_pe[ch] = self.flat_base_mV[ch]/50/spe_mean
             self.flat_base_std_pe[ch] = self.flat_base_std_mV[ch]/50/spe_mean
@@ -133,7 +134,7 @@ class Waveform():
         ch_name: str
         """
         dT_ns = 48 # externally calibrated parameter
-        dS = dT_ns//int(1e9/ADC_RATE_HZ)
+        dS = dT_ns//int(SAMPLE_TO_NS)
         for ch, a in self.amp_pe.items():
             a_corr = a.copy()
             if "_b1" in ch:
@@ -166,7 +167,7 @@ class Waveform():
         med, std = self.get_flat_baseline(tot_pe)
         self.flat_base_pe['sum'] = med
         self.flat_base_std_pe['sum'] = std
-        self.amp_pe['sum_bt'] = bt_pe
+        self.amp_pe['sum_bot'] = bt_pe
         self.amp_pe['sum_side'] = side_pe
         return None
 
@@ -175,7 +176,7 @@ class Waveform():
         integrated waveform
         """
         for ch, val in self.amp_pe.items():
-            self.amp_pe_int[ch] = cumsum(val)*(1e9/ADC_RATE_HZ) # adc*ns
+            self.amp_pe_int[ch] = cumsum(val)*(SAMPLE_TO_NS) # adc*ns
 
     def find_ma_baseline(self):
         n = self.cfg.moving_avg_length
@@ -199,8 +200,8 @@ class Waveform():
         """
         self.roi_area_pe=[]
         for i in range(len(self.cfg.roi_start_ns)):
-            start=self.trg_pos + (self.cfg.roi_start_ns[i]//int(1e9/ADC_RATE_HZ))
-            end=self.trg_pos + (self.cfg.roi_end_ns[i]//int(1e9/ADC_RATE_HZ))
+            start=self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
+            end=self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
             if start<0:
                 start=0
             roi_a={}
@@ -221,8 +222,8 @@ class Waveform():
         """
         self.roi_height_pe=[]
         for i in range(len(self.cfg.roi_start_ns)):
-            start= self.trg_pos + (self.cfg.roi_start_ns[i]//int(1e9/ADC_RATE_HZ))
-            end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(1e9/ADC_RATE_HZ))
+            start= self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
+            end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
 
             if start<0:
                 start=0

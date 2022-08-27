@@ -7,6 +7,7 @@ from os.path import splitext, basename, dirname
 
 from pulse_finder import PulseFinder
 from waveform import Waveform
+from pandas import DataFrame
 
 class RQWriter:
     """
@@ -48,8 +49,8 @@ class RQWriter:
         self.pulse_coincidence = []
 
         # channel x pulse variables
-        self.pulse_area_pe = {}
-        self.pulse_height_pe = {}
+        self.pulse_area_pe = []
+        self.pulse_height_pe = []
         return None
 
     def create_output(self):
@@ -131,13 +132,15 @@ class RQWriter:
         roi1_a = zeros(len(wfm.ch_id))
         roi2_a = zeros(len(wfm.ch_id))
         for i, ch_id in enumerate(wfm.ch_id):
-            ch_name = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
-            roi0_h[i] = wfm.roi_height_pe[0][ch_name]
-            roi1_h[i] = wfm.roi_height_pe[1][ch_name]
-            roi2_h[i] = wfm.roi_height_pe[2][ch_name]
-            roi0_a[i] = wfm.roi_area_pe[0][ch_name]
-            roi1_a[i] = wfm.roi_area_pe[1][ch_name]
-            roi2_a[i] = wfm.roi_area_pe[2][ch_name]
+            ch = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
+            if ch in wfm.cfg.non_signal_channels:
+                continue
+            roi0_h[i] = wfm.roi_height_pe[0][ch]
+            roi1_h[i] = wfm.roi_height_pe[1][ch]
+            roi2_h[i] = wfm.roi_height_pe[2][ch]
+            roi0_a[i] = wfm.roi_area_pe[0][ch]
+            roi1_a[i] = wfm.roi_area_pe[1][ch]
+            roi2_a[i] = wfm.roi_area_pe[2][ch]
 
         self.roi0_height_pe.append(roi0_h)
         self.roi1_height_pe.append(roi1_h)
@@ -154,8 +157,8 @@ class RQWriter:
         self.pulse_coincidence.append(pf.coincidence)
 
         # pulse x channel level
-        self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
-        self.pulse_height_pe.append(pf.height_pe)
+        # self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
+        # self.pulse_height_pe.append(pf.height_pe)
 
         return None
 
@@ -177,11 +180,10 @@ class RQWriter:
         """
         if df is None:
             return None
-            
+
         pmt_info = {
             'ch_id': df['ch_id'].tolist(),
-            'ch_name:': df['ch_name'].tolist(),
-            'pmt_name': df['pmt_name'].tolist(),
+            #'pmt_name': df['pmt_name'].tolist(), # uproot write does not handle string well
             'spe_mean': df['spe_mean'].tolist(),
             'spe_width': df['spe_width'].tolist(),
             'spe_mean_err': df['spe_mean_err'].tolist(),

@@ -78,6 +78,7 @@ class RunDROP():
             tmp = [tmp]
         self.ch_id = sorted(tmp)
         self.ch_names = ["adc_b%d_ch%d" % (i // 100, i % 100) for i in self.ch_id]
+        self.ch_name_to_id_dict = dict(zip(self.ch_names, self.ch_id))
         return None
 
     def load_pmt_info(self):
@@ -89,12 +90,14 @@ class RunDROP():
         self.spe_mean = {}
         try:
             df = pd.read_csv(fpath)
-            self.spe_fit_results  = df.set_index('ch_id') # to be saved in root
             df.set_index('ch_name', inplace=True)
-            ch_names = df.index()
+            self.spe_fit_results  = df # to be saved in root
+            ch_names = df.index
             for ch in ch_names:
                 self.spe_mean[ch] = float(df['spe_mean'][ch])
         except:
+            for ch in self.ch_names:
+                self.spe_mean[ch] = 1.6
             print("WARNING: your spe_fit_results_path cannot be load properly!")
             print('WARNING: Use 1.6 pC as spe_mean for all PMTs')
 
@@ -120,6 +123,7 @@ class RunDROP():
         wfm = Waveform(self.cfg)
         wfm.ch_names = self.ch_names
         wfm.ch_id = self.ch_id
+        wfm.ch_name_to_id_dict=self.ch_name_to_id_dict
         wfm.n_boards = self.n_boards
         wfm.spe_mean = self.spe_mean
 
@@ -149,6 +153,7 @@ class RunDROP():
             pf.reset()
             pf.wfm = wfm
             pf.find_pulses()
+            pf.calc_pulse_ch_info()
             pf.calc_pulse_info()
             # fill rq event structure
             if writer is None:
@@ -158,7 +163,8 @@ class RunDROP():
                 writer.fill(wfm, pf)
 
         if writer is not None:
-            writer.dump_event_rq()
+            #writer.dump_event_rq()
+            pass
         self.batch_id += 1
         return None
 
@@ -191,11 +197,11 @@ def main(argv):
     run = RunDROP(args)
 
     # RQWriter creates output file, fill, and dump
-    writer = RQWriter(args, basket_size=run.batch_size)
-    writer.init_basket_cap = int(run.n_event_proc/run.batch_size)+2
+    writer = RQWriter(args, basket_size=run.cfg.batch_size)
+    writer.init_basket_cap = int(run.n_event_proc/run.cfg.batch_size)+2
     writer.create_output()
 
-    batch_list = uproot.iterate('%s:daq' % args.if_path, step_size=run.batch_size)
+    batch_list = uproot.iterate('%s:daq' % args.if_path, step_size=run.cfg.batch_size)
 
     for batch in batch_list:
         run.process_batch(batch, writer)
@@ -210,7 +216,7 @@ def main(argv):
     'ch_id': [run.ch_id],
     })
 
-    writer.dump_pmt_info(run.)
+    writer.dump_pmt_info(run.spe_fit_results)
 
     # remeber to close file
     writer.close()
