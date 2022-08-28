@@ -163,8 +163,7 @@ class RunDROP():
                 writer.fill(wfm, pf)
 
         if writer is not None:
-            #writer.dump_event_rq()
-            pass
+            writer.dump_event_rq()
         self.batch_id += 1
         return None
 

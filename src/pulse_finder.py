@@ -141,7 +141,6 @@ class PulseFinder():
         """
         height_thresh = self.cfg.spe_height_threshold
 
-
         # calcualte pulse level variables (one per pulse)
         for i in self.id:
             start = self.start[i] # start of pulse i in sample
