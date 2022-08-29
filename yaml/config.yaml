@@ -31,4 +31,4 @@ scipy_peak_finder_parameters:
   threshold: 2
   height: 2 # None
   prominence: 1 #
-coincidence_threshold_pe: 0.3 # if a channel-pulse height is above threshold, it's counted toward coincidence
+spe_height_threshold: 0.125 # if a pulse-channel height is above this threshold, it's counted toward coincidence
