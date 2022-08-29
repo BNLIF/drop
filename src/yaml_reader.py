@@ -25,6 +25,37 @@ class YamlReader():
             except yaml.YAMLError as exc:
                 print(exc)
 
+    def get_ch_names(self, input_list):
+        """
+        Allow user to specify channels using different conventions.
+        For example: 101 -> adc_b1_ch1, or b1_ch1 -> adc_b1_ch1
+        """
+        if isinstance(input_list, list):
+            ch_names = []
+            for item in input_list:
+                if type(item)==str:
+                    if item[0:4]=='adc_':
+                        ch_names.append(item)
+                    elif 'ch' in item:
+                        ch_names.append('adc_'+item)
+                    elif item.isdigit():
+                        chid = int(item)%100
+                        boardId = int(item) // 100
+                        ch_str = 'adc_b%d_ch%d' % (boardId, chid)
+                        ch_names.append(ch_str)
+                    else:
+                        print('ERROR: string type not recognized:', item)
+                elif isinstance(item, int):
+                    chid = item%100
+                    boardId = item//100
+                    ch_str = 'adc_b%d_ch%d' % (boardId, chid)
+                    ch_names.append(ch_str)
+                else:
+                    print('ERROR: not recognized element in user_list')
+            return ch_names
+        else:
+            print("ERROR: not a list")
+
     def type_casting(self):
         """
         The right variable type
@@ -32,10 +63,10 @@ class YamlReader():
         self.batch_size = int(self.data['batch_size'])
         self.post_trigger = float(self.data['post_trigger'])
         self.dgtz_dynamic_range_mV = int(self.data['dgtz_dynamic_range_mV'])
-        self.non_signal_channels= self.data['non_signal_channels']
-        for i, ch in enumerate(self.non_signal_channels):
-            if ch[0:4] != 'adc_':
-                self.non_signal_channels[i] = 'adc_'+ self.non_signal_channels[i]
+        self.non_signal_channels= self.get_ch_names( self.data['non_signal_channels'] )
+        self.bottom_pmt_channels= self.get_ch_names( self.data['bottom_pmt_channels'] )
+        self.side_pmt_channels= self.get_ch_names( self.data['side_pmt_channels'] )
+
         self.daisy_chain = bool(self.data['daisy_chain'])
         self.apply_high_pass_filter = bool(self.data['apply_high_pass_filter'])
         self.high_pass_cutoff_Hz = float(self.data['high_pass_cutoff_Hz'])
@@ -54,6 +85,6 @@ class YamlReader():
         self.scipy_pf_pars.threshold = int(self.data['scipy_peak_finder_parameters']['threshold'])
         self.scipy_pf_pars.height = int(self.data['scipy_peak_finder_parameters']['height'])
         self.scipy_pf_pars.prominence = int(self.data['scipy_peak_finder_parameters']['prominence'])
-
+        self.coincidence_threshold_pe = float(self.data['coincidence_threshold_pe'])
 
         return None

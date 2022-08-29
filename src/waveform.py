@@ -68,7 +68,7 @@ class Waveform():
                     n_samp = len(self.amp_mV[ch])
                     pre_trg_frac = 1.0-self.cfg.post_trigger
                     self.trg_pos = int(n_samp*pre_trg_frac)
-                    self.trg_pos_ns = self.trg_pos*(1e9/ADC_RATE_HZ)
+                    self.trg_time_ns = self.trg_pos*(1e9/ADC_RATE_HZ)
                     return None
         else:
             print('Sorry pal. Fan-out not yet implemented.')
@@ -150,15 +150,25 @@ class Waveform():
 
     def sum_channels(self):
         """
-        Sum all signal channels
+        Sum up channels
         """
         tot_pe = 0
+        bt_pe = 0
+        side_pe=0
         for ch, val in self.amp_pe.items():
-            tot_pe += val
+            if 'adc_' in ch:
+                tot_pe += val
+                if ch in self.cfg.bottom_pmt_channels:
+                    bt_pe += val
+                if ch in self.cfg.side_pmt_channels:
+                    side_pe += val
+
         self.amp_pe['sum'] = tot_pe
         med, std = self.get_flat_baseline(tot_pe)
         self.flat_base_pe['sum'] = med
         self.flat_base_std_pe['sum'] = std
+        self.amp_pe['sum_bt'] = bt_pe
+        self.amp_pe['sum_side'] = side_pe
         return None
 
     def integrate_waveform(self):
@@ -181,6 +191,13 @@ class Waveform():
         return None
 
     def find_roi_area(self):
+        """
+        Calc Integral in the Region of Interest (ROI) whose start_ns and end_ns
+        are defined in yaml config file.
+
+        Notes:
+            roi_start_ns and roi_end_ns are defined with respect to trigger time
+        """
         self.roi_area_pe=[]
         for i in range(len(self.cfg.roi_start_ns)):
             start=self.trg_pos + (self.cfg.roi_start_ns[i]//int(1e9/ADC_RATE_HZ))
@@ -196,6 +213,13 @@ class Waveform():
         return None
 
     def find_roi_height(self):
+        """
+        calc the height within  the Region of Interest (ROI) whose start_ns and
+        end_ns are defined in yaml config file
+
+        Notes:
+            roi_start_ns and roi_end_ns are defined with respect to trigger time
+        """
         self.roi_height_pe=[]
         for i in range(len(self.cfg.roi_start_ns)):
             start= self.trg_pos + (self.cfg.roi_start_ns[i]//int(1e9/ADC_RATE_HZ))
