@@ -183,7 +183,8 @@ class RawDataRooter():
                 vars_type[b_name] = ak.Array(ch_var).type
             vars_type['event_id'] = uint32
             vars_type['event_ttt'] = uint64
-
+            vars_type['event_sanity'] = uint16
+            
             # make tree
             self.file.mktree("daq", vars_type,
             initial_basket_capacity=INITIAL_BASKET_CAPACITY)
@@ -203,6 +204,8 @@ class RawDataRooter():
         """
         Fill event queue, one trigger at a time.
         Add TTT to the queue as well. If N_BOARDS>1, use board 1 as event ttt.
+
+        For example, event_sanity = 100 means boardId=3 has sanity=1. other boards are 0.
         """
         boardId = trg.boardId
         trg_id = trg.eventCounter
@@ -214,8 +217,11 @@ class RawDataRooter():
                     return RunStatus.SKIP
                 else:
                     self.event_queue[trg_id][ch] = val
+            self.event_queue[trg_id]['sanity'] += 10**(boardId-1) * trg.sanity
         else:
             self.event_queue[trg_id] = trg.traces
+            self.event_queue[trg_id]['sanity'] = 10**(boardId-1) * trg.sanity
+
         # add ttt to the queue
         ttt = trg.triggerTimeTag
         if boardId == min(self.boardId):
@@ -229,6 +235,7 @@ class RawDataRooter():
         """
         all_keys = self.ch_names.copy()
         all_keys.add('ttt')
+        all_keys.add('sanity')
         full_event_id = set()
         for i, ev in self.event_queue.items():
             if set(ev.keys()) == all_keys:
@@ -252,12 +259,14 @@ class RawDataRooter():
             basket[b_name] = zeros([n_evts, self.n_samples])
         basket['event_id'] = zeros(n_evts, dtype=uint32)
         basket['event_ttt'] = zeros(n_evts, dtype=uint64)
-
+        basket['event_sanity'] = zeros(n_evts, dtype=uint16)
+        
         # fill basket
         for i, ID in enumerate(id_set):
             ev = self.event_queue[ID]
             basket['event_id'][i]=ID
             basket['event_ttt'][i]=ev['ttt']
+            basket['event_sanity'][i]=ev['sanity']
             for ch in self.ch_names:
                 b_name = 'adc_' + ch
                 basket[b_name][i] = ev[ch]

@@ -60,9 +60,9 @@ class RawDataFile:
 
         # Check to make sure the event starts with the key value (0xa0000000), otherwise it's ill-formed
         if (i0 & 0xF0000000 == 0xa0000000):
-            sanity = 1 # normal if the left 4 bits are 1010
+            trigger.sanity = 0 # normal
         else:
-            sanity = 2 # bad
+            trigger.sanity = 0 # not good, but let's keep going
             print('Info: Read did not pass sanity check')
             print('Info: Last read headers:')
             print(bin(i0), bin(i1), bin(i2), bin(i3))
@@ -149,10 +149,16 @@ class RawDataFile:
                     if self.DAQ_Software=='LabVIEW':
                         dt = dtype('>H')
                     else:
-                        dt = dtype('<H') # > Xin: > is the correct order for us.
+                        dt = dtype('<H') # Xin: LabVIEW and ToolDAQ have different ordering
 
                     # Use numpy's fromfile to read binary data and convert into a numpy array all at once
                     trace = fromfile(self.file, dtype=dt, count=size//(2*numChannels))
+
+                    # sanity check again (the left two bits should be empty)
+                    l2 = np.right_shift(trace, 14)
+                    if np.any(l2 > 0):
+                        trigger.sanity = 1
+
                 else:
                     # initialize an array of length self.recordLen, then set all values to nan
                     trace = zeros(self.recordLen)
@@ -221,7 +227,8 @@ class RawTrigger:
         self.triggerTimeTag = uint64(0)
         self.triggerTime = 0.
         self.eventCounter = 0
-
+        self.sanity = 0
+        
         #Xin added
         self.boardId = 0
         self.size = 0
