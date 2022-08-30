@@ -63,8 +63,8 @@ class PulseFinder():
             # std = self.wfm.flat_base_std_pe[ch]
             peaks, prop = find_peaks(a,
                 distance=pars.distance,
-                threshold=pars.threshold*std,
-                height=pars.height*std,
+                threshold=pars.threshold,
+                height=pars.height,
                 prominence=pars.prominence
             )
             self.peaks[ch] = peaks #peak position

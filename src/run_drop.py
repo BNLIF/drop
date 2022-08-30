@@ -11,6 +11,7 @@ import numpy as np
 from enum import Enum
 import uproot
 import pandas as pd
+import os
 
 from yaml_reader import YamlReader
 from waveform import Waveform
@@ -18,6 +19,7 @@ from pulse_finder import PulseFinder
 from rq_writer import RQWriter
 
 MAX_N_EVENT = 999999999 # Arbiarty large
+YAML_DIR = os.environ['YAML_DIR']
 
 
 class RunDROP():
@@ -86,7 +88,7 @@ class RunDROP():
         PMT calibration results are saved in a csv file
         The path to the csv file is specified in yaml config file
         """
-        fpath = self.cfg.spe_fit_results_path
+        fpath = YAML_DIR + '/' +self.cfg.spe_fit_results_file
         self.spe_mean = {}
         try:
             df = pd.read_csv(fpath)
@@ -98,7 +100,7 @@ class RunDROP():
         except:
             for ch in self.ch_names:
                 self.spe_mean[ch] = 1.6
-            print("WARNING: your spe_fit_results_path cannot be load properly!")
+            print("WARNING: your spe_fit_results_file cannot be load properly!")
             print('WARNING: Use 1.6 pC as spe_mean for all PMTs')
 
     def process_batch(self, batch, writer:RQWriter):

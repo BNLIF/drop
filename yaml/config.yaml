@@ -7,8 +7,8 @@ non_signal_channels: ['b1_ch0', 'b2_ch15'] # some channels are used for paddles,
 bottom_pmt_channels: [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214]
 side_pmt_channels: [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315]
 
-# PMT calibration file path
-spe_fit_results_path: 'yaml/bnl1t_spe_fit_results_220826.csv'
+# PMT calibration file (DROP looks for this file in yaml directory)
+spe_fit_results_file: 'bnl1t_spe_fit_results_220826.csv'
 
 # Waveform: digiter filter
 apply_high_pass_filter: False
@@ -27,8 +27,8 @@ roi_end_ns: [-100, 70, 230]
 # PulseFinder: scipy peak finding
 pulse_finder_algo: 0
 scipy_peak_finder_parameters:
-  distance: 15
-  threshold: 2
-  height: 2 # None
-  prominence: 1 #
+  distance: 20
+  threshold: 0.3
+  height: 0.3 # None
+  prominence: 1.0 #
 spe_height_threshold: 0.125 # if a pulse-channel height is above this threshold, it's counted toward coincidence
