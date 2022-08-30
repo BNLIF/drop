@@ -198,6 +198,10 @@ class EventDisplay():
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
+        if self.xlim is not None:
+            plt.xlim(self.xlim)
+        if self.ylim is not None:
+            plt.ylim(self.ylim)
         plt.xlabel('Time [ns]')
         plt.ylabel(left_ylabel)
         plt.grid(linewidth=0.5, alpha=0.5)
@@ -210,7 +214,8 @@ class EventDisplay():
         if p.n_pulses>0:
             for j in range(len(p.start)):
                 xy = (p.start[j]*(SAMPLE_TO_NS), 0)
-                h = p.height_pe['sum'][j]
+                #h = np.max(a[p.start[j]:p.end[j]])
+                h = p.height_sum_pe[j]
                 w = (p.end[j]-p.start[j])*(SAMPLE_TO_NS)
                 rect = patches.Rectangle(xy, w, h, label='pulse', linewidth=0.5,
                 edgecolor='r', facecolor='none')

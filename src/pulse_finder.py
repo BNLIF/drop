@@ -36,6 +36,9 @@ class PulseFinder():
         self.area_sum_pe = []
         self.area_bot_pe = []
         self.area_side_pe = []
+        self.height_sum_pe = []
+        self.height_bot_pe = []
+        self.height_side_pe = []
         self.sba = [] # side-bottom-asymmetry
         self.ptime_ns = []
         self.coincidence = []
@@ -154,6 +157,9 @@ class PulseFinder():
             self.area_sum_pe.append(a_sum_int[end]-a_sum_int[start])
             self.area_bot_pe.append(a_bot_int[end]-a_bot_int[start])
             self.area_side_pe.append(a_side_int[end]-a_side_int[start])
+            self.height_sum_pe.append(np.max(a_sum[start:end]))
+            self.height_bot_pe.append(np.max(a_bot[start:end]))
+            self.height_side_pe.append(np.max(a_side[start:end]))
             self.ptime_ns.append(argmax(a_sum[start:end])*SAMPLE_TO_NS)
             sba = (self.area_side_pe[-1]-self.area_bot_pe[-1])/self.area_sum_pe[-1]
             self.sba.append( sba ) # side-to-bottom asymmetry

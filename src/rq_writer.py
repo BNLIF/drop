@@ -49,6 +49,9 @@ class RQWriter:
         self.pulse_area_sum_pe = []
         self.pulse_area_bot_pe = []
         self.pulse_area_side_pe = []
+        self.pulse_height_sum_pe = []
+        self.pulse_height_bot_pe = []
+        self.pulse_height_side_pe = []
         self.pulse_sba = []
         self.pulse_ptime_ns = []
         self.pulse_coincidence = []
@@ -170,6 +173,9 @@ class RQWriter:
         self.pulse_area_sum_pe.append(pf.area_sum_pe)
         self.pulse_area_bot_pe.append(pf.area_bot_pe)
         self.pulse_area_side_pe.append(pf.area_side_pe)
+        self.pulse_height_sum_pe.append(pf.height_sum_pe)
+        self.pulse_height_bot_pe.append(pf.height_bot_pe)
+        self.pulse_height_side_pe.append(pf.height_side_pe)
         self.pulse_sba.append(pf.sba)
         self.pulse_ptime_ns.append(pf.ptime_ns)
         self.pulse_coincidence.append(pf.coincidence)
@@ -230,6 +236,9 @@ class RQWriter:
             'area_sum_pe': self.pulse_area_sum_pe,
             'area_bot_pe': self.pulse_area_bot_pe,
             'area_side_pe': self.pulse_area_side_pe,
+            'height_sum_pe': self.pulse_height_sum_pe,
+            'height_bot_pe': self.pulse_height_bot_pe,
+            'height_side_pe': self.pulse_height_side_pe,
             'sba': self.pulse_sba,
             'ptime_ns': self.pulse_ptime_ns,
             'coincidence': self.pulse_coincidence,
