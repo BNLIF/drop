@@ -86,7 +86,7 @@ class PulseFinder():
             self.scipy_find_peaks()
 
         # peaks found at sum channel, sorted by prominence
-        idx = argsort(self.peak_properties['sum']['prominences'])
+        idx = argsort(self.peak_properties['sum']['prominences'])[::-1] # decending
         peaks = self.peaks['sum'][idx]
         pprop = {}
         for k, val in self.peak_properties['sum'].items():
@@ -160,7 +160,7 @@ class PulseFinder():
             self.height_sum_pe.append(np.max(a_sum[start:end]))
             self.height_bot_pe.append(np.max(a_bot[start:end]))
             self.height_side_pe.append(np.max(a_side[start:end]))
-            self.ptime_ns.append(argmax(a_sum[start:end])*SAMPLE_TO_NS)
+            self.ptime_ns.append( (argmax(a_sum[start:end])+start)*SAMPLE_TO_NS )
             sba = (self.area_side_pe[-1]-self.area_bot_pe[-1])/self.area_sum_pe[-1]
             self.sba.append( sba ) # side-to-bottom asymmetry
 
