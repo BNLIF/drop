@@ -4,7 +4,7 @@ from numpy import array
 """
 The following parameters do not change often. So hard coded here
 """
-ADC_RATE_HZ=5e8 # Hz
+SAMPLE_TO_NS=2
 
 class ScipyPeakFindingParam():
     """
@@ -66,6 +66,7 @@ class YamlReader():
         self.non_signal_channels= self.get_ch_names( self.data['non_signal_channels'] )
         self.bottom_pmt_channels= self.get_ch_names( self.data['bottom_pmt_channels'] )
         self.side_pmt_channels= self.get_ch_names( self.data['side_pmt_channels'] )
+        self.spe_fit_results_file = self.data['spe_fit_results_file']
 
         self.daisy_chain = bool(self.data['daisy_chain'])
         self.apply_high_pass_filter = bool(self.data['apply_high_pass_filter'])
@@ -85,6 +86,6 @@ class YamlReader():
         self.scipy_pf_pars.threshold = int(self.data['scipy_peak_finder_parameters']['threshold'])
         self.scipy_pf_pars.height = int(self.data['scipy_peak_finder_parameters']['height'])
         self.scipy_pf_pars.prominence = int(self.data['scipy_peak_finder_parameters']['prominence'])
-        self.coincidence_threshold_pe = float(self.data['coincidence_threshold_pe'])
+        self.spe_height_threshold = float(self.data['spe_height_threshold'])
 
         return None

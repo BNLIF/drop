@@ -10,6 +10,8 @@ from numpy import array, isscalar
 import numpy as np
 from enum import Enum
 import uproot
+import pandas as pd
+import os
 
 from yaml_reader import YamlReader
 from waveform import Waveform
@@ -17,6 +19,7 @@ from pulse_finder import PulseFinder
 from rq_writer import RQWriter
 
 MAX_N_EVENT = 999999999 # Arbiarty large
+YAML_DIR = os.environ['YAML_DIR']
 
 
 class RunDROP():
@@ -41,6 +44,7 @@ class RunDROP():
         self.batch_id = 0
         self.batch = None
         self.load_run_info()
+        self.load_pmt_info()
         self.sanity_check()
 
     def sanity_check(self):
@@ -76,7 +80,28 @@ class RunDROP():
             tmp = [tmp]
         self.ch_id = sorted(tmp)
         self.ch_names = ["adc_b%d_ch%d" % (i // 100, i % 100) for i in self.ch_id]
+        self.ch_name_to_id_dict = dict(zip(self.ch_names, self.ch_id))
         return None
+
+    def load_pmt_info(self):
+        """
+        PMT calibration results are saved in a csv file
+        The path to the csv file is specified in yaml config file
+        """
+        fpath = YAML_DIR + '/' +self.cfg.spe_fit_results_file
+        self.spe_mean = {}
+        try:
+            df = pd.read_csv(fpath)
+            df.set_index('ch_name', inplace=True)
+            self.spe_fit_results  = df # to be saved in root
+            ch_names = df.index
+            for ch in ch_names:
+                self.spe_mean[ch] = float(df['spe_mean'][ch])
+        except:
+            for ch in self.ch_names:
+                self.spe_mean[ch] = 1.6
+            print("WARNING: your spe_fit_results_file cannot be load properly!")
+            print('WARNING: Use 1.6 pC as spe_mean for all PMTs')
 
     def process_batch(self, batch, writer:RQWriter):
         '''
@@ -100,8 +125,9 @@ class RunDROP():
         wfm = Waveform(self.cfg)
         wfm.ch_names = self.ch_names
         wfm.ch_id = self.ch_id
+        wfm.ch_name_to_id_dict=self.ch_name_to_id_dict
         wfm.n_boards = self.n_boards
-        wfm.load_spe_csv_file()
+        wfm.spe_mean = self.spe_mean
 
         # create PulseFinder
         pf = PulseFinder(self.cfg, wfm)
@@ -129,6 +155,7 @@ class RunDROP():
             pf.reset()
             pf.wfm = wfm
             pf.find_pulses()
+            pf.calc_pulse_ch_info()
             pf.calc_pulse_info()
             # fill rq event structure
             if writer is None:
@@ -171,11 +198,11 @@ def main(argv):
     run = RunDROP(args)
 
     # RQWriter creates output file, fill, and dump
-    writer = RQWriter(args, basket_size=run.batch_size)
-    writer.init_basket_cap = int(run.n_event_proc/run.batch_size)+2
+    writer = RQWriter(args, basket_size=run.cfg.batch_size)
+    writer.init_basket_cap = int(run.n_event_proc/run.cfg.batch_size)+2
     writer.create_output()
 
-    batch_list = uproot.iterate('%s:daq' % args.if_path, step_size=run.batch_size)
+    batch_list = uproot.iterate('%s:daq' % args.if_path, step_size=run.cfg.batch_size)
 
     for batch in batch_list:
         run.process_batch(batch, writer)
@@ -187,8 +214,10 @@ def main(argv):
     'n_trg_read': [run.n_trg_read],
     'n_event_proc': [run.n_event_proc],
     'leftover_event_id': [run.leftover_event_id],
-    'ch_id': [run.ch_id]
+    'ch_id': [run.ch_id],
     })
+
+    writer.dump_pmt_info(run.spe_fit_results)
 
     # remeber to close file
     writer.close()

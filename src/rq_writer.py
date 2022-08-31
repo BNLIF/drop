@@ -7,6 +7,7 @@ from os.path import splitext, basename, dirname
 
 from pulse_finder import PulseFinder
 from waveform import Waveform
+from pandas import DataFrame
 
 class RQWriter:
     """
@@ -40,16 +41,27 @@ class RQWriter:
         self.roi1_area_pe = []
         self.roi2_area_pe = []
 
-        # PulseFinder variables
+        # pulse level variables
         self.n_pulses=[]
         self.pulse_id = []
         self.pulse_start = []
         self.pulse_end = []
+        self.pulse_area_sum_pe = []
+        self.pulse_area_bot_pe = []
+        self.pulse_area_side_pe = []
+        self.pulse_height_sum_pe = []
+        self.pulse_height_bot_pe = []
+        self.pulse_height_side_pe = []
+        self.pulse_sba = []
+        self.pulse_ptime_ns = []
         self.pulse_coincidence = []
+        self.pulse_area_max_frac = []
+        self.pulse_area_max_ch_id = []
+
 
         # channel x pulse variables
-        self.pulse_area_pe = {}
-        self.pulse_height_pe = {}
+        self.pulse_ch_area_pe = []
+        self.pulse_ch_height_pe = []
         return None
 
     def create_output(self):
@@ -65,15 +77,24 @@ class RQWriter:
         self.of_path = self.output_dir + '/' + name +'_rq.root'
         self.file = uproot.recreate(self.of_path)
 
-        type_uint = ak.values_astype([[0,0], []], uint32)
-        type_float = ak.values_astype([[0.,0.], []], float32)
+        type_uint = ak.values_astype([[0], []], uint32)
+        type_float = ak.values_astype([[0.], []], float32)
+
         pulse_info = {
-        'id': type_uint,
-        'start': type_uint,
-        'end': type_uint,
-        'area_pe': type_float,
-        'height_pe': type_float,
-        'coincidence': type_uint
+            'id': type_uint,
+            'start': type_uint,
+            'end': type_uint,
+            'area_sum_pe': type_float,
+            'area_bot_pe': type_float,
+            'area_side_pe': type_float,
+            'height_sum_pe': type_float,
+            'height_bot_pe': type_float,
+            'height_side_pe': type_float,
+            'sba': type_float,
+            'ptime_ns': type_float,
+            'coincidence': type_uint,
+            'area_max_frac': type_float,
+            'area_max_ch_id': type_uint,
         }
         ch_info = {
             'id': type_uint,
@@ -131,14 +152,15 @@ class RQWriter:
         roi1_a = zeros(len(wfm.ch_id))
         roi2_a = zeros(len(wfm.ch_id))
         for i, ch_id in enumerate(wfm.ch_id):
-            ch_name = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
-            roi0_h[i] = wfm.roi_height_pe[0][ch_name]
-            roi1_h[i] = wfm.roi_height_pe[1][ch_name]
-            roi2_h[i] = wfm.roi_height_pe[2][ch_name]
-            roi0_a[i] = wfm.roi_area_pe[0][ch_name]
-            roi1_a[i] = wfm.roi_area_pe[1][ch_name]
-            roi2_a[i] = wfm.roi_area_pe[2][ch_name]
-
+            ch = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
+            if ch in wfm.cfg.non_signal_channels:
+                continue
+            roi0_h[i] = wfm.roi_height_pe[0][ch]
+            roi1_h[i] = wfm.roi_height_pe[1][ch]
+            roi2_h[i] = wfm.roi_height_pe[2][ch]
+            roi0_a[i] = wfm.roi_area_pe[0][ch]
+            roi1_a[i] = wfm.roi_area_pe[1][ch]
+            roi2_a[i] = wfm.roi_area_pe[2][ch]
         self.roi0_height_pe.append(roi0_h)
         self.roi1_height_pe.append(roi1_h)
         self.roi2_height_pe.append(roi2_h)
@@ -148,15 +170,27 @@ class RQWriter:
 
         # pulse level
         self.n_pulses.append(pf.n_pulses)
-        self.pulse_id.append(pf.id.tolist())
-        self.pulse_start.append(pf.start.tolist())
-        self.pulse_end.append(pf.end.tolist())
+        self.pulse_id.append(pf.id)
+        self.pulse_start.append(pf.start)
+        self.pulse_end.append(pf.end)
+        self.pulse_area_sum_pe.append(pf.area_sum_pe)
+        self.pulse_area_bot_pe.append(pf.area_bot_pe)
+        self.pulse_area_side_pe.append(pf.area_side_pe)
+        self.pulse_height_sum_pe.append(pf.height_sum_pe)
+        self.pulse_height_bot_pe.append(pf.height_bot_pe)
+        self.pulse_height_side_pe.append(pf.height_side_pe)
+        self.pulse_sba.append(pf.sba)
+        self.pulse_ptime_ns.append(pf.ptime_ns)
         self.pulse_coincidence.append(pf.coincidence)
+        self.pulse_area_max_frac.append(pf.area_max_frac)
+        self.pulse_area_max_ch_id.append(pf.area_max_ch_id)
+
+
 
         # pulse x channel level
-        self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
-        self.pulse_height_pe.append(pf.height_pe)
-        
+        # self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
+        # self.pulse_height_pe.append(pf.height_pe)
+
         return None
 
     def close(self):
@@ -171,6 +205,26 @@ class RQWriter:
         """
         self.file['run_info'] = rq
 
+    def dump_pmt_info(self, df: DataFrame):
+        """
+        uproot only accept dictionary
+        """
+        if df is None:
+            return None
+
+        pmt_info = {
+            'ch_id': df['ch_id'].tolist(),
+            #'pmt_name': df['pmt_name'].tolist(), # uproot write does not handle string well
+            'spe_mean': df['spe_mean'].tolist(),
+            'spe_width': df['spe_width'].tolist(),
+            'spe_mean_err': df['spe_mean_err'].tolist(),
+            'spe_width_err': df['spe_width_err'].tolist(),
+            'chi2': df['chi2'].tolist(),
+            'dof': df['dof'].tolist(),
+            'HV': df['HV'].tolist(),
+        }
+        self.file['pmt_info']=pmt_info
+
     def dump_event_rq(self):
         """
         Write one basket at a time
@@ -179,12 +233,21 @@ class RQWriter:
             print("WARNING: Empty list. Nothing to dump")
             return None
         pulse_info = {
-        'id': self.pulse_id,
-        'start': self.pulse_start,
-        'end': self.pulse_end,
-        'area_pe': self.pulse_area_pe,
-        'height_pe': self.pulse_height_pe,
-        'coincidence': self.pulse_coincidence
+            'id': self.pulse_id,
+            'start': self.pulse_start,
+            'end': self.pulse_end,
+            'area_sum_pe': self.pulse_area_sum_pe,
+            'area_bot_pe': self.pulse_area_bot_pe,
+            'area_side_pe': self.pulse_area_side_pe,
+            'height_sum_pe': self.pulse_height_sum_pe,
+            'height_bot_pe': self.pulse_height_bot_pe,
+            'height_side_pe': self.pulse_height_side_pe,
+            'sba': self.pulse_sba,
+            'ptime_ns': self.pulse_ptime_ns,
+            'coincidence': self.pulse_coincidence,
+            'area_max_frac': self.pulse_area_max_frac,
+            'area_max_ch_id': self.pulse_area_max_ch_id,
+
         }
         ch_info = {
             'id': self.ch_id,
