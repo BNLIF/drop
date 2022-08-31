@@ -59,6 +59,7 @@ class Waveform():
         self.raw_data = val
         self.event_id = val.event_id
         self.event_ttt = val.event_ttt
+        self.event_sanity=val.event_sanity
 
     def define_trigger_position(self):
         """

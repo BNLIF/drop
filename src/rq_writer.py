@@ -31,6 +31,7 @@ class RQWriter:
         # Event level variable
         self.event_id=[]
         self.event_ttt=[]
+        self.event_sanity=[]
 
         # channel level variables
         self.ch_id = [] # boardId*100 + chID
@@ -110,7 +111,9 @@ class RQWriter:
         pulse_type= ak.zip(pulse_info).type
 
         #a=ak.values_astype(a, np.uint16)
-        self.file.mktree('event', { 'event_id': 'uint32', 'event_ttt': 'uint32',
+        self.file.mktree('event', { 'event_id': 'uint32',
+                                    'event_ttt': 'uint32',
+                                    'event_sanity': 'uint32',
                                     'ch' : ch_type,
                                     'pulse': pulse_type},
                          initial_basket_capacity=self.init_basket_cap)
@@ -142,6 +145,7 @@ class RQWriter:
         # event level
         self.event_id.append(wfm.event_id)
         self.event_ttt.append(wfm.event_ttt)
+        self.event_sanity.append(wfm.event_sanity)
 
         # channel level
         self.ch_id.append( wfm.ch_id )
@@ -262,6 +266,7 @@ class RQWriter:
         data = {
             "event_id": self.event_id,
             "event_ttt": self.event_ttt,
+            'event_sanity': self.event_sanity,
             'ch': ak.zip(ch_info),
             'pulse': ak.zip(pulse_info)
         }
