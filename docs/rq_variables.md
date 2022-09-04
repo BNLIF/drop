@@ -16,6 +16,21 @@ Run Info.
 | leftover_event_id	| vector\<uint32\> 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
 | active_ch_id		|  vector\<uint32\>	 | unique id for active channels      	       |
 
+## Tree: `pmt_info`
+
+Calibrated PMT info. Variables are from fit.
+
+| Tables		| type			 |		Description			|
+|:------------ 	|----------------------| -------------------------------------------|
+| ch_id      	| uint16 		 | number of digitizer boards			|
+| spe_mean      	| float32		 | spe mean from fit			|
+| spe_width      	| float32		 | spe width from fit			|
+| spe_mean_err      	| float32		 | standard error for spe_mean			|
+| spe_width_err      	| float32		 | standard error for spe_width			|
+| chi2      	| float32		 | chi square			|
+| dof		| uint16		 | number of degree of freedom			|
+| HV		| int16		 | HV value in voltage 				| 	    
+
 ## Tree: `event`
 Event info
 
@@ -26,6 +41,20 @@ One per event
 |:------------ |-------------| -----------------	|
 | event_id      | uint32	| unique event id	|	   
 | event_ttt     | uint32	| trigger time tag	|
+| event_sanity  | uint32        | sanity of an event    |
+
+### Channel level variables
+Every event has `nch` number of variables
+
+| Variable Name      | type			| Description						|
+|:------------      |---------------		| ---------------------------------------		|
+| nch	     	     | uint32			| number of active channels				|
+| ch_roi0_height_pe | vector\<float32\>	| max height in pe/ns within roi 0 (see yaml file)	|
+| ch_roi1_height_pe | vector\<float32\>	| max height in pe/ns within roi 1 (see yaml file)	|
+| ch_roi2_height_pe | vector\<float32\>	| max height in pe/ns within roi 2 (see yaml file)	|
+| ch_roi0_area_pe   | vector\<float32\>	| area in pe within roi 0 (see yaml file)		|
+| ch_roi1_area_pe   | vector\<float32\> 	| area in pe within roi 1 (see yaml file)		|
+| ch_roi2_area_pe   | vector\<float32\> 	| area in pe within roi 2 (see yaml file)		|
 
 
 ### Pulse level variables
@@ -37,17 +66,14 @@ Every event has `npulse` number of variables
 | pulse_id	     | vector\<uint32\>	| unique pulse id, sorted   	   		|
 | pulse_start        | vector\<uint32\>	| the start index of a pulse			|
 | pulse_end	     | vector\<uint32\>	| the end index of a pulse			|
-| pulse_area_adc     | vector\<float32\>	| summed channel area in adc from `pulse_start` to `pulse_end`. To convert it to the unit of adc*ns, multiple by 2 since V1730 is 2 ns/sample. 		|
-| pulse_height_adc   | vector\<float32\>	| max height in adc from `pulse_start` to `pulse_end` |
-| pulse_coincidence  | vector\<uint32\>	| number of active channels passing thresholds within `pulse_start` to `pulse_end` |
-
-### Channel level variables
-Every event has `nch` number of variables
-
-| Variable Name      | type			| Description						|
-|:------------      |---------------		| ---------------------------------------		|
-| nch	     	     | uint32			| number of active channels				|
-| ch_roi0_height_adc | vector\<float32\>	| max height in adc within roi 0 (see yaml file)	|
-| ch_roi1_height_adc | vector\<float32\>	| max height in adc within roi 1 (see yaml file)	|
-| ch_roi0_area_adc   | vector\<float32\>	| area in adc within roi 0 (see yaml file)		|
-| ch_roi1_area_adc   | vector\<float32\> 	| area in adc within roi 1 (see yaml file)		|
+| pulse_area_sum_pe     | vector\<float32\>	| summed PMT area in pe from `pulse_start` to `pulse_end`. 		|
+| pulse_area_bot_pe     | vector\<float32\>	| summed bottom PMT area in adc from `pulse_start` to `pulse_end`.	|
+| pulse_area_side_pe     | vector\<float32\>	| summed side PMT area in adc from `pulse_start` to `pulse_end`.  |
+| pulse_height_sum_pe     | vector\<float32\>	| max height of this pulse in the sum channel, unit pe/ns 		|
+| pulse_height_bot_pe     | vector\<float32\>	| max height of this pulse in the sum of bottom PMTs, unit pe/ns	|
+| pulse_height_side_pe     | vector\<float32\>	| max height of this pulse in the sum of side PMTs, unit pe/ns  |
+| pulse_sba  | vector\<uint32\>	| side-to-bottom asymmetry: (`pulse_area_side_pe`-`pulse_area_bot_pe`)/`pulse_area_sum_pe` |
+| pulse_ptime_ns  | vector\<uint32\>	| peak time in ns |
+| pulse_coincidence  | vector\<uint32\>	| number of PMTs passing thresholds within `pulse_start` to `pulse_end` |
+| pulse_area_max_frac  | vector\<uint32\>	| max channel fraction. Area in max channel / total area, for all channels|
+| pulse_area_max_ch_id  | vector\<uint32\>	| max channel id. The  |

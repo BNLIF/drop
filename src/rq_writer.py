@@ -1,4 +1,4 @@
-from numpy import int32, uint16, uint32, float32, array, zeros
+from numpy import int16, int32, uint16, uint32, float32, array, zeros
 import numpy as np
 import uproot
 import awkward as ak
@@ -259,6 +259,16 @@ class RQWriter:
         """
         if df is None:
             return None
+
+        df = df.astype({
+            "ch_id": uint16,
+            "spe_mean": float32,
+            "spe_width": float32,
+            "spe_mean_err": float32,
+            "spe_width_err": float32,
+            "dof": uint16,
+            "HV": int16,
+        })
 
         pmt_info = {
             'ch_id': df['ch_id'].tolist(),
