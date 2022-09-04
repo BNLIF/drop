@@ -3,6 +3,7 @@
 A brief summary of Reduced Quality (RQ) variables in root file. The RQ files contain high level reconstructed event infomation from waveforms. A RQ root file is typically identified with `_rq` in its name.
 
 > This markdown document is manually created on Jun 2 2022. Feel free to update it.
+> Last Update: Sept 4 2022 by Xin
 
 ## Tree: `run_info`
 
@@ -40,25 +41,35 @@ One per event
 | Variable Name | type		| Description		|
 |:------------ |-------------| -----------------	|
 | event_id      | uint32	| unique event id	|	   
-| event_ttt     | uint32	| trigger time tag	|
+| event_ttt     | uint64	| trigger time tag (8 ns/counter)	|
 | event_sanity  | uint32        | sanity of an event    |
 
 ### Channel level variables
-Every event has `nch` number of variables
+
+PMTs channel variables. Each branch is a static array of fixed size `n_ch`. 
 
 | Variable Name      | type			| Description						|
 |:------------      |---------------		| ---------------------------------------		|
-| nch	     	     | uint32			| number of active channels				|
-| ch_roi0_height_pe | vector\<float32\>	| max height in pe/ns within roi 0 (see yaml file)	|
-| ch_roi1_height_pe | vector\<float32\>	| max height in pe/ns within roi 1 (see yaml file)	|
-| ch_roi2_height_pe | vector\<float32\>	| max height in pe/ns within roi 2 (see yaml file)	|
-| ch_roi0_area_pe   | vector\<float32\>	| area in pe within roi 0 (see yaml file)		|
-| ch_roi1_area_pe   | vector\<float32\> 	| area in pe within roi 1 (see yaml file)		|
-| ch_roi2_area_pe   | vector\<float32\> 	| area in pe within roi 2 (see yaml file)		|
+| ch_id		    | uint16[n_ch]		| id for PMT channel					|
+| ch_roi0_height_pe | float32[n_ch]	| max height in pe/ns within roi 0 (see yaml file)	|
+| ch_roi1_height_pe | float32[n_ch]	| max height in pe/ns within roi 1 (see yaml file)	|
+| ch_roi2_height_pe | float32[n_ch]	| max height in pe/ns within roi 2 (see yaml file)	|
+| ch_roi0_area_pe   | float32[n_ch]	| area in pe within roi 0 (see yaml file)		|
+| ch_roi1_area_pe   | float32[n_ch] 	| area in pe within roi 1 (see yaml file)		|
+| ch_roi2_area_pe   | float32[n_ch] 	| area in pe within roi 2 (see yaml file)		|
+
+### Auxilary channel variables
+
+Auxilary (non-signal) channels provide extra info. For example, paddle is considered aux channel. Each branch is a static array of size `n_aux_ch`.
+
+| Variable Name      | type                     | Description                                           |
+|:------------      |---------------            | ---------------------------------------               |
+| aux_ch_id         | uint16[n_aux_ch]            | id for auxiliary channel                             |
+| aux_ch_area_mV | float32[n_aux_ch] | channel area in mV      |
 
 
 ### Pulse level variables
-Every event has `npulse` number of variables
+Every event has `npulse` number of variables. Pulse branches are dynamic arrays. Pulses are order by [prominence](https://en.wikipedia.org/wiki/Topographic_prominence), and in decending order.
 
 | Variable Name      | type		| Description					|
 |:------------      |---------------	| -----------------				|
