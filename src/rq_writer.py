@@ -13,8 +13,23 @@ class RQWriter:
     """
     Write to file
     """
-    def __init__(self, args, basket_size=1000):
+    def __init__(self, args, n_pmt_ch, n_aux_ch, basket_size=1000):
+        """
+        Constructor: create root tree structure, fill, and write. The n_ch and
+        n_aux_ch variables are needed to define branch structure (static array).
+        Pulse-level variables are dynamic arrays, hence no need to define array
+        size. Dynamic array is slower than static array.
+
+        Args:
+            args: input arguments passed to main, it includes output Directory
+            n_ch: number of channels used for PMTs (n_active_ch - n_aux_ch)
+            n_aux_ch: number of auxiliary (not-signal) channels
+            batch_size: number of entries per batch
+        """
+
         self.args = args
+        self.n_pmt_ch = n_pmt_ch
+        self.n_aux_ch = n_aux_ch
         self.basket_size = basket_size
         self.init_basket_cap = 100
         if self.basket_size<=10:
@@ -33,14 +48,18 @@ class RQWriter:
         self.event_ttt=[]
         self.event_sanity=[]
 
-        # channel level variables
+        # pmt channel level variables
         self.ch_id = [] # boardId*100 + chID
-        self.roi0_height_pe = []
-        self.roi1_height_pe = []
-        self.roi2_height_pe = []
-        self.roi0_area_pe = []
-        self.roi1_area_pe = []
-        self.roi2_area_pe = []
+        self.ch_roi0_height_pe = []
+        self.ch_roi1_height_pe = []
+        self.ch_roi2_height_pe = []
+        self.ch_roi0_area_pe = []
+        self.ch_roi1_area_pe = []
+        self.ch_roi2_area_pe = []
+
+        # non-signal channel info (auxiliary channels)
+        self.aux_ch_id = []
+        self.aux_ch_area_mV = []
 
         # pulse level variables
         self.n_pulses=[]
@@ -59,8 +78,7 @@ class RQWriter:
         self.pulse_area_max_frac = []
         self.pulse_area_max_ch_id = []
 
-
-        # channel x pulse variables
+        # channel x pulse variables (not yet implemented)
         self.pulse_ch_area_pe = []
         self.pulse_ch_height_pe = []
         return None
@@ -78,10 +96,32 @@ class RQWriter:
         self.of_path = self.output_dir + '/' + name +'_rq.root'
         self.file = uproot.recreate(self.of_path)
 
+        bs = self.basket_size
+        type_ch_uint16 = ak.Array(zeros([bs, self.n_pmt_ch], dtype=uint16)).type
+        type_ch_float = ak.Array(zeros([bs, self.n_pmt_ch], dtype=float32)).type
+        type_aux_ch_uint16 = ak.Array(zeros([bs, self.n_aux_ch], dtype=uint16)).type
+        type_aux_ch_float = ak.Array(zeros([bs, self.n_aux_ch], dtype=float32)).type
+
+        type_event={
+            'event_id': 'uint32',
+            'event_ttt': 'uint64',
+            'event_sanity': 'uint32',
+
+            'ch_id': type_ch_uint16,
+            'ch_roi0_height_pe': type_ch_float,
+            'ch_roi1_height_pe': type_ch_float,
+            'ch_roi2_height_pe': type_ch_float,
+            'ch_roi0_area_pe': type_ch_float,
+            'ch_roi1_area_pe': type_ch_float,
+            'ch_roi2_area_pe': type_ch_float,
+
+            'aux_ch_id': type_aux_ch_uint16,
+            'aux_ch_area_mV': type_aux_ch_float,
+        }
+
         type_uint = ak.values_astype([[0], []], uint32)
         type_float = ak.values_astype([[0.], []], float32)
-
-        pulse_info = {
+        type_pulse={
             'id': type_uint,
             'start': type_uint,
             'end': type_uint,
@@ -97,25 +137,10 @@ class RQWriter:
             'area_max_frac': type_float,
             'area_max_ch_id': type_uint,
         }
-        ch_info = {
-            'id': type_uint,
-            'roi0_height_pe': type_float,
-            'roi1_height_pe': type_float,
-            'roi2_height_pe': type_float,
-            'roi0_area_pe': type_float,
-            'roi1_area_pe': type_float,
-            'roi2_area_pe': type_float,
-
-        }
-        ch_type = ak.zip(ch_info).type
-        pulse_type= ak.zip(pulse_info).type
+        type_event['pulse']=ak.zip(type_pulse).type
 
         #a=ak.values_astype(a, np.uint16)
-        self.file.mktree('event', { 'event_id': 'uint32',
-                                    'event_ttt': 'uint32',
-                                    'event_sanity': 'uint32',
-                                    'ch' : ch_type,
-                                    'pulse': pulse_type},
+        self.file.mktree('event', type_event,
                          initial_basket_capacity=self.init_basket_cap)
         print('\nInfo: creating tree structure as the following: ')
         self.file['event'].show()
@@ -148,29 +173,48 @@ class RQWriter:
         self.event_sanity.append(wfm.event_sanity)
 
         # channel level
-        self.ch_id.append( wfm.ch_id )
-        roi0_h = zeros(len(wfm.ch_id))
-        roi1_h = zeros(len(wfm.ch_id))
-        roi2_h = zeros(len(wfm.ch_id))
-        roi0_a = zeros(len(wfm.ch_id))
-        roi1_a = zeros(len(wfm.ch_id))
-        roi2_a = zeros(len(wfm.ch_id))
-        for i, ch_id in enumerate(wfm.ch_id):
-            ch = "adc_b%d_ch%d" % (ch_id // 100, ch_id % 100)
+        n_ch = len(wfm.ch_id)-self.n_aux_ch
+        if n_ch != self.n_pmt_ch:
+            print('wfm.event_id=', wfm.event_id)
+            msg = "ERROR: len(wfm.ch_id)=%d while n_aux_ch=%d, but n_ch=%d" % (len(wfm.ch_id), self.n_aux_ch , n_ch)
+            sys.exit(msg)
+        ch_id = zeros(n_ch)
+        roi0_h = zeros(n_ch)
+        roi1_h = zeros(n_ch)
+        roi2_h = zeros(n_ch)
+        roi0_a = zeros(n_ch)
+        roi1_a = zeros(n_ch)
+        roi2_a = zeros(n_ch)
+        i=0
+        for ch in wfm.ch_names:
             if ch in wfm.cfg.non_signal_channels:
                 continue
+            ch_id[i] = wfm.ch_name_to_id_dict[ch]
             roi0_h[i] = wfm.roi_height_pe[0][ch]
             roi1_h[i] = wfm.roi_height_pe[1][ch]
             roi2_h[i] = wfm.roi_height_pe[2][ch]
             roi0_a[i] = wfm.roi_area_pe[0][ch]
             roi1_a[i] = wfm.roi_area_pe[1][ch]
             roi2_a[i] = wfm.roi_area_pe[2][ch]
-        self.roi0_height_pe.append(roi0_h)
-        self.roi1_height_pe.append(roi1_h)
-        self.roi2_height_pe.append(roi2_h)
-        self.roi0_area_pe.append(roi0_a)
-        self.roi1_area_pe.append(roi1_a)
-        self.roi2_area_pe.append(roi2_a)
+            i+=1
+        self.ch_id.append( ch_id )
+        self.ch_roi0_height_pe.append(roi0_h)
+        self.ch_roi1_height_pe.append(roi1_h)
+        self.ch_roi2_height_pe.append(roi2_h)
+        self.ch_roi0_area_pe.append(roi0_a)
+        self.ch_roi1_area_pe.append(roi1_a)
+        self.ch_roi2_area_pe.append(roi2_a)
+
+        # auxiliary channel
+        n_aux_ch = len(wfm.cfg.non_signal_channels)
+        aux_ch_id = zeros(n_aux_ch)
+        aux_ch_area_mV = zeros(n_aux_ch)
+        for i in range(n_aux_ch):
+            ch = wfm.cfg.non_signal_channels[i]
+            aux_ch_id[i] = wfm.ch_name_to_id_dict[ch]
+            aux_ch_area_mV[i] = wfm.aux_ch_area_mV[ch]
+        self.aux_ch_id.append(aux_ch_id)
+        self.aux_ch_area_mV.append(aux_ch_area_mV)
 
         # pulse level
         self.n_pulses.append(pf.n_pulses)
@@ -189,8 +233,6 @@ class RQWriter:
         self.pulse_area_max_frac.append(pf.area_max_frac)
         self.pulse_area_max_ch_id.append(pf.area_max_ch_id)
 
-
-
         # pulse x channel level
         # self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
         # self.pulse_height_pe.append(pf.height_pe)
@@ -207,6 +249,8 @@ class RQWriter:
         """
         Write one per run/file. No need to loop.
         """
+        rq['n_pmt_ch']=[self.n_pmt_ch]
+        rq['n_aux_ch']=[self.n_aux_ch]
         self.file['run_info'] = rq
 
     def dump_pmt_info(self, df: DataFrame):
@@ -236,7 +280,25 @@ class RQWriter:
         if not self.n_pulses:
             print("WARNING: Empty list. Nothing to dump")
             return None
-        pulse_info = {
+
+        data_event = {
+            "event_id": self.event_id,
+            "event_ttt": self.event_ttt,
+            'event_sanity': self.event_sanity,
+
+            'ch_id': self.ch_id,
+            'ch_roi0_height_pe': self.ch_roi0_height_pe,
+            'ch_roi1_height_pe': self.ch_roi1_height_pe,
+            'ch_roi2_height_pe': self.ch_roi2_height_pe,
+            'ch_roi0_area_pe': self.ch_roi0_area_pe,
+            'ch_roi1_area_pe': self.ch_roi1_area_pe,
+            'ch_roi2_area_pe': self.ch_roi2_area_pe,
+
+            'aux_ch_id': self.aux_ch_id,
+            'aux_ch_area_mV': self.aux_ch_area_mV
+        }
+
+        data_pulse = {
             'id': self.pulse_id,
             'start': self.pulse_start,
             'end': self.pulse_end,
@@ -251,24 +313,8 @@ class RQWriter:
             'coincidence': self.pulse_coincidence,
             'area_max_frac': self.pulse_area_max_frac,
             'area_max_ch_id': self.pulse_area_max_ch_id,
+        }
+        data_event['pulse']=ak.zip(data_pulse)
 
-        }
-        ch_info = {
-            'id': self.ch_id,
-            'roi0_height_pe': self.roi0_height_pe,
-            'roi1_height_pe': self.roi1_height_pe,
-            'roi2_height_pe': self.roi2_height_pe,
-            'roi0_area_pe': self.roi0_area_pe,
-            'roi1_area_pe': self.roi1_area_pe,
-            'roi2_area_pe': self.roi2_area_pe,
-
-        }
-        data = {
-            "event_id": self.event_id,
-            "event_ttt": self.event_ttt,
-            'event_sanity': self.event_sanity,
-            'ch': ak.zip(ch_info),
-            'pulse': ak.zip(pulse_info)
-        }
-        self.file['event'].extend(data)
+        self.file['event'].extend(data_event)
         return None
