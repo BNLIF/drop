@@ -74,7 +74,7 @@ Every event has `npulse` number of variables. Pulse branches are dynamic arrays.
 | Variable Name      | type		| Description					|
 |:------------      |---------------	| -----------------				|
 | npulse	     | uint32		| number of pulses				|
-| pulse_id	     | vector\<uint32\>	| unique pulse id, sorted   	   		|
+| pulse_id	     | vector\<uint32\>	| unique pulse id.   	   			|
 | pulse_start        | vector\<uint32\>	| the start index of a pulse			|
 | pulse_end	     | vector\<uint32\>	| the end index of a pulse			|
 | pulse_area_sum_pe     | vector\<float32\>	| summed PMT area in pe from `pulse_start` to `pulse_end`. 		|
