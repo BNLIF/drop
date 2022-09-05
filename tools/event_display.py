@@ -194,6 +194,8 @@ class EventDisplay():
         t = np.arange(0, len(a)*2, 2)
         ax1.plot(t, a, label='summed channel');
         ax1.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline');
+        trg_time_ns = self.wfm_list[i].trg_time_ns
+        ax1.scatter(trg_time_ns, 0, color='orange', marker='v', label='master trigger time')
         ax1.legend(loc='upper left')
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
@@ -244,6 +246,8 @@ class EventDisplay():
         t = np.arange(0, len(a)*2, 2)
         ax1.plot(t, a, label=ch[4:]) # remove adc_ from ch names
         ax1.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
+        trg_time_ns = self.wfm_list[i].trg_time_ns
+        ax1.scatter(trg_time_ns, 0, color='orange', marker='v', label='master trigger time')
         ax1.legend(loc='upper left')
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
