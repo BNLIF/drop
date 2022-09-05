@@ -67,6 +67,7 @@ class Waveform():
         """
         if self.cfg.daisy_chain:
             for ch in self.ch_names:
+                if '_b1' in ch:
                     n_samp = len(self.amp_mV[ch])
                     pre_trg_frac = 1.0-self.cfg.post_trigger
                     self.trg_pos = int(n_samp*pre_trg_frac)
@@ -147,6 +148,8 @@ class Waveform():
                 print("ERROR in correct_trg_delay: invalid boardId")
                 return None
             self.amp_pe[ch] = a_corr
+            self.trg_pos -= dS*2
+            self.trg_time_ns -= dT_ns*2
 
     def sum_channels(self):
         """
