@@ -13,6 +13,7 @@ class ScipyPeakFindingParam():
     distance = None
     thresold = None
     height = None
+    prominence = None
 
 
 class YamlReader():
