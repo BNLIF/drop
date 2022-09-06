@@ -151,6 +151,8 @@ class RunDROP():
             wfm.integrate_waveform()
             wfm.find_roi_height()
             wfm.find_roi_area()
+            wfm.calc_aux_ch_info()
+
             # pulses finding
             pf.reset()
             pf.wfm = wfm
@@ -196,9 +198,14 @@ def main(argv):
 
     # RunDROP class is at the top of food-chain
     run = RunDROP(args)
+    print("\nSummary of your config file:")
+    print(run.cfg.data)
+    print("")
 
     # RQWriter creates output file, fill, and dump
-    writer = RQWriter(args, basket_size=run.cfg.batch_size)
+    n_aux_ch = len(run.cfg.non_signal_channels)
+    n_ch = len(run.ch_id)-n_aux_ch
+    writer = RQWriter(args, n_ch, n_aux_ch, basket_size=run.cfg.batch_size)
     writer.init_basket_cap = int(run.n_event_proc/run.cfg.batch_size)+2
     writer.create_output()
 

@@ -6,7 +6,7 @@ Outline
 - pulse finding
 - sum channels
 '''
-from numpy import zeros, argwhere, trapz, diff, sign, concatenate, quantile
+from numpy import zeros, argwhere, trapz, diff, sign, concatenate, quantile, argmax
 from numpy import median, cumsum
 import numpy as np
 import matplotlib.pylab as plt
@@ -63,11 +63,11 @@ class Waveform():
 
     def define_trigger_position(self):
         """
-        In a dasiy_chain, the last slave board trigger position is used
+        Time of the first trigger arrived.
         """
         if self.cfg.daisy_chain:
             for ch in self.ch_names:
-                if '_b3' in ch:
+                if '_b1' in ch:
                     n_samp = len(self.amp_mV[ch])
                     pre_trg_frac = 1.0-self.cfg.post_trigger
                     self.trg_pos = int(n_samp*pre_trg_frac)
@@ -148,6 +148,8 @@ class Waveform():
                 print("ERROR in correct_trg_delay: invalid boardId")
                 return None
             self.amp_pe[ch] = a_corr
+        self.trg_pos -= dS*2
+        self.trg_time_ns -= dT_ns*2
 
     def sum_channels(self):
         """
@@ -215,7 +217,7 @@ class Waveform():
 
     def find_roi_height(self):
         """
-        calc the height within  the Region of Interest (ROI) whose start_ns and
+        calc the height within the Region of Interest (ROI) whose start_ns and
         end_ns are defined in yaml config file
 
         Notes:
@@ -235,3 +237,17 @@ class Waveform():
                 height[ch] = np.max(val[start:end])
             self.roi_height_pe.append(height)
         return None
+
+    def calc_aux_ch_info(self):
+        """
+        Reconstruct simple variables for non-signal channels (auxiliary channel)
+        For example, the paddles are non-signal channels that provides auxiliary info
+        """
+        self.aux_ch_area_mV={}
+        for ch in self.cfg.non_signal_channels:
+            a=self.amp_mV[ch]
+            pp = argmax(a) # peak position
+            start=np.max([pp-50, 0])
+            end = np.min([pp+50, len(a)-1])
+            area = np.sum(a[start:end])*SAMPLE_TO_NS
+            self.aux_ch_area_mV[ch] = area

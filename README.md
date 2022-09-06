@@ -47,6 +47,11 @@ Enter virtual environment if not already in (recommneded):
 source env/bin/activate
 ```
 
+Source the setup script in the drop directory. This will setup a few enviromental variables needed.
+```bash
+source setup.sh
+```
+
 To convert the raw data from binary file to root file, check out the rooter:
 ```bash
 python src/raw_data_rooter.py --help
