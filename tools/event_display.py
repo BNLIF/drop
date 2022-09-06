@@ -64,6 +64,7 @@ class EventDisplay():
         self.xlim = None
         self.ylim = None
         self.dpi = None
+        self.logy_flag = False
 
         # how many new figure?
         self.plot_counter = 0
@@ -200,13 +201,10 @@ class EventDisplay():
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
-        if self.xlim is not None:
-            plt.xlim(self.xlim)
-        if self.ylim is not None:
-            plt.ylim(self.ylim)
-        plt.xlabel('Time [ns]')
         plt.ylabel(left_ylabel)
+        plt.xlabel('Time [ns]')
         plt.grid(linewidth=0.5, alpha=0.5)
+
 
         ax2 = ax1.twinx()
         ax2.plot(t, a_int, color='k', label='accumulated', linewidth=1)
@@ -222,6 +220,14 @@ class EventDisplay():
                 rect = patches.Rectangle(xy, w, h, label='pulse', linewidth=0.5,
                 edgecolor='r', facecolor='none')
                 ax1.add_patch(rect)
+
+        if self.xlim is not None:
+            ax1.set_xlim(self.xlim)
+        if self.ylim is not None:
+            ax1.set_ylim(self.ylim)
+        if self.logy_flag:
+            ax1.set_yscale('log')
+            ax2.set_yscale('log')
 
         if no_show==False:
             plt.show()
@@ -252,10 +258,6 @@ class EventDisplay():
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
-        if self.xlim is not None:
-            plt.xlim(self.xlim)
-        if self.ylim is not None:
-            plt.ylim(self.ylim)
         plt.xlabel('Time [ns]')
         plt.ylabel(left_ylabel)
         plt.grid(linewidth=0.5, alpha=0.5)
@@ -264,6 +266,16 @@ class EventDisplay():
         ax2.plot(t, a_int, color='k', label='accumulated', linewidth=1)
         ax2.legend(loc='center right')
         plt.ylabel(right_ylabel)
+
+        # user config
+        if self.xlim is not None:
+            ax1.set_xlim(self.xlim)
+        if self.ylim is not None:
+            ax1.set_ylim(self.ylim)
+        if self.logy_flag:
+            ax1.set_yscale('log')
+            ax2.set_yscale('log')
+
         if no_show==False:
             plt.show()
 
