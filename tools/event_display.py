@@ -33,7 +33,27 @@ class Args:
 
 class EventDisplay():
     def __init__(self, raw_data_path, yaml_path=None):
+        """Constructor:
 
+        EventDisplay class to visualize individual waveform. This class recyles
+        the same source code in drop/src. So details such as the baseline
+        subtraction, SPE normalization, accumulated integral, and pulse finder
+        results are consisent with DROP --- good for making cross-checks with the
+        Reduced Quality (RQ) variables.
+
+        Usage example:
+            event_display_example.ipynb.
+
+        Args:
+            raw_data_path (str): path to the raw root file
+            yaml_path (str): path to the configuration yaml file (default:
+                yaml/config.yaml)
+
+        Notes:
+            Since EventDisplay uses DROP source code, brand new update may break
+            the main EventDispaly in the main branch. Try `event_display` branch
+            which contains an older but a frozen version of DROP.
+        """
         self.args = Args() # arguments needed to run DROP
         self.args.if_path=raw_data_path
         if yaml_path is None:
@@ -70,6 +90,17 @@ class EventDisplay():
         self.plot_counter = 0
 
     def set_user_summed_channel_list(self, user_list: list):
+        """
+        Set a user-defined list of channels to plot.
+
+        Args:
+            user_list (list): a list of str or a list of int
+
+        Examples:
+            For example, the following list is sum of all side channels
+            user_list=[300, 301, 302, 303, 304, 305, 306, 307, 308, 309,
+            310, 311, 312, 313, 314, 315]
+        """
         user_list = self.run.cfg.get_ch_names(user_list)
         self.user_summed_channel_list = user_list
         return None
@@ -172,6 +203,10 @@ class EventDisplay():
             return None
 
     def __display_summed_waveform(self, i, no_show=False):
+        """
+            Notes: function starts with __ are not meant for users to call. This
+            is a python naming convention, not strictly reforced.
+        """
         #plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         self.plot_counter += 1
@@ -194,9 +229,9 @@ class EventDisplay():
 
         t = np.arange(0, len(a)*2, 2)
         ax1.plot(t, a, label='summed channel');
-        ax1.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline');
+        ax1.plot(t, np.zeros(len(a)), '--', color='gray', label='flat baseline');
         trg_time_ns = self.wfm_list[i].trg_time_ns
-        ax1.scatter(trg_time_ns, 0, color='orange', marker='v', label='master trigger time')
+        ax1.scatter(trg_time_ns, 0.01, color='orange', marker='v', label='master trigger time')
         ax1.legend(loc='upper left')
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
@@ -234,6 +269,10 @@ class EventDisplay():
         return None
 
     def __display_ch_waveform(self, i, ch, no_show=False):
+        """
+            Notes: function starts with __ are not meant for users to call. This
+            is a python naming convention, not strictly reforced.
+        """
         # plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         self.plot_counter += 1
@@ -251,9 +290,9 @@ class EventDisplay():
 
         t = np.arange(0, len(a)*2, 2)
         ax1.plot(t, a, label=ch[4:]) # remove adc_ from ch names
-        ax1.plot(np.zeros(len(a)), '--', color='gray', label='flat baseline')
+        ax1.plot(t, np.zeros(len(a)), '--', color='gray', label='flat baseline')
         trg_time_ns = self.wfm_list[i].trg_time_ns
-        ax1.scatter(trg_time_ns, 0, color='orange', marker='v', label='master trigger time')
+        ax1.scatter(trg_time_ns, 0.01, color='orange', marker='v', label='master trigger time')
         ax1.legend(loc='upper left')
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
@@ -280,6 +319,10 @@ class EventDisplay():
             plt.show()
 
     def __display_ch_raw_waveform(self, i, ch, no_show=False):
+        """
+            Notes: function starts with __ are not meant for users to call. This
+            is a python naming convention, not strictly reforced.
+        """
         #plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         self.plot_counter += 1
@@ -309,7 +352,10 @@ class EventDisplay():
         return active_board_id
 
     def __display_all_ch_waveform(self, i, no_show=False):
-
+        """
+            Notes: function starts with __ are not meant for users to call. This
+            is a python naming convention, not strictly reforced.
+        """
         active_board_id = self.__get_active_board_id()
         n_boards = self.run.n_boards
 
@@ -325,18 +371,26 @@ class EventDisplay():
                     a = self.wfm_list[i].amp_pe[ch]
                     t = np.arange(0, len(a)*2, 2)
                     axes[b].plot(t, a, label=ch[7:], linewidth=1, color=self.user_ch_colors[ch_id])
-                    axes[b].plot(np.zeros(len(a)), '--', color='gray', linewidth=1)
+                    axes[b].plot(t, np.zeros(len(a)), '--', color='gray', linewidth=1)
             if b==0:
                 axes[b].set_title('event_id=%d' % self.grabbed_event_id[i])
             axes[b].set_xlabel('Time [ns]')
             axes[b].set_ylabel("PE / 2ns")
             axes[b].grid(linewidth=0.5, alpha=0.5)
             axes[b].legend(loc='best', title="board_id: %d" % b_id, ncol=2, fontsize=8)
+            # user config
+            if self.xlim is not None:
+                axes[b].set_xlim(self.xlim)
+            if self.ylim is not None:
+                axes[b].set_ylim(self.ylim)
         if no_show==False:
             plt.show()
 
     def __display_all_ch_raw_waveform(self, i, no_show=False):
-
+        """
+            Notes: function starts with __ are not meant for users to call. This
+            is a python naming convention, not strictly reforced.
+        """
         active_board_id = self.__get_active_board_id()
         n_boards = self.run.n_boards
         fig, axes = plt.subplots(n_boards, 1, figsize=[8,4*n_boards], sharex=True)
@@ -367,6 +421,12 @@ class EventDisplay():
         return d
 
     def set_bottom_pmt_positions(self):
+        """
+        Location of PMTs, which is hard coded for now
+
+        TODO: use tools/ratdb_reader.py, which can readin ratdb/geo file, and extract
+        position from them.
+        """
         # when bottom is filled with 30 PMTs, copy from ratdb
         bottom_position_30pmt = {
         "x": [381. ,  381. ,  381. ,  381. ,  190.5,  190.5,  190.5,  190.5, 190.5,  \
@@ -405,13 +465,16 @@ class EventDisplay():
 
     def get_bottom_pmt_hit_pattern(self, event_id, start_ns=0, end_ns=100):
         """
-        WORK IN PROGRESS. THIS FUNCTION HAS NOT BEEN TESTED.
+        Get the bottom PMT hit patterns
 
         Args:
             event_id (int): the event you want
             start_ns (int): the first ns to include
-            end_ns (int): The end ns. Open end conv, ex: [start_ns, end_ns
-            ).
+            end_ns (int): The end ns. Open end conv, ex: [start_ns, end_ns).
+
+        Notes:
+            WORK IN PROGRESS. THIS FUNCTION HAS NOT BEEN TESTED.
+
         """
         if isinstance(event_id, int):
             if event_id in self.grabbed_event_id:
