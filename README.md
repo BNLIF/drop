@@ -79,3 +79,4 @@ The master branch is not protected at the moment since the team is small.
 
 **Style**. I tried to follow [PEP 8](https://realpython.com/python-pep8/) convention as much as possible. Not a requirement, but I hope you do it too so that we have a clean and consistent coding style. For quick formating, you can use `black` or other automatic formating software. `black` will not change variable naming for you. 
 
+Naming Conventions:
