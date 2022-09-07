@@ -25,6 +25,11 @@ class Waveform():
     Waveform class. One waveform per event.
     """
     def __init__(self, cfg: YamlReader):
+        """Constructor.
+
+        Args:
+            cfg (YamlReader): the config objection from YamlReader class.
+        """
         if cfg is not None:
             self.cfg = cfg
         self.ch_names = None
@@ -56,6 +61,9 @@ class Waveform():
         self.ma_base_std_pe = {} # moving average std
 
     def set_raw_data(self, val):
+        """
+        Set raw data.
+        """
         self.raw_data = val
         self.event_id = val.event_id
         self.event_ttt = val.event_ttt
@@ -63,7 +71,9 @@ class Waveform():
 
     def define_trigger_position(self):
         """
-        Time of the first trigger arrived.
+        You have to define an event's trigger time. For simplicity, use time of
+        the first trigger arrived at the master board. This is calculate based
+        on DAQ length and post_trigger fraction.
         """
         if self.cfg.daisy_chain:
             for ch in self.ch_names:
@@ -78,10 +88,10 @@ class Waveform():
 
     def get_flat_baseline(self, val):
         """
-        define a flat baseline. Find the median and std.
+        Define a flat baseline. Find the median and std, and return them
 
-        Input:
-            val: array
+        Args:
+            val: array of float
 
         Return:
             float, float
@@ -91,8 +101,9 @@ class Waveform():
 
     def subtract_flat_baseline(self):
         """
-        Very basic
-        Baseline is avg over all excluding trigger regions
+        Very basic: subratct a flat baseline for all channels. New variables
+        are saved in class for later usage: flat_base_mV, flat_base_std_mV,
+        amp_mV.
         """
         if self.ch_names is None:
             sys.exit('ERROR: Waveform::ch_names is not specified.')
@@ -129,10 +140,18 @@ class Waveform():
 
     def correct_daisy_chain_trg_delay(self):
         """
-        Shift a channel's waveform based on which board it is
-        boardId is baked into ch_name.
-        arr: array
-        ch_name: str
+        Shift a channel's waveform based on which board it is. The 48 ns delay
+        from V1730s trg_in to trg_out is calibrated with a square pulse. We do
+        not expect it changes. Hence hard coded below.
+
+        Remember to shift trigger position too.
+
+        TODO:
+            1. save the delay in config yaml file.
+            2. what about FAN-OUT?
+
+        Notes:
+            boardId is baked into ch_name.
         """
         dT_ns = 48 # externally calibrated parameter
         dS = dT_ns//int(SAMPLE_TO_NS)
@@ -153,7 +172,10 @@ class Waveform():
 
     def sum_channels(self):
         """
-        Sum up channels
+        Sum up channels.
+            - "sum" means the sum of all PMTs
+            - "bot" means the sum of all bottom PMTs
+            - "side" means the sum of all side PMTs
         """
         tot_pe = 0
         bt_pe = 0
@@ -176,7 +198,8 @@ class Waveform():
 
     def integrate_waveform(self):
         """
-        integrated waveform
+        Compute accumulated integral of the waveform. Do not forget to multiple by
+        the sample size (2ns for V1730s) as it's integral not accumulated sum.
         """
         for ch, val in self.amp_pe.items():
             self.amp_pe_int[ch] = cumsum(val)*(SAMPLE_TO_NS) # adc*ns
@@ -251,3 +274,4 @@ class Waveform():
             end = np.min([pp+50, len(a)-1])
             area = np.sum(a[start:end])*SAMPLE_TO_NS
             self.aux_ch_area_mV[ch] = area
+        return None

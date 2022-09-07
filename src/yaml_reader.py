@@ -18,6 +18,11 @@ class ScipyPeakFindingParam():
 
 class YamlReader():
     def __init__(self, file_path=None):
+        """Constructor
+
+        Args:
+            file_path (str). Path to yaml file.
+        """
         self.file_path=file_path
         with open(file_path, "r") as f:
             try:
@@ -30,6 +35,9 @@ class YamlReader():
         """
         Allow user to specify channels using different conventions.
         For example: 101 -> adc_b1_ch1, or b1_ch1 -> adc_b1_ch1
+
+        Args:
+            input_list (list): list of str or list of int.
         """
         if isinstance(input_list, list):
             ch_names = []

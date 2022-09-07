@@ -12,13 +12,15 @@ class PulseFinder():
     def __init__(self, cfg: YamlReader, wfm: Waveform):
         """Constructor
 
-        Args:
-            cfg (YamlReader): configurations passed in by yaml file
-            wfm (Waveform): waveform by Waveform class
+        Pulse finder identify pulses in the sum channels. A pulse is defined by
+        pulse_start and pulse_end sample index, and labelled by pulse_id. Once
+        a pulse is found (or defined), pulse variables are then calculated.
+        If scipy pulse finder is used, pulses are order in decending order of
+        prominence.
 
-        Notes:
-            Initializes variables. When no pulse found, initial value are used. So
-            better to have consistent initial type.
+        Args:
+            cfg (YamlReader): configuration by YamlReader class
+            wfm (Waveform): waveform by Waveform class
         """
         self.cfg = cfg
         self.reset()
@@ -26,6 +28,10 @@ class PulseFinder():
     def reset(self):
         """
         Variables that needs to be reset per event
+
+        Notes:
+            If you want to add more pulse variables, do not forget to reset it
+            here.
         """
         self.peaks={} # dict
         self.peak_properties={}
@@ -51,7 +57,7 @@ class PulseFinder():
 
     def scipy_find_peaks(self):
         """
-        Scipy find_peaks functions
+        Scipy find_peaks functions. The parameters can be tuned in the yaml file.
         """
         pars = self.cfg.scipy_pf_pars
         self.base_std_pe = {}
@@ -118,6 +124,8 @@ class PulseFinder():
         """
         Calculate pulse x channel variables.
         One per pulse per channel, excluding padles and summed channels.
+
+        TODO: these variables are calcualted but not yet saved.
         """
         if self.n_pulses<=0:
             return None
@@ -139,8 +147,15 @@ class PulseFinder():
 
     def calc_pulse_info(self):
         """
-        Calculate pulse variable
-        One per pulse
+        Calculate pulse-level variables. One event may have many pulses.
+
+        area: integral in unit of PE
+        height: max height in unit of PE/ns
+        ptime_ns: peak time in ns
+        sba: side bottom asymmetry
+        coincidence: number of PMTs whose pulse height pass threshold
+        area_max_frac: fraction of light in max PMTs
+        ... [add more if you wish]
         """
         height_thresh = self.cfg.spe_height_threshold
 
@@ -192,11 +207,14 @@ class PulseFinder():
 
     def display(self, ch='sum'):
         '''
-        A plotting function showcase pulse finder
+        A plotting function showcase pulse finder.
 
         Args:
             ch (str, list):  specified a channel to dispaly.
                 ex. b1_ch0, ['b1_ch0', 'b1_ch1']. Default: sum
+
+        Notes:
+            depricated? At least X.X. does not recall using it recently.
         '''
         if isinstance(ch, list):
             print("ERROR: ch is a string, not a list. Use Waveform::display \

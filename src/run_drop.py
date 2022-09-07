@@ -62,11 +62,12 @@ class RunDROP():
 
     def load_run_info(self):
         """
-        Load run_info tree, which contains one entry.
+        Load run_info tree, which contains only one entry.
 
         Notes:
             Not yet possible to save str via uproot. Use numbering convension:
-            100*boardId + chID,
+            100*boardId + chID. For example, 211 means board 2, channel 11, or
+            `adc_b2_ch11`.
         """
         f = uproot.open(self.if_path)
         b_names = ['n_boards', 'n_event_proc', 'n_trg_read', 'leftover_event_id', 'active_ch_id']
@@ -109,7 +110,7 @@ class RunDROP():
 
         Args:
         - batch (high-level awkward array): a collection of raw events
-        - writer (RQWriter). If None, nothig to fill & write, but save to memory.
+        - writer (RQWriter). If None, nothing to fill & write, but save to memory.
         '''
         # save ref for later ease of access
         self.batch = batch

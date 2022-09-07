@@ -23,8 +23,8 @@
 - `post_pulse`: int. Number of samples before pulse peak. **THIS IS NOT USED FOR NOW**
 
 ### ROI Assocaited
-- `roi_start`: list. ROI start time in ns. `roi_start` is defined with respect to the trigger arrival time of the master boards.
-- `roi_end`: list. ROI end time in ns. `roi_end` is defined with respect to the trigger arrival time of the master boards.
+- `roi_start_ns`: list. ROI start time in ns. `roi_start` is defined with respect to the trigger arrival time of the master boards.
+- `roi_end_ns`: list. ROI end time in ns. `roi_end` is defined with respect to the trigger arrival time of the master boards.
 
 > **Note**: The RQWriter will saves three ROI. For example, `roi_start_ns: [-200, -50, 200]` and `roi_end_ns: [-100, 50, 300]` define three 100ns ROIs. The first starts 200 ns before master trigger time. (MTT) The second start 50ns before and ends 50ns after MTT. The third starts 200 ns after MTT.
 
