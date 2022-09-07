@@ -10,10 +10,11 @@ Contact: X. Xiang <xxiang@bnl.gov>
 **Global Variables**
 ---------------
 - **MAX_N_EVENT**
+- **YAML_DIR**
 
 ---
 
-<a href="../../src/run_drop.py#L149"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L187"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `main`
 
@@ -26,12 +27,12 @@ Main function
 
 ---
 
-<a href="../../src/run_drop.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L25"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `RunDROP`
 Main Class. Once per run. Manage all operations. 
 
-<a href="../../src/run_drop.py#L26"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L29"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.__init__`
 
@@ -50,7 +51,19 @@ __init__(args)
 
 ---
 
-<a href="../../src/run_drop.py#L60"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L87"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+
+### <kbd>method</kbd> `RunDROP.load_pmt_info`
+
+```python
+load_pmt_info()
+```
+
+PMT calibration results are saved in a csv file The path to the csv file is specified in yaml config file 
+
+---
+
+<a href="../../src/run_drop.py#L63"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.load_run_info`
 
@@ -58,17 +71,17 @@ __init__(args)
 load_run_info()
 ```
 
-Load run_info tree, which contains one entry. 
+Load run_info tree, which contains only one entry. 
 
 
 
 **Notes:**
 
-> Not yet possible to save str via uproot. Use numbering convension: 100*boardId + chID, 
+> Not yet possible to save str via uproot. Use numbering convension: 100*boardId + chID. For example, 211 means board 2, channel 11, or `adc_b2_ch11`. 
 
 ---
 
-<a href="../../src/run_drop.py#L79"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L107"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.process_batch`
 
@@ -83,11 +96,11 @@ Process one batch at a time. Batch size is defined in the yaml file.
 **Args:**
  
 - batch (high-level awkward array): a collection of raw events 
-- writer (RQWriter). If None, nothig to fill & write, but save to memory. 
+- writer (RQWriter). If None, nothing to fill & write, but save to memory. 
 
 ---
 
-<a href="../../src/run_drop.py#L47"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L50"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.sanity_check`
 
@@ -99,7 +112,7 @@ Collection of check before running
 
 ---
 
-<a href="../../src/run_drop.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../src/run_drop.py#L175"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `RunDROP.show_progress`
 

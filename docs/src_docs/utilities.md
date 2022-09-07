@@ -7,7 +7,7 @@ Utility functions that are used by DROP
 
 **Global Variables**
 ---------------
-- **ADC_RATE_HZ**
+- **SAMPLE_TO_NS**
 
 ---
 
