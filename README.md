@@ -16,11 +16,11 @@ The write access to this gitlab repoistory is grant to the WbLS group, or indivi
   - pyYAML 5.1+
   - scipy, matplotlib (?+)
 
-The full dependence is specified in requirememts.txt. 
+The full dependence is specified in requirememts.txt.
 
 ## Installation and Setup
 
-Download is open to public, but write permission is limited to BNL Intensity Frontier (BNLIF). 
+Download is open to public, but write permission is limited to BNL Intensity Frontier (BNLIF).
 
 Upgrade your pip (optional) to keep up to date with the dependence requirement:
 ```bash
@@ -32,7 +32,7 @@ Create a virtual environment and activate it (optional):
 python3 -m venv env
 source env/bin/activate
 ```
-If everything goes right, you are now in a virutial environment named `env`. If you do not know how to use virtial enironment, check out [here](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/). The same page also includes instruction on how to use `pip`. Both `venv` and `pip` are common tools for python users. 
+If everything goes right, you are now in a virutial environment named `env`. If you do not know how to use virtial enironment, check out [here](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/). The same page also includes instruction on how to use `pip`. Both `venv` and `pip` are common tools for python users.
 
 Install the exact package dependence from requirement within your virtual env (optional).
 ```bash
@@ -56,10 +56,10 @@ To convert the raw data from binary file to root file, check out the rooter:
 ```bash
 python src/raw_data_rooter.py --help
 ```
-The rooter is fairly fast. Please check the global parameters (ALL CAP) defined at the beginning of this script; they may not affect the output root file, but may affect the processing speed and the accuracy of the print out. 
+The rooter is fairly fast. Please check the global parameters (ALL CAP) defined at the beginning of this script; they may not affect the output root file, but may affect the processing speed and the accuracy of the print out.
 
 
-In your virtual env (recommended), check out the help manual. 
+In your virtual env (recommended), check out the help manual.
 
 ```bash
 python src/run_drop.py --help
@@ -75,8 +75,19 @@ deactivate
 
 # Contributing
 
-The master branch is not protected at the moment since the team is small. 
+The master branch is not protected at the moment since the team is small.
 
-**Style**. I tried to follow [PEP 8](https://realpython.com/python-pep8/) convention as much as possible. Not a requirement, but I hope you do it too so that we have a clean and consistent coding style. For quick formating, you can use `black` or other automatic formating software. `black` will not change variable naming for you. 
+**Style**. I tried to follow [PEP 8](https://realpython.com/python-pep8/) convention as much as possible. Not a requirement, but I hope you do it too so that we have a clean and consistent coding style. For quick formating, you can use `black` or other automatic formating software. `black` will not change variable naming for you.
 
-Naming Conventions:
+For your connivence, here is a summary of the style.
+
+## Naming Styles
+| **Type**    | **Naming Convention**         | **Examples**               |
+|:------------|-------------------------------|----------------------------|
+| Function | Use a lowercase word or words. Separate words by underscores to improve readability.| `function`, `my_function` |
+| Variable | Use a lowercase single letter, word, or words. Separate words with underscores to improve readability.  |  `x`, `var`, `my_variable` |
+| Class | Start each word with a capital letter. Do not separate words with underscores. This style is called camel case or pascal case.  | Model, MyClass  |
+| Method | Use a lowercase word or words. Separate words with underscores to improve readability.  | `class_method`, `method`  |
+| Constant	 | Use an uppercase single letter, word, or words. Separate words with underscores to improve readability.  | `CONSTANT`, `MY_CONSTANT`, `MY_LONG_CONSTANT`  |
+| Module | Use a short, lowercase word or words. Separate words with underscores to improve readability.	  | `module.py`, `my_module.py`  |
+| Package  |  Use a short, lowercase word or words. Do not separate words with underscores.	 |  `package`, `mypackage` |
