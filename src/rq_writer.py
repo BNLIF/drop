@@ -243,7 +243,7 @@ class RQWriter:
         """
         remember to close file after done
         """
-        print('Info: closing file', self.self.of_path):
+        print("Info: closing file", self.of_path)
         self.file.close()
 
     def dump_run_rq(self, rq: dict):
