@@ -116,7 +116,10 @@ For your connivence, here is a summary of the style.
 | Module | Use a short, lowercase word or words. Separate words with underscores to improve readability.	  | `module.py`, `my_module.py`  |
 | Package  |  Use a short, lowercase word or words. Do not separate words with underscores.	 |  `package`, `mypackage` |
 
-Also, function starts with __ are not meant for users to call. This is a python naming convention, not strictly enforced. For example
+Also, function starts with underscores are not meant for users to call. This is a python naming convention, not strictly enforced. For example,
+ - `_single_leading_underscore`: weak "internal use" indicator. E.g. from M import * does not import objects whose name starts with an underscore
+- Double pre underscores are used for the name mangling.
+- Double underscores before and after are reserved for python. For example, `__init__`. DO NOT make yours.
 
 ### Indentation
 
