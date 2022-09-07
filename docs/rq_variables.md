@@ -19,7 +19,7 @@ Run Info.
 
 In addition, the yaml configuration file are also saved to run_info tree. They're labelled as `cfg_*`, The `cfg_*` names are self-explanatory. See [yaml/README.md] (https://github.com/BNLIF/drop/blob/main/yaml/README.md)).
 
-> Note: uproot cannot save string. A string is broken into a list of ASCII char, and saved as list of int. After load in python, need to convert: [int] -> [char] -> str
+> Note: uproot cannot save string. A string is broken into a list of ASCII char, and saved as list of int. After load in python, need to convert: [int] -> [char] -> str. For example, "cat" -> ['c', 'a', 't'] -> [99, 97, 116] -> saved. To recovery the str, use chr(int): [chr(i) for i in [99, 97, 116]] ->  ['c', 'a', 't'] -> "cat" .
 
 ## Tree: `pmt_info`
 
