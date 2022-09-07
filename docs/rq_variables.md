@@ -17,7 +17,7 @@ Run Info.
 | leftover_event_id	| uint64 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
 | active_ch_id		|  uint64[n_ch]	 | unique id for all active channels      	       |
 
-In addition, the yaml configuration file are also saved to run_info tree. They're labelled as `cfg_*`, The `cfg_*` names are self-explainory. See [yaml/README.md] (https://github.com/BNLIF/drop/blob/main/yaml/README.md)).
+In addition, the yaml configuration file are also saved to run_info tree. They're labelled as `cfg_*`, The `cfg_*` names are self-explanatory. See [yaml/README.md] (https://github.com/BNLIF/drop/blob/main/yaml/README.md)).
 
 > Note: uproot cannot save string. A string is broken into a list of ASCII char, and saved as list of int. After load in python, need to convert: [int] -> [char] -> str
 
