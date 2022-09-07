@@ -11,11 +11,15 @@ Run Info.
 
 | Tables		| type			 |		Description			|
 |:------------ 	|----------------------| -------------------------------------------|
-| n_boards      	| uint32 		 | number of digitizer boards			|
-| n_event_proc      	| uint32		 | number of events processed			|
-| n_trg_read 		| uint32      	  	 | number of triggers read from binary file	|
-| leftover_event_id	| vector\<uint32\> 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
-| active_ch_id		|  vector\<uint32\>	 | unique id for active channels      	       |
+| n_boards      	| uint64 		 | number of digitizer boards			|
+| n_event_proc      	| uint64		 | number of events processed			|
+| n_trg_read 		| uint64      	  	 | number of triggers read from binary file	|
+| leftover_event_id	| uint64 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
+| active_ch_id		|  uint64[n_ch]	 | unique id for all active channels      	       |
+
+In addition, the yaml configuration file are also saved to run_info tree. They're labelled as `cfg_*`, The `cfg_*` names are self-explainory. See [yaml/README.md] (https://github.com/BNLIF/drop/blob/main/yaml/README.md)).
+
+> Note: uproot cannot save string. A string is broken into a list of ASCII char, and saved as list of int. After load in python, need to convert: [int] -> [char] -> str
 
 ## Tree: `pmt_info`
 
@@ -46,7 +50,7 @@ One per event
 
 ### Channel level variables
 
-PMTs channel variables. Each branch is a static array of fixed size `n_ch`. 
+PMTs channel variables. Each branch is a static array of fixed size `n_ch`.
 
 | Variable Name      | type			| Description						|
 |:------------      |---------------		| ---------------------------------------		|
