@@ -82,7 +82,7 @@ The main(master) branch is protected. The typical workflow is:
 ```bash
 git branch <new-branch>
 ```
-I recommend including your initials to the new branch new, such as `xx-fix_blah_blah`.
+I recommend including your initials to the new branch name, such as `xx-fix_blah_blah`.
 
 2. Switch to the new local branch you created:
 ```bash
