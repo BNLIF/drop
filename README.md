@@ -75,19 +75,80 @@ deactivate
 
 # Contributing
 
-The master branch is not protected at the moment since the team is small.
+## Git Workflow
+The main(master) branch is protected. The typical workflow is:
 
+1. On main (master) branch, start a new branch:
+```bash
+git branch <new-branch>
+```
+I recommend including your initials to the new branch new, such as `xx-fix_blah_blah`.
+
+2. Switch to the new local branch you created:
+```bash
+git checkout <new-branch>
+```
+3. Make your edit
+
+4. Commit and push your change to remote branch:
+```bash
+git commit -m "this is what I did"
+git push origin <new-branch>
+```
+
+5. After you've make sure your code actually runs, create a new pull request at https://github.com/BNLIF/drop/pulls to merge your branch to the main (master)
+
+> **_Note_**: Please ask help if you're not familiar with git at all. `git` is a common tool for software collaboration.
+
+## Style
 **Style**. I tried to follow [PEP 8](https://realpython.com/python-pep8/) convention as much as possible. Not a requirement, but I hope you do it too so that we have a clean and consistent coding style. For quick formating, you can use `black` or other automatic formating software. `black` will not change variable naming for you.
 
 For your connivence, here is a summary of the style.
 
-## Naming Styles
+### Naming Styles
 | **Type**    | **Naming Convention**         | **Examples**               |
 |:------------|-------------------------------|----------------------------|
 | Function | Use a lowercase word or words. Separate words by underscores to improve readability.| `function`, `my_function` |
 | Variable | Use a lowercase single letter, word, or words. Separate words with underscores to improve readability.  |  `x`, `var`, `my_variable` |
-| Class | Start each word with a capital letter. Do not separate words with underscores. This style is called camel case or pascal case.  | Model, MyClass  |
+| Class | Start each word with a capital letter. Do not separate words with underscores. This style is called camel case or pascal case.  | `Model`, `MyClass`  |
 | Method | Use a lowercase word or words. Separate words with underscores to improve readability.  | `class_method`, `method`  |
 | Constant	 | Use an uppercase single letter, word, or words. Separate words with underscores to improve readability.  | `CONSTANT`, `MY_CONSTANT`, `MY_LONG_CONSTANT`  |
 | Module | Use a short, lowercase word or words. Separate words with underscores to improve readability.	  | `module.py`, `my_module.py`  |
 | Package  |  Use a short, lowercase word or words. Do not separate words with underscores.	 |  `package`, `mypackage` |
+
+Also, function starts with __ are not meant for users to call. This is a python naming convention, not strictly enforced. For example
+
+### Indentation
+
+- Use 4 consecutive spaces to indicate indentation.
+- Prefer spaces over tabs.
+
+> **_Note_**: You can adjust the settings in your text editor to output 4 spaces instead of a tab character, when you press the Tab key.
+
+### Comments
+
+Use comments to document the code!!!
+
+Documentation strings, or docstrings, are strings enclosed in double (""") or single (''') quotation marks that appear on the first line of any function, class, method, or module. You can use them to explain and document a specific block of code.
+
+The most important rules applying to docstrings are the following:
+
+- Surround docstrings with three double quotes on either side, as in """This is a docstring""".
+- Write them for all public modules, functions, classes, and methods.
+- Put the """ that ends a multiline docstring on a line by itself:
+
+For example,
+```python
+def quadratic(a, b, c, x):
+    """Solve quadratic equation via the quadratic formula.
+
+    A quadratic equation has the following form:
+    ax**2 + bx + c = 0
+
+    There always two solutions to a quadratic equation: x_1 & x_2.
+    """
+    x_1 = (- b+(b**2-4*a*c)**(1/2)) / (2*a)
+    x_2 = (- b-(b**2-4*a*c)**(1/2)) / (2*a)
+
+    return x_1, x_2
+```

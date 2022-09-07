@@ -1,4 +1,4 @@
-"""
+_d"""
 Simple Event Display
 
 PYTHONPATH is specified in setup.sh
@@ -178,12 +178,12 @@ class EventDisplay():
 
         if isinstance(ch, str):
             if ch == 'sum' or ch == 'summed':
-                self.__display_summed_waveform(i, no_show)
+                self._display_summed_waveform(i, no_show)
             elif ch == 'all':
                 if baseline_subtracted==False:
-                    self.__display_all_ch_raw_waveform(i, no_show)
+                    self._display_all_ch_raw_waveform(i, no_show)
                 else:
-                    self.__display_all_ch_waveform(i, no_show)
+                    self._display_all_ch_waveform(i, no_show)
             else:
                 if ch[0:3] != 'adc_':
                     # sometimes user forget the prefix adc_
@@ -193,19 +193,19 @@ class EventDisplay():
                     print('Hint: active ch names are:', self.run.ch_names)
                     return None
                 if baseline_subtracted==True:
-                    self.__display_ch_waveform(i, ch, no_show)
+                    self._display_ch_waveform(i, ch, no_show)
                 else:
-                    self.__display_ch_raw_waveform(i, ch, no_show)
+                    self._display_ch_raw_waveform(i, ch, no_show)
         elif isinstance(ch, list):
             pass # to do
         else:
             print("ERROR: ch variable type is not recognized.")
             return None
 
-    def __display_summed_waveform(self, i, no_show=False):
+    def _display_summed_waveform(self, i, no_show=False):
         """
-            Notes: function starts with __ are not meant for users to call. This
-            is a python naming convention, not strictly reforced.
+            Notes: function starts with _ are not meant for users to call. This
+            is a python naming convention, not strictly enforced.
         """
         #plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
@@ -268,10 +268,10 @@ class EventDisplay():
             plt.show()
         return None
 
-    def __display_ch_waveform(self, i, ch, no_show=False):
+    def _display_ch_waveform(self, i, ch, no_show=False):
         """
-            Notes: function starts with __ are not meant for users to call. This
-            is a python naming convention, not strictly reforced.
+            Notes: function starts with _ are not meant for users to call. This
+            is a python naming convention, not strictly enforced.
         """
         # plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
@@ -318,10 +318,10 @@ class EventDisplay():
         if no_show==False:
             plt.show()
 
-    def __display_ch_raw_waveform(self, i, ch, no_show=False):
+    def _display_ch_raw_waveform(self, i, ch, no_show=False):
         """
-            Notes: function starts with __ are not meant for users to call. This
-            is a python naming convention, not strictly reforced.
+            Notes: function starts with _ are not meant for users to call. This
+            is a python naming convention, not strictly enforced.
         """
         #plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
@@ -340,7 +340,7 @@ class EventDisplay():
         if no_show==False:
             plt.show()
 
-    def __get_active_board_id(self):
+    def _get_active_board_id(self):
         """
         which boardId is available? Return a set of int.
 
@@ -351,12 +351,12 @@ class EventDisplay():
             active_board_id.add(int(int(ch[5])))
         return active_board_id
 
-    def __display_all_ch_waveform(self, i, no_show=False):
+    def _display_all_ch_waveform(self, i, no_show=False):
         """
-            Notes: function starts with __ are not meant for users to call. This
-            is a python naming convention, not strictly reforced.
+            Notes: function starts with _ are not meant for users to call. This
+            is a python naming convention, not strictly enforced.
         """
-        active_board_id = self.__get_active_board_id()
+        active_board_id = self._get_active_board_id()
         n_boards = self.run.n_boards
 
         fig, axes = plt.subplots(n_boards, 1, figsize=[8,4*n_boards], sharex=True)
@@ -386,12 +386,12 @@ class EventDisplay():
         if no_show==False:
             plt.show()
 
-    def __display_all_ch_raw_waveform(self, i, no_show=False):
+    def _display_all_ch_raw_waveform(self, i, no_show=False):
         """
-            Notes: function starts with __ are not meant for users to call. This
-            is a python naming convention, not strictly reforced.
+            Notes: function starts with _ are not meant for users to call. This
+            is a python naming convention, not strictly enforced.
         """
-        active_board_id = self.__get_active_board_id()
+        active_board_id = self._get_active_board_id()
         n_boards = self.run.n_boards
         fig, axes = plt.subplots(n_boards, 1, figsize=[8,4*n_boards], sharex=True)
 
@@ -413,7 +413,7 @@ class EventDisplay():
         if no_show==False:
             plt.show()
 
-    def __merge_dict(self, d1, d2):
+    def _merge_dict(self, d1, d2):
         ds = [d1, d2]
         d = {}
         for k in d1.keys():
@@ -445,7 +445,7 @@ class EventDisplay():
         "z": [200.] * 18
         }
 
-        self.pmt_pos  = self.__merge_dict(bottom_position_30pmt, side_position_16pmt)
+        self.pmt_pos  = self._merge_dict(bottom_position_30pmt, side_position_16pmt)
 
         self.ch_to_bt_pmt_map = {
         'adc_b1_ch0': None, 'adc_b1_ch1': 1, 'adc_b1_ch2': 2, 'adc_b1_ch3': 3,
