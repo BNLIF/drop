@@ -1,7 +1,7 @@
 #!/bin/bash
 
-do_raw_data_rooter=1
-do_run_drop=0
+do_raw_data_rooter=0
+do_run_drop=1
 
 if [ $do_raw_data_rooter -eq 1 ]; then
     file_path=$1
@@ -17,7 +17,7 @@ fi
 
 if [ $do_run_drop -eq 1 ]; then
     file_path=$1
-    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/rq/phase0
+    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/rq/muon
 
     while read fpath; do
 	case "$fpath" in \#*) continue ;; esac

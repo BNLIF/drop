@@ -20,8 +20,8 @@ pre_pulse: 1
 post_pulse: 5
 
 # ROI stands for Region of Interest. Ex. Several variables (ex. max height, integral) are computed within ROI.
-roi_start_ns: [-180, -10, 150]
-roi_end_ns: [-100, 70, 230]
+roi_start_ns: [-180, -20, 120]
+roi_end_ns: [-100, 60, 500]
 
 # PulseFinder: scipy peak finding
 pulse_finder_algo: 0

@@ -217,12 +217,36 @@ def main(argv):
         run.show_progress()
 
     # write run tree once per file
+    # run rq includes from raw root data, and yaml config
+    # (uproot cannot save string; so ASCII->int->ASCII for spe_fit_results_file)  
     writer.dump_run_rq({
-    'n_boards': [run.n_boards],
-    'n_trg_read': [run.n_trg_read],
-    'n_event_proc': [run.n_event_proc],
-    'leftover_event_id': [run.leftover_event_id],
-    'ch_id': [run.ch_id],
+        'n_boards': [run.n_boards],
+        'n_trg_read': [run.n_trg_read],
+        'n_event_proc': [run.n_event_proc],
+        'leftover_event_id': [run.leftover_event_id],
+        'ch_id': [run.ch_id],
+        'cfg_batch_size': [run.cfg.batch_size],
+        'cfg_post_trigger': [run.cfg.post_trigger],
+        'cfg_dgtz_dynamic_range_mV': [run.cfg.dgtz_dynamic_range_mV],
+        'cfg_non_signal_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.non_signal_channels]],
+        'cfg_bottom_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.bottom_pmt_channels]],
+        'cfg_side_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.side_pmt_channels]],
+        'cfg_spe_fit_results_file': [[ord(i) for i in run.cfg.spe_fit_results_file]],
+        'cfg_daisy_chainr': [run.cfg.daisy_chain],
+        'cfg_apply_high_pass_filter': [run.cfg.apply_high_pass_filter],
+        'cfg_high_pass_cutoff_Hz': [run.cfg.high_pass_cutoff_Hz],
+        'cfg_moving_avg_length': [run.cfg.moving_avg_length],
+        'cfg_sigma_above_baseline': [run.cfg.sigma_above_baseline],
+        'cfg_pre_pulse': [run.cfg.pre_pulse],
+        'cfg_post_pulse': [run.cfg.post_pulse],
+        'cfg_roi_start_ns': [run.cfg.roi_start_ns],
+        'cfg_roi_end_ns': [run.cfg.roi_end_ns],
+        'cfg_pulse_finder_algo': [run.cfg.pulse_finder_algo],
+        'cfg_scipy_pf_pars_distance': [run.cfg.scipy_pf_pars.distance],
+        'cfg_scipy_pf_pars_threshold': [run.cfg.scipy_pf_pars.threshold],
+        'cfg_scipy_pf_pars_height': [run.cfg.scipy_pf_pars.height],
+        'cfg_scipy_pf_pars_prominence': [run.cfg.scipy_pf_pars.prominence],
+        'cfg_spe_height_threshold': [run.cfg.spe_height_threshold],
     })
 
     writer.dump_pmt_info(run.spe_fit_results)
