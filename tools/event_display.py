@@ -1,4 +1,4 @@
-_d"""
+"""
 Simple Event Display
 
 PYTHONPATH is specified in setup.sh
