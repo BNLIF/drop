@@ -10,17 +10,16 @@ side_pmt_channels: [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 
 # PMT calibration file (DROP looks for this file in yaml directory)
 spe_fit_results_file: 'bnl1t_spe_fit_results_220826.csv'
 
-# Waveform: digiter filter
+# Noise filter
 apply_high_pass_filter: False
 high_pass_cutoff_Hz: 5e6
-
-# Waveform: Baseline subtraction
+# The following are reserved for rolling baseline subtraction (not yet implemented)
 moving_avg_length: 10
 sigma_above_baseline: 3.0
 pre_pulse: 1
 post_pulse: 5
 
-# Waveform: ROI with respect to trigger position
+# ROI stands for Region of Interest. Ex. Several variables (ex. max height, integral) are computed within ROI.
 roi_start_ns: [-180, -10, 150]
 roi_end_ns: [-100, 70, 230]
 

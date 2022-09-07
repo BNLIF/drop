@@ -1,6 +1,10 @@
 """
+A script to inspect binary file.
+
+> **__Note__**: Alternatively, you can use xxd to look at binary file. Try: `xxd -h`
+
 Usage:
-python print_binary_info.py /path/to/raw_binary_file
+    python print_binary_info.py /path/to/raw_binary_file
 """
 import os
 import sys

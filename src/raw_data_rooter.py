@@ -7,10 +7,13 @@ A trigger is a digitizer's data. Map triggers to events by using a event queue.
 An event queue is like a table: row->event_id, col->info
 
 Algotrhim in a nutshell:
-0. Create an event queue
-1. Read a trigger
-2. Check this trigger's event_id in event queue; if not exist, create a new row in the queue. If exist, add to the row.
-3. Periodically check if queue has any rows fully filled. If yes, dump the fully filled rows to file.
+    0. Create an event queue
+    1. Read a trigger
+    2. Check this trigger's event_id in event queue; if not exist, create a new row in the queue. If exist, add to the row.
+    3. Periodically check if queue has any rows fully filled. If yes, dump the fully filled rows to file.
+
+Notes:
+    The glogal parameters are all captialized. Make sure they are what you want.
 
 '''
 
@@ -35,7 +38,7 @@ MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary f
 DUMP_SIZE = 3000 # number of triggers to accumulate in queue before dump
 INITIAL_BASKET_CAPACITY=1000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
-#EXPECTED_FIRST_4_BYTES=0xa0003e84 # first word (4-byte); 
+#EXPECTED_FIRST_4_BYTES=0xa0003e84 # first word (4-byte);
 EXPECTED_FIRST_4_BYTES=0xa0000fa4 # 16x500/2+4=4004=>0xfa4, so first 4-byte is 0xa00000fa4
 
 if DUMP_SIZE<=10:
@@ -55,8 +58,11 @@ class RawDataRooter():
     Convert BNL raw data collected by V1730 from binary to root
     """
     def __init__(self, args):
-        """
-        Constructor
+        """Constructor
+
+        RawDataRooter.
+
+        args: the input arguments
         """
         self.args = args # save a copy
         self.start_id = int(args.start_id)
@@ -89,13 +95,12 @@ class RawDataRooter():
 
     def sanity_check(self):
         '''
-        Werid thing may happen. Check.:
+        Werid thing may happen. Check:
         '''
         # Check a few triggers first from binary file
         raw_data_file = RawDataFile(self.args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
         if EXPECTED_FIRST_4_BYTES is not None:
             raw_data_file.expected_first_4_bytes=EXPECTED_FIRST_4_BYTES
-        
         for i in range(N_BOARDS):
             trg = raw_data_file.getNextTrigger()
             if i==0:
@@ -113,6 +118,11 @@ class RawDataRooter():
             - Find active ch names by reading a few.
             - Find active boardId.
             - Find number of samples.
+
+        Notes:
+            By default, it loads 100 triggers to get the info above. Error if bad.
+            Smaller than 100 triggers? You may want to change the code. It's rare
+            but not impossible to process a small file.
         """
         self.ch_names = set()
         self.boardId = set()
@@ -120,7 +130,7 @@ class RawDataRooter():
         raw_data_file = RawDataFile(self.args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
         if EXPECTED_FIRST_4_BYTES is not None:
             raw_data_file.expected_first_4_bytes=EXPECTED_FIRST_4_BYTES
-        
+
         for i in range(100):
             trg = raw_data_file.getNextTrigger()
             if trg is None:
@@ -194,7 +204,7 @@ class RawDataRooter():
             vars_type['event_id'] = uint32
             vars_type['event_ttt'] = uint64
             vars_type['event_sanity'] = uint16
-            
+
             # make tree
             self.file.mktree("daq", vars_type,
             initial_basket_capacity=INITIAL_BASKET_CAPACITY)
@@ -214,8 +224,15 @@ class RawDataRooter():
         """
         Fill event queue, one trigger at a time.
         Add TTT to the queue as well. If N_BOARDS>1, use board 1 as event ttt.
+        event_sanity is added to flag bad events saved to binary file.
+        event_sanity = 10^(boardId-1) + trigger_sanity.
 
-        For example, event_sanity = 100 means boardId=3 has sanity=1. other boards are 0.
+        Examples:
+            event_sanity = 0 means all good.
+            event_sanity = 100 means boardId=3 has sanity=1. other boards are 0.
+
+        Args:
+            trg (RawTrigger): RawTrigger class object from caen_reader module
         """
         boardId = trg.boardId
         trg_id = trg.eventCounter
@@ -270,7 +287,7 @@ class RawDataRooter():
         basket['event_id'] = zeros(n_evts, dtype=uint32)
         basket['event_ttt'] = zeros(n_evts, dtype=uint64)
         basket['event_sanity'] = zeros(n_evts, dtype=uint16)
-        
+
         # fill basket
         for i, ID in enumerate(id_set):
             ev = self.event_queue[ID]
