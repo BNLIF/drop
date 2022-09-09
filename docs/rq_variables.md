@@ -1,9 +1,32 @@
+> This markdown document is manually created on Jun 2 2022. Feel free to update it.
+> Last Update: Sept 8 2022 by Xin
 
 # RQ
-A brief summary of Reduced Quality (RQ) variables in root file. The RQ files contain high level reconstructed event infomation from waveforms. A RQ root file is typically identified with `_rq` in its name.
+A brief summary of Reduced Quality (RQ) variables in root file. The RQ files contain high level reconstructed event infomation from waveforms. Other experiments call them ntuples or DSTs.
 
-> This markdown document is manually created on Jun 2 2022. Feel free to update it.
-> Last Update: Sept 4 2022 by Xin
+The RQs are stored in ROOT TTrees in a ROOT file, typically with the suffix `_rq` in its name.
+
+## Data structure Overview
+
+The data are saved in ROOT tree structure. A tree has many branches, but all branches have the same number of entries, or sometimes we say the same number of events. Imagine a tree as a gaint table:
+|         | branch 1 | branch 2 | branch 3 | ... |
+|:-------:|:--------:|:--------:|:--------:|:---:|
+| entry 0 |          |          |          |     |
+| entry 1 |          |          |          |     |
+| entry 2 |          |          |          |     |
+|   ...   |          |          |          |     |
+
+where each entry (or each event) is described by the features stored in many branches. When loading a tree branch in uproot, for example:
+```python
+f = uproot.open('path/to/your/rq/file')
+t = f['event'] # event is a tree name
+b1 = t['pulse_area_sum_pe'].array(library='np') # pulse_area_sum_pe is a branch name
+```
+you're loading the entire column named `pulse_area_sum_pe` of that gaint table. So the length of `b1` is the number of entries of the table. Suppose you load another branch like:
+```python
+b2 = t['event_ttt'].array(library='np') # event_ttt is a branch name
+```
+This branch `b2` will have the same length as `b1` even through the elements of `b1` and `b2` do not necessarily have the same data type. In this particular example, `b2[0]` is an `uint32`, while `b1[0]` is a dynamic array. 
 
 ## Tree: `run_info`
 
@@ -19,7 +42,7 @@ Run Info.
 
 In addition, the yaml configuration file are also saved to run_info tree. They're labelled as `cfg_*`, The `cfg_*` names are self-explanatory. See [yaml/README.md] (https://github.com/BNLIF/drop/blob/main/yaml/README.md)).
 
-> Note: uproot cannot save string. A string is broken into a list of ASCII char, and saved as list of int. After load in python, need to convert: [int] -> [char] -> str
+> Note: uproot cannot save string. A string is broken into a list of ASCII char, and saved as list of int. After load in python, need to convert: [int] -> [char] -> str. For example, "cat" -> ['c', 'a', 't'] -> [99, 97, 116] -> saved. To recovery the str, use chr(int): [chr(i) for i in [99, 97, 116]] ->  ['c', 'a', 't'] -> "cat" .
 
 ## Tree: `pmt_info`
 
