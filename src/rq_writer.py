@@ -47,9 +47,11 @@ class RQWriter:
         self.event_id=[]
         self.event_ttt=[]
         self.event_sanity=[]
+        self.event_saturated=[]
 
         # pmt channel level variables
         self.ch_id = [] # boardId*100 + chID
+        self.ch_saturated = []
         self.ch_roi0_height_pe = []
         self.ch_roi1_height_pe = []
         self.ch_roi2_height_pe = []
@@ -99,6 +101,7 @@ class RQWriter:
         bs = self.basket_size
         type_ch_uint16 = ak.Array(zeros([bs, self.n_pmt_ch], dtype=uint16)).type
         type_ch_float = ak.Array(zeros([bs, self.n_pmt_ch], dtype=float32)).type
+        type_ch_bool = ak.Array(zeros([bs, self.n_pmt_ch], dtype=bool)).type
         type_aux_ch_uint16 = ak.Array(zeros([bs, self.n_aux_ch], dtype=uint16)).type
         type_aux_ch_float = ak.Array(zeros([bs, self.n_aux_ch], dtype=float32)).type
 
@@ -106,8 +109,10 @@ class RQWriter:
             'event_id': 'uint32',
             'event_ttt': 'uint64',
             'event_sanity': 'uint32',
+            'event_saturated': 'bool',
 
             'ch_id': type_ch_uint16,
+            'ch_saturated': type_ch_bool,
             'ch_roi0_height_pe': type_ch_float,
             'ch_roi1_height_pe': type_ch_float,
             'ch_roi2_height_pe': type_ch_float,
@@ -171,6 +176,7 @@ class RQWriter:
         self.event_id.append(wfm.event_id)
         self.event_ttt.append(wfm.event_ttt)
         self.event_sanity.append(wfm.event_sanity)
+        self.event_saturated.append(wfm.event_saturated)
 
         # channel level
         n_ch = len(wfm.ch_id)-self.n_aux_ch
@@ -179,6 +185,7 @@ class RQWriter:
             msg = "ERROR: len(wfm.ch_id)=%d while n_aux_ch=%d, but n_ch=%d" % (len(wfm.ch_id), self.n_aux_ch , n_ch)
             sys.exit(msg)
         ch_id = zeros(n_ch)
+        ch_saturated = np.full(n_ch, False)
         roi0_h = zeros(n_ch)
         roi1_h = zeros(n_ch)
         roi2_h = zeros(n_ch)
@@ -190,6 +197,7 @@ class RQWriter:
             if ch in wfm.cfg.non_signal_channels:
                 continue
             ch_id[i] = wfm.ch_name_to_id_dict[ch]
+            ch_saturated[i] = wfm.ch_saturated[ch]
             roi0_h[i] = wfm.roi_height_pe[0][ch]
             roi1_h[i] = wfm.roi_height_pe[1][ch]
             roi2_h[i] = wfm.roi_height_pe[2][ch]
@@ -198,6 +206,7 @@ class RQWriter:
             roi2_a[i] = wfm.roi_area_pe[2][ch]
             i+=1
         self.ch_id.append( ch_id )
+        self.ch_saturated.append( ch_saturated )
         self.ch_roi0_height_pe.append(roi0_h)
         self.ch_roi1_height_pe.append(roi1_h)
         self.ch_roi2_height_pe.append(roi2_h)
@@ -296,8 +305,10 @@ class RQWriter:
             "event_id": self.event_id,
             "event_ttt": self.event_ttt,
             'event_sanity': self.event_sanity,
+            'event_saturated': self.event_saturated,
 
             'ch_id': self.ch_id,
+            'ch_saturated': self.ch_saturated,
             'ch_roi0_height_pe': self.ch_roi0_height_pe,
             'ch_roi1_height_pe': self.ch_roi1_height_pe,
             'ch_roi2_height_pe': self.ch_roi2_height_pe,
