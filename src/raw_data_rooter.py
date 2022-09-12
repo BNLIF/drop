@@ -38,8 +38,8 @@ MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary f
 DUMP_SIZE = 3000 # number of triggers to accumulate in queue before dump
 INITIAL_BASKET_CAPACITY=1000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
-#EXPECTED_FIRST_4_BYTES=0xa0003e84 # first word (4-byte);
-EXPECTED_FIRST_4_BYTES=0xa0000fa4 # 16x500/2+4=4004=>0xfa4, so first 4-byte is 0xa00000fa4
+EXPECTED_FIRST_4_BYTES=0xa0003e84 # first word (4-byte);
+#EXPECTED_FIRST_4_BYTES=0xa0000fa4 # 16x500/2+4=4004=>0xfa4, so first 4-byte is 0xa00000fa4
 
 if DUMP_SIZE<=10:
     print("Info: write small baskets is not recommended by Jim \

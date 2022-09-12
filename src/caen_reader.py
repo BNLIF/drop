@@ -38,8 +38,11 @@ class RawDataFile:
             order_type='>u4'
         else:
             order_type='<u4'
-        w = fromfile(self.file, dtype=order_type, count=n_words)
-        return w
+        try:
+            w = fromfile(self.file, dtype=order_type, count=n_words)
+            return w
+        except ValueError:
+            return None
 
     def getNextTrigger(self):
         """
@@ -68,13 +71,15 @@ class RawDataFile:
             print(bin(i0), bin(i1), bin(i2), bin(i3))
             print("Start skipping...4 bytes at a time...until the next good first 4-bytes...")
             while (True):
-                try:
-                    i0 = self.get_next_n_words(1)[0]
-                    if i0 == self.expected_first_4_bytes:
-                       i1, i2, i3 = self.get_next_n_words(3)
-                       break
-                except ValueError:
+                w = self.get_next_n_words(1)
+                if w is None:
                     return None
+                if not w:
+                    return None
+                i0 = w[0]
+                if i0 == self.expected_first_4_bytes:
+                    i1, i2, i3 = self.get_next_n_words(3)
+                    break
 
         # extract the event size from the first header long-word
         eventSize = i0 - 0xa0000000

@@ -1,6 +1,6 @@
 # General DAQ config setting on LabVIEW
 batch_size: 1000 # int, how many events to process at a time
-post_trigger: 0.5 # float, between 0 and 1
+post_trigger: 0.875 # float, between 0 and 1
 daisy_chain: True # bool
 dgtz_dynamic_range_mV: 2000 # Digitizer dynamic range in mV. 2000 or 500
 non_signal_channels: ['b1_ch0', 'b2_ch15'] # some channels are used for paddles, exclude them for reconstructing variables
@@ -20,8 +20,8 @@ pre_pulse: 1
 post_pulse: 5
 
 # ROI stands for Region of Interest. Ex. Several variables (ex. max height, integral) are computed within ROI.
-roi_start_ns: [-180, -20, 120]
-roi_end_ns: [-100, 60, 500]
+roi_start_ns: [-180, -20, 150]
+roi_end_ns: [-100, 60, 4000]
 
 # PulseFinder: scipy peak finding
 pulse_finder_algo: 0
