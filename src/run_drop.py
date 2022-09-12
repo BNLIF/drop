@@ -143,6 +143,7 @@ class RunDROP():
             # waveform
             wfm.reset()
             wfm.set_raw_data(batch[i])
+            wfm.find_saturation()
             wfm.subtract_flat_baseline()
             #wfm.find_ma_baseline()
             wfm.do_spe_normalization()
@@ -218,7 +219,7 @@ def main(argv):
 
     # write run tree once per file
     # run rq includes from raw root data, and yaml config
-    # (uproot cannot save string; so ASCII->int->ASCII for spe_fit_results_file)  
+    # (uproot cannot save string; so ASCII->int->ASCII for spe_fit_results_file)
     writer.dump_run_rq({
         'n_boards': [run.n_boards],
         'n_trg_read': [run.n_trg_read],
