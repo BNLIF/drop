@@ -79,6 +79,7 @@ class RQWriter:
         self.pulse_coincidence = []
         self.pulse_area_max_frac = []
         self.pulse_area_max_ch_id = []
+        self.pulse_saturated = []
 
         # channel x pulse variables (not yet implemented)
         self.pulse_ch_area_pe = []
@@ -126,6 +127,7 @@ class RQWriter:
 
         type_uint = ak.values_astype([[0], []], uint32)
         type_float = ak.values_astype([[0.], []], float32)
+        type_bool = ak.values_astype([[0.], []], bool)
         type_pulse={
             'id': type_uint,
             'start': type_uint,
@@ -141,6 +143,7 @@ class RQWriter:
             'coincidence': type_uint,
             'area_max_frac': type_float,
             'area_max_ch_id': type_uint,
+            'saturated': type_bool,
         }
         type_event['pulse']=ak.zip(type_pulse).type
 
@@ -241,6 +244,7 @@ class RQWriter:
         self.pulse_coincidence.append(pf.coincidence)
         self.pulse_area_max_frac.append(pf.area_max_frac)
         self.pulse_area_max_ch_id.append(pf.area_max_ch_id)
+        self.pulse_saturated.append(pf.pulse_saturated)
 
         # pulse x channel level
         # self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
@@ -335,6 +339,7 @@ class RQWriter:
             'coincidence': self.pulse_coincidence,
             'area_max_frac': self.pulse_area_max_frac,
             'area_max_ch_id': self.pulse_area_max_ch_id,
+            'saturated': self.pulse_saturated,
         }
         data_event['pulse']=ak.zip(data_pulse)
 

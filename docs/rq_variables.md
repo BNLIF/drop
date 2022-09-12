@@ -26,7 +26,7 @@ you're loading the entire column named `pulse_area_sum_pe` of that gaint table. 
 ```python
 b2 = t['event_ttt'].array(library='np') # event_ttt is a branch name
 ```
-This branch `b2` will have the same length as `b1` even through the elements of `b1` and `b2` do not necessarily have the same data type. In this particular example, `b2[0]` is an `uint32`, while `b1[0]` is a dynamic array. 
+This branch `b2` will have the same length as `b1` even through the elements of `b1` and `b2` do not necessarily have the same data type. In this particular example, `b2[0]` is an `uint32`, while `b1[0]` is a dynamic array.
 
 ## Tree: `run_info`
 
@@ -70,6 +70,7 @@ One per event
 | event_id      | uint32	| unique event id	|	   
 | event_ttt     | uint64	| trigger time tag (8 ns/counter)	|
 | event_sanity  | uint32        | sanity of an event    |
+| event_saturated  | bool        | True if any of the signal channels are saturated |
 
 ### Channel level variables
 
@@ -78,6 +79,7 @@ PMTs channel variables. Each branch is a static array of fixed size `n_ch`.
 | Variable Name      | type			| Description						|
 |:------------      |---------------		| ---------------------------------------		|
 | ch_id		    | uint16[n_ch]		| id for PMT channel					|
+| ch_saturated		 | bool[n_ch]		| true if this channel is saturated					|
 | ch_roi0_height_pe | float32[n_ch]	| max height in pe/ns within roi 0 (see yaml file)	|
 | ch_roi1_height_pe | float32[n_ch]	| max height in pe/ns within roi 1 (see yaml file)	|
 | ch_roi2_height_pe | float32[n_ch]	| max height in pe/ns within roi 2 (see yaml file)	|
@@ -114,4 +116,5 @@ Every event has `npulse` number of variables. Pulse branches are dynamic arrays.
 | pulse_ptime_ns  | vector\<uint32\>	| peak time in ns |
 | pulse_coincidence  | vector\<uint32\>	| number of PMTs passing thresholds within `pulse_start` to `pulse_end` |
 | pulse_area_max_frac  | vector\<uint32\>	| max channel fraction. Area in max channel / total area, for all channels|
-| pulse_area_max_ch_id  | vector\<uint32\>	| max channel id. The  |
+| pulse_area_max_ch_id  | vector\<uint32\>	| The id for the channel that has the max area frac.  |
+| pulse_saturated  | vector\<bool\>	| True if this pulse is saturated. |

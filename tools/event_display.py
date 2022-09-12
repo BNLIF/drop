@@ -326,7 +326,7 @@ class EventDisplay():
         #plt.clf()
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         self.plot_counter += 1
-        a = self.wfm_list[i].raw_data[ch].to_numpy()
+        a = self.wfm_list[i].raw_data[ch]
         plt.plot(a, label=ch[4:])
         plt.legend(loc=0)
         plt.title('event_id=%d' % self.grabbed_event_id[i])
@@ -402,7 +402,7 @@ class EventDisplay():
                 if int(ch[5]) == b_id:
                     #ch_id is the end digit
                     ch_id = int(re.match('.*?([0-9]+)$', ch).group(1))
-                    a = self.wfm_list[i].raw_data[ch].to_numpy()
+                    a = self.wfm_list[i].raw_data[ch]
                     axes[b].plot(a, label=ch[7:], color=self.user_ch_colors[ch_id])
             if b==0:
                 axes[b].set_title('event_id=%d' % self.grabbed_event_id[i])
