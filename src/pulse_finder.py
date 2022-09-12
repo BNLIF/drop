@@ -50,6 +50,7 @@ class PulseFinder():
         self.coincidence = []
         self.area_max_frac = []
         self.area_max_ch_id = []
+        self.pulse_saturated = []
 
         self.area_ch_pe = []
         self.height_ch_pe = []
@@ -182,6 +183,7 @@ class PulseFinder():
             area_max_frac = 0
             area_max_ch_id = 0
             coin=0
+            pulse_saturated = False
             for ch in self.wfm.amp_pe.keys():
                 if ch[0:4]=='adc_':
                     a = self.wfm.amp_pe[ch]
@@ -189,15 +191,19 @@ class PulseFinder():
                     area = a_int[end]-a_int[start]
                     if self.height_ch_pe[i][ch]>height_thresh:
                         coin += 1
-
                     if area>area_max_frac:
                         area_max_frac = area
                         ch_id = self.wfm.ch_name_to_id_dict[ch]
                         area_max_ch_id = ch_id
+                    if self.wfm.ch_saturated[ch]:
+                        val = self.wfm.raw_data[ch][start:end]
+                        if val.min()<=self.cfg.ch_saturated_threshold:
+                            pulse_saturated=True
             area_max_frac /= self.area_sum_pe[-1]
             self.area_max_frac.append(area_max_frac)
             self.area_max_ch_id.append(area_max_ch_id)
             self.coincidence.append(coin)
+            self.pulse_saturated.append(pulse_saturated)
         return None
 
 

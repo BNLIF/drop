@@ -64,10 +64,33 @@ class Waveform():
         """
         Set raw data.
         """
-        self.raw_data = val
+        self.raw_data = {}
+        for ch in self.ch_names:
+            self.raw_data[ch] = val[ch].to_numpy() # numpy is faster
         self.event_id = val.event_id
         self.event_ttt = val.event_ttt
         self.event_sanity=val.event_sanity
+
+    def find_saturation(self):
+        """
+        Saturation is easily defined in the raw waveform in adc. Since signal
+        are negatively polarized, a channel is saturated if it cross below 0 adc.
+        - Flag a channel if it's saturated.
+        - Flag a event if any of the signal channels are saturated.
+        """
+        thresh = self.cfg.ch_saturated_threshold #
+        self.ch_saturated = {}
+        self.event_saturated = False
+        for ch in self.ch_names:
+            val = self.raw_data[ch]
+            if val.min()<=thresh:
+                self.ch_saturated[ch]=True
+                if ch in self.cfg.non_signal_channels:
+                    continue
+                self.event_saturated = True
+            else:
+                self.ch_saturated[ch]=False
+        return None
 
     def define_trigger_position(self):
         """
@@ -110,7 +133,7 @@ class Waveform():
 
         adc_to_mV = self.cfg.dgtz_dynamic_range_mV/(2**14-1)
         for ch in self.ch_names:
-            val = self.raw_data[ch].to_numpy() # numpy is faster
+            val = self.raw_data[ch]
             med, std = self.get_flat_baseline(val)
             self.flat_base_mV[ch] = med # save a copy
             self.flat_base_std_mV[ch] = std # save a copy
