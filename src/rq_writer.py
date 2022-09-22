@@ -71,6 +71,7 @@ class RQWriter:
         self.pulse_area_sum_pe = []
         self.pulse_area_bot_pe = []
         self.pulse_area_side_pe = []
+        self.pulse_area_side_b1_pe = []
         self.pulse_height_sum_pe = []
         self.pulse_height_bot_pe = []
         self.pulse_height_side_pe = []
@@ -236,6 +237,7 @@ class RQWriter:
         self.pulse_area_sum_pe.append(pf.area_sum_pe)
         self.pulse_area_bot_pe.append(pf.area_bot_pe)
         self.pulse_area_side_pe.append(pf.area_side_pe)
+        self.pulse_area_side_b1_pe.append(pf.area_side_b1_pe)
         self.pulse_height_sum_pe.append(pf.height_sum_pe)
         self.pulse_height_bot_pe.append(pf.height_bot_pe)
         self.pulse_height_side_pe.append(pf.height_side_pe)
@@ -331,6 +333,7 @@ class RQWriter:
             'area_sum_pe': self.pulse_area_sum_pe,
             'area_bot_pe': self.pulse_area_bot_pe,
             'area_side_pe': self.pulse_area_side_pe,
+            'area_side_b1_pe': self.pulse_area_side_b1_pe,
             'height_sum_pe': self.pulse_height_sum_pe,
             'height_bot_pe': self.pulse_height_bot_pe,
             'height_side_pe': self.pulse_height_side_pe,
