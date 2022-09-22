@@ -65,7 +65,7 @@ In your virtual env (recommended), check out the help manual.
 python src/run_drop.py --help
 ```
 
-**Note: the pipeline is still under-development. For example, the RQ file saved into a root tree has a limited number of branches. **
+run_drop takes the raw root files as input, and convert them into a reduced quality (ntuple) file. The variables are documented [here](docs/rq_variables.md). A small but growing list of variables are added to the ntuple. Production version matches git tag. For example, rq/v1.0.0/ contains data produced by git tag v1.0.0. 
 
 When you're done, exit the virtual env:
 
