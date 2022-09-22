@@ -151,8 +151,7 @@ class RunDROP():
             wfm.correct_daisy_chain_trg_delay()
             wfm.sum_channels()
             wfm.integrate_waveform()
-            wfm.find_roi_height()
-            wfm.find_roi_area()
+            wfm.calc_roi_info()
             wfm.calc_aux_ch_info()
 
             # pulses finding

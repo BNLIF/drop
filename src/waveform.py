@@ -239,37 +239,21 @@ class Waveform():
             self.ma_base_std_pe[ch] = std # bs stands for baseline subtracted
         return None
 
-    def find_roi_area(self):
+    def calc_roi_info(self):
         """
-        Calc Integral in the Region of Interest (ROI) whose start_ns and end_ns
-        are defined in yaml config file.
+        Calculate variables within a region of interest (ROI) -- ROI an interval
+        whose start_ns and end_ns are defined in yaml config file
 
-        Notes:
-            roi_start_ns and roi_end_ns are defined with respect to trigger time
+        The following info are calculated:
+        - area
+        - height
+        - low
+        - std
         """
         self.roi_area_pe=[]
-        for i in range(len(self.cfg.roi_start_ns)):
-            start=self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
-            end=self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
-            if start<0:
-                start=0
-            roi_a={}
-            for ch, val in self.amp_pe_int.items():
-                if end>=len(val):
-                    end = len(val)-1
-                roi_a[ch] = val[end]-val[start]
-            self.roi_area_pe.append(roi_a)
-        return None
-
-    def find_roi_height(self):
-        """
-        calc the height within the Region of Interest (ROI) whose start_ns and
-        end_ns are defined in yaml config file
-
-        Notes:
-            roi_start_ns and roi_end_ns are defined with respect to trigger time
-        """
         self.roi_height_pe=[]
+        self.roi_low_pe=[]
+        self.roi_std_pe=[]
         for i in range(len(self.cfg.roi_start_ns)):
             start= self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
             end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
@@ -277,11 +261,21 @@ class Waveform():
             if start<0:
                 start=0
             height={}
+            area = {}
+            low = {}
+            std = {}
             for ch, val in self.amp_pe.items():
                 if end>=len(val):
                     end = len(val)-1
                 height[ch] = np.max(val[start:end])
+                area[ch] = self.amp_pe_int[end]-self.amp_pe_int[start]
+                low[ch] = np.min(val[start:end])
+                std[ch] = np.std(val[start:end])
+
             self.roi_height_pe.append(height)
+            self.roi_area_pe.append(roi_a)
+            self.roi_low_pe.append(low)
+            self.roi_std_pe.append(std)
         return None
 
     def calc_aux_ch_info(self):

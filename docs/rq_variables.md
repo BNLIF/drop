@@ -80,12 +80,18 @@ PMTs channel variables. Each branch is a static array of fixed size `n_ch`.
 |:------------      |---------------		| ---------------------------------------		|
 | ch_id		    | uint16[n_ch]		| id for PMT channel					|
 | ch_saturated		 | bool[n_ch]		| true if this channel is saturated					|
-| ch_roi0_height_pe | float32[n_ch]	| max height in pe/ns within roi 0 (see yaml file)	|
-| ch_roi1_height_pe | float32[n_ch]	| max height in pe/ns within roi 1 (see yaml file)	|
-| ch_roi2_height_pe | float32[n_ch]	| max height in pe/ns within roi 2 (see yaml file)	|
+| ch_roi0_height_pe | float32[n_ch]	| max height (peak) in pe/ns within roi 0 (see yaml file for interval definition)	|
+| ch_roi1_height_pe | float32[n_ch]	| max height (peak) in pe/ns within roi 1 	|
+| ch_roi2_height_pe | float32[n_ch]	| max height (peak) in pe/ns within roi 2	|
 | ch_roi0_area_pe   | float32[n_ch]	| area in pe within roi 0 (see yaml file)		|
 | ch_roi1_area_pe   | float32[n_ch] 	| area in pe within roi 1 (see yaml file)		|
 | ch_roi2_area_pe   | float32[n_ch] 	| area in pe within roi 2 (see yaml file)		|
+| ch_roi0_low_pe   | float32[n_ch]	| lowest height (valley) in pe/ns within roi 0		|
+| ch_roi1_low_pe   | float32[n_ch] 	| lowest height (valley) in pe/ns within roi 1 		|
+| ch_roi2_low_pe   | float32[n_ch] 	| lowest height (valley) in pe/ns within roi 2 		|
+| ch_roi0_std_pe   | float32[n_ch]	| standard devition in pe/ns within roi 0		|
+| ch_roi1_std_pe   | float32[n_ch] 	| standard devition in pe/ns within roi 1		|
+| ch_roi2_std_pe   | float32[n_ch] 	| standard devition in pe/ns within roi 2		|
 
 ### Auxilary channel variables
 
