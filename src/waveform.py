@@ -285,7 +285,7 @@ class Waveform():
                 a_int =  self.amp_pe_int[ch]
                 area[ch] = a_int[end]-a_int[start]
             self.roi_height_pe.append(height)
-            self.roi_area_pe.append(roi_a)
+            self.roi_area_pe.append(area)
             self.roi_low_pe.append(low)
             self.roi_std_pe.append(std)
         return None
