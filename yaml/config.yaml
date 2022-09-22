@@ -6,6 +6,10 @@ dgtz_dynamic_range_mV: 2000 # Digitizer dynamic range in mV. 2000 or 500
 non_signal_channels: ['b1_ch0', 'b2_ch15'] # some channels are used for paddles, exclude them for reconstructing variables
 bottom_pmt_channels: [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214]
 side_pmt_channels: [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315]
+row1_pmt_channels: [300, 304, 308, 312]
+row2_pmt_channels: [301, 305, 309, 313]
+row3_pmt_channels: [302, 306, 310, 314]
+row4_pmt_channels: [303, 307, 311, 315]
 ch_saturated_threshold: 0 # threshold below which a channel is considered saturated. Unit: adc
 
 # PMT calibration file (DROP looks for this file in yaml directory)

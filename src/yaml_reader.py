@@ -75,6 +75,11 @@ class YamlReader():
         self.non_signal_channels= self.get_ch_names( self.data['non_signal_channels'] )
         self.bottom_pmt_channels= self.get_ch_names( self.data['bottom_pmt_channels'] )
         self.side_pmt_channels= self.get_ch_names( self.data['side_pmt_channels'] )
+        self.row1_pmt_channels= self.get_ch_names( self.data['row1_pmt_channels'] )
+        self.row2_pmt_channels= self.get_ch_names( self.data['row2_pmt_channels'] )
+        self.row3_pmt_channels= self.get_ch_names( self.data['row3_pmt_channels'] )
+        self.row4_pmt_channels= self.get_ch_names( self.data['row4_pmt_channels'] )
+
         self.ch_saturated_threshold = int(self.data['ch_saturated_threshold'])
 
         self.spe_fit_results_file = self.data['spe_fit_results_file']

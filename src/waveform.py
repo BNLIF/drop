@@ -203,6 +203,7 @@ class Waveform():
         tot_pe = 0
         bt_pe = 0
         side_pe=0
+        r1_pe, r2_pe, r3_pe, r4_pe = 0, 0, 0, 0
         for ch, val in self.amp_pe.items():
             if 'adc_' in ch:
                 tot_pe += val
@@ -210,13 +211,24 @@ class Waveform():
                     bt_pe += val
                 if ch in self.cfg.side_pmt_channels:
                     side_pe += val
-
+                if ch in self.cfg.row1_pmt_channels:
+                    r1_pe += val
+                if ch in self.cfg.row2_pmt_channels:
+                    r2_pe += val
+                if ch in self.cfg.row3_pmt_channels:
+                    r3_pe += val
+                if ch in self.cfg.row4_pmt_channels:
+                    r4_pe += val
         self.amp_pe['sum'] = tot_pe
         med, std = self.get_flat_baseline(tot_pe)
         self.flat_base_pe['sum'] = med
         self.flat_base_std_pe['sum'] = std
         self.amp_pe['sum_bot'] = bt_pe
         self.amp_pe['sum_side'] = side_pe
+        self.amp_pe['sum_row1'] = r1_pe
+        self.amp_pe['sum_row2'] = r2_pe
+        self.amp_pe['sum_row3'] = r3_pe
+        self.amp_pe['sum_row4'] = r4_pe
         return None
 
     def integrate_waveform(self):
@@ -264,14 +276,14 @@ class Waveform():
             area = {}
             low = {}
             std = {}
-            for ch, val in self.amp_pe.items():
-                if end>=len(val):
-                    end = len(val)-1
-                height[ch] = np.max(val[start:end])
-                area[ch] = self.amp_pe_int[end]-self.amp_pe_int[start]
-                low[ch] = np.min(val[start:end])
-                std[ch] = np.std(val[start:end])
-
+            for ch, a in self.amp_pe.items():
+                if end>=len(a):
+                    end = len(a)-1
+                height[ch] = np.max(a[start:end])
+                low[ch] = np.min(a[start:end])
+                std[ch] = np.std(a[start:end])
+                a_int =  self.amp_pe_int[ch]
+                area[ch] = a_int[end]-a_int[start]
             self.roi_height_pe.append(height)
             self.roi_area_pe.append(roi_a)
             self.roi_low_pe.append(low)

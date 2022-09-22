@@ -112,12 +112,20 @@ Every event has `npulse` number of variables. Pulse branches are dynamic arrays.
 | pulse_id	     | vector\<uint32\>	| unique pulse id.   	   			|
 | pulse_start        | vector\<uint32\>	| the start index of a pulse			|
 | pulse_end	     | vector\<uint32\>	| the end index of a pulse			|
-| pulse_area_sum_pe     | vector\<float32\>	| summed PMT area in pe from `pulse_start` to `pulse_end`. 		|
-| pulse_area_bot_pe     | vector\<float32\>	| summed bottom PMT area in adc from `pulse_start` to `pulse_end`.	|
-| pulse_area_side_pe     | vector\<float32\>	| summed side PMT area in adc from `pulse_start` to `pulse_end`.  |
+| pulse_area_sum_pe     | vector\<float32\>	| summed PMT area in pe. Area is integrated from `pulse_start` to `pulse_end`. 		|
+| pulse_area_bot_pe     | vector\<float32\>	| summed bottom PMT area in pe. Area is integrated from `pulse_start` to `pulse_end`.	|
+| pulse_area_side_pe     | vector\<float32\>	| summed side PMT area in pe. Area is integrated from  `pulse_start` to `pulse_end`.  |
+| pulse_area_row1_pe    | vector\<float32\>	| summed row 1 PMT area in pe.  Row 1 is the highest 4 side PMTs (ex. b1_p1, b2_p1, b3_p1, b4_p1). |
+| pulse_area_row2_pe    | vector\<float32\>	| summed row 2 PMT area in pe. Row 2 is the second highest 4 side PMTs (ex. b1_p2, b2_p2, b3_p2, b4_p2). |
+| pulse_area_row3_pe    | vector\<float32\>	| summed row 3 PMT area in pe. Row 3 is the third highest 4 side PMTs (ex. b1_p3, b2_p3, b3_p3, b4_p3). |
+| pulse_area_row4_pe    | vector\<float32\>	| summed row 4 PMT area in pe. Row 4 is the lowest 4 side PMTs (ex. b1_p4, b2_p4, b3_p4, b4_p4). |
 | pulse_height_sum_pe     | vector\<float32\>	| max height of this pulse in the sum channel, unit pe/ns 		|
 | pulse_height_bot_pe     | vector\<float32\>	| max height of this pulse in the sum of bottom PMTs, unit pe/ns	|
-| pulse_height_side_pe     | vector\<float32\>	| max height of this pulse in the sum of side PMTs, unit pe/ns  |
+| pulse_height_side_pe     | vector\<float32\>	| max height of this pulse in the summed side PMTs, unit pe/ns  |
+| pulse_height_row1_pe     | vector\<float32\>	| max height of this pulse in the summed row 1 PMTs, unit pe/ns  |
+| pulse_height_row2_pe     | vector\<float32\>	| max height of this pulse in the summed row 2 PMTs, unit pe/ns  |
+| pulse_height_row3_pe     | vector\<float32\>	| max height of this pulse in the summed row 3 PMTs, unit pe/ns  |
+| pulse_height_row4_pe     | vector\<float32\>	| max height of this pulse in the summed row 4 PMTs, unit pe/ns  |
 | pulse_sba  | vector\<uint32\>	| side-to-bottom asymmetry: (`pulse_area_side_pe`-`pulse_area_bot_pe`)/`pulse_area_sum_pe` |
 | pulse_ptime_ns  | vector\<uint32\>	| peak time in ns |
 | pulse_coincidence  | vector\<uint32\>	| number of PMTs passing thresholds within `pulse_start` to `pulse_end` |
