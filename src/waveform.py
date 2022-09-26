@@ -237,7 +237,6 @@ class Waveform():
         self.flat_base_pe['sum'] = med
         self.flat_base_std_pe['sum'] = std
         self.amp_pe['sum_bot'] = bt_pe
-        self.amp_pe['sum_ir'] = bt_pe
         self.amp_pe['sum_side'] = side_pe
         self.amp_pe['sum_row1'] = r1_pe
         self.amp_pe['sum_row2'] = r2_pe

@@ -69,7 +69,7 @@ class RunDROP():
         """
         match = re.search(r'\d{6}T\d{4}', s)
         try:
-            dt = datetime.strptime(match.group(), '%Y%m%dT%H%M')
+            dt = datetime.strptime(match.group(), '%y%m%dT%H%M')
             return dt
         except ValueError:
             print('Fail finding the datetime string from path: %s' % s)
