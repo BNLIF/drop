@@ -204,6 +204,7 @@ class Waveform():
         bt_pe = 0
         side_pe=0
         r1_pe, r2_pe, r3_pe, r4_pe = 0, 0, 0, 0
+        c1_pe, c2_pe, c3_pe, c4_pe = 0, 0, 0, 0
         for ch, val in self.amp_pe.items():
             if 'adc_' in ch:
                 tot_pe += val
@@ -219,6 +220,14 @@ class Waveform():
                     r3_pe += val
                 if ch in self.cfg.row4_pmt_channels:
                     r4_pe += val
+                if ch in self.cfg.col1_pmt_channels:
+                    c1_pe += val
+                if ch in self.cfg.col2_pmt_channels:
+                    c2_pe += val
+                if ch in self.cfg.col3_pmt_channels:
+                    c3_pe += val
+                if ch in self.cfg.col4_pmt_channels:
+                    c4_pe += val
         self.amp_pe['sum'] = tot_pe
         med, std = self.get_flat_baseline(tot_pe)
         self.flat_base_pe['sum'] = med
@@ -229,6 +238,10 @@ class Waveform():
         self.amp_pe['sum_row2'] = r2_pe
         self.amp_pe['sum_row3'] = r3_pe
         self.amp_pe['sum_row4'] = r4_pe
+        self.amp_pe['sum_col1'] = c1_pe
+        self.amp_pe['sum_col2'] = c2_pe
+        self.amp_pe['sum_col3'] = c3_pe
+        self.amp_pe['sum_col4'] = c4_pe
         return None
 
     def integrate_waveform(self):

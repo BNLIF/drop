@@ -10,6 +10,10 @@ row1_pmt_channels: [300, 304, 308, 312]
 row2_pmt_channels: [301, 305, 309, 313]
 row3_pmt_channels: [302, 306, 310, 314]
 row4_pmt_channels: [303, 307, 311, 315]
+col1_pmt_channels: [300, 301, 302, 303]
+col2_pmt_channels: [304, 305, 306, 307]
+col3_pmt_channels: [308, 309, 310, 311]
+col4_pmt_channels: [312, 313, 314, 315]
 ch_saturated_threshold: 0 # threshold below which a channel is considered saturated. Unit: adc
 
 # PMT calibration file (DROP looks for this file in yaml directory)
