@@ -202,7 +202,11 @@ class Waveform():
         """
         tot_pe = 0
         bt_pe = 0
+        ir_pe = 0
         side_pe=0
+        r1_pe, r2_pe, r3_pe, r4_pe = 0, 0, 0, 0
+        c1_pe, c2_pe, c3_pe, c4_pe = 0, 0, 0, 0
+        user_pe = 0
         for ch, val in self.amp_pe.items():
             if 'adc_' in ch:
                 tot_pe += val
@@ -210,13 +214,39 @@ class Waveform():
                     bt_pe += val
                 if ch in self.cfg.side_pmt_channels:
                     side_pe += val
-
+                if ch in self.cfg.row1_pmt_channels:
+                    r1_pe += val
+                if ch in self.cfg.row2_pmt_channels:
+                    r2_pe += val
+                if ch in self.cfg.row3_pmt_channels:
+                    r3_pe += val
+                if ch in self.cfg.row4_pmt_channels:
+                    r4_pe += val
+                if ch in self.cfg.col1_pmt_channels:
+                    c1_pe += val
+                if ch in self.cfg.col2_pmt_channels:
+                    c2_pe += val
+                if ch in self.cfg.col3_pmt_channels:
+                    c3_pe += val
+                if ch in self.cfg.col4_pmt_channels:
+                    c4_pe += val
+                if ch in self.cfg.user_pmt_channels:
+                    user_pe += val
         self.amp_pe['sum'] = tot_pe
         med, std = self.get_flat_baseline(tot_pe)
         self.flat_base_pe['sum'] = med
         self.flat_base_std_pe['sum'] = std
         self.amp_pe['sum_bot'] = bt_pe
         self.amp_pe['sum_side'] = side_pe
+        self.amp_pe['sum_row1'] = r1_pe
+        self.amp_pe['sum_row2'] = r2_pe
+        self.amp_pe['sum_row3'] = r3_pe
+        self.amp_pe['sum_row4'] = r4_pe
+        self.amp_pe['sum_col1'] = c1_pe
+        self.amp_pe['sum_col2'] = c2_pe
+        self.amp_pe['sum_col3'] = c3_pe
+        self.amp_pe['sum_col4'] = c4_pe
+        self.amp_pe['sum_user'] = user_pe
         return None
 
     def integrate_waveform(self):
@@ -239,37 +269,21 @@ class Waveform():
             self.ma_base_std_pe[ch] = std # bs stands for baseline subtracted
         return None
 
-    def find_roi_area(self):
+    def calc_roi_info(self):
         """
-        Calc Integral in the Region of Interest (ROI) whose start_ns and end_ns
-        are defined in yaml config file.
+        Calculate variables within a region of interest (ROI) -- ROI an interval
+        whose start_ns and end_ns are defined in yaml config file
 
-        Notes:
-            roi_start_ns and roi_end_ns are defined with respect to trigger time
+        The following info are calculated:
+        - area
+        - height
+        - low
+        - std
         """
         self.roi_area_pe=[]
-        for i in range(len(self.cfg.roi_start_ns)):
-            start=self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
-            end=self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
-            if start<0:
-                start=0
-            roi_a={}
-            for ch, val in self.amp_pe_int.items():
-                if end>=len(val):
-                    end = len(val)-1
-                roi_a[ch] = val[end]-val[start]
-            self.roi_area_pe.append(roi_a)
-        return None
-
-    def find_roi_height(self):
-        """
-        calc the height within the Region of Interest (ROI) whose start_ns and
-        end_ns are defined in yaml config file
-
-        Notes:
-            roi_start_ns and roi_end_ns are defined with respect to trigger time
-        """
         self.roi_height_pe=[]
+        self.roi_low_pe=[]
+        self.roi_std_pe=[]
         for i in range(len(self.cfg.roi_start_ns)):
             start= self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
             end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
@@ -277,11 +291,21 @@ class Waveform():
             if start<0:
                 start=0
             height={}
-            for ch, val in self.amp_pe.items():
-                if end>=len(val):
-                    end = len(val)-1
-                height[ch] = np.max(val[start:end])
+            area = {}
+            low = {}
+            std = {}
+            for ch, a in self.amp_pe.items():
+                if end>=len(a):
+                    end = len(a)-1
+                height[ch] = np.max(a[start:end])
+                low[ch] = np.min(a[start:end])
+                std[ch] = np.std(a[start:end])
+                a_int =  self.amp_pe_int[ch]
+                area[ch] = a_int[end]-a_int[start]
             self.roi_height_pe.append(height)
+            self.roi_area_pe.append(area)
+            self.roi_low_pe.append(low)
+            self.roi_std_pe.append(std)
         return None
 
     def calc_aux_ch_info(self):

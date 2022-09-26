@@ -58,6 +58,12 @@ class RQWriter:
         self.ch_roi0_area_pe = []
         self.ch_roi1_area_pe = []
         self.ch_roi2_area_pe = []
+        self.ch_roi0_low_pe = []
+        self.ch_roi1_low_pe = []
+        self.ch_roi2_low_pe = []
+        self.ch_roi0_std_pe = []
+        self.ch_roi1_std_pe = []
+        self.ch_roi2_std_pe = []
 
         # non-signal channel info (auxiliary channels)
         self.aux_ch_id = []
@@ -71,6 +77,15 @@ class RQWriter:
         self.pulse_area_sum_pe = []
         self.pulse_area_bot_pe = []
         self.pulse_area_side_pe = []
+        self.pulse_area_row1_pe = []
+        self.pulse_area_row2_pe = []
+        self.pulse_area_row3_pe = []
+        self.pulse_area_row4_pe = []
+        self.pulse_area_col1_pe = []
+        self.pulse_area_col2_pe = []
+        self.pulse_area_col3_pe = []
+        self.pulse_area_col4_pe = []
+        self.pulse_area_user_pe = []
         self.pulse_height_sum_pe = []
         self.pulse_height_bot_pe = []
         self.pulse_height_side_pe = []
@@ -120,6 +135,12 @@ class RQWriter:
             'ch_roi0_area_pe': type_ch_float,
             'ch_roi1_area_pe': type_ch_float,
             'ch_roi2_area_pe': type_ch_float,
+            'ch_roi0_low_pe': type_ch_float,
+            'ch_roi1_low_pe': type_ch_float,
+            'ch_roi2_low_pe': type_ch_float,
+            'ch_roi0_std_pe': type_ch_float,
+            'ch_roi1_std_pe': type_ch_float,
+            'ch_roi2_std_pe': type_ch_float,
 
             'aux_ch_id': type_aux_ch_uint16,
             'aux_ch_area_mV': type_aux_ch_float,
@@ -135,6 +156,15 @@ class RQWriter:
             'area_sum_pe': type_float,
             'area_bot_pe': type_float,
             'area_side_pe': type_float,
+            'area_row1_pe': type_float,
+            'area_row2_pe': type_float,
+            'area_row3_pe': type_float,
+            'area_row4_pe': type_float,
+            'area_col1_pe': type_float,
+            'area_col2_pe': type_float,
+            'area_col3_pe': type_float,
+            'area_col4_pe': type_float,
+            'area_user_pe': type_float,
             'height_sum_pe': type_float,
             'height_bot_pe': type_float,
             'height_side_pe': type_float,
@@ -195,6 +225,12 @@ class RQWriter:
         roi0_a = zeros(n_ch)
         roi1_a = zeros(n_ch)
         roi2_a = zeros(n_ch)
+        roi0_l = zeros(n_ch)
+        roi1_l = zeros(n_ch)
+        roi2_l = zeros(n_ch)
+        roi0_s = zeros(n_ch)
+        roi1_s = zeros(n_ch)
+        roi2_s = zeros(n_ch)
         i=0
         for ch in wfm.ch_names:
             if ch in wfm.cfg.non_signal_channels:
@@ -207,6 +243,13 @@ class RQWriter:
             roi0_a[i] = wfm.roi_area_pe[0][ch]
             roi1_a[i] = wfm.roi_area_pe[1][ch]
             roi2_a[i] = wfm.roi_area_pe[2][ch]
+            roi0_l[i] = wfm.roi_low_pe[0][ch]
+            roi1_l[i] = wfm.roi_low_pe[1][ch]
+            roi2_l[i] = wfm.roi_low_pe[2][ch]
+            roi0_s[i] = wfm.roi_std_pe[0][ch]
+            roi1_s[i] = wfm.roi_std_pe[1][ch]
+            roi2_s[i] = wfm.roi_std_pe[2][ch]
+
             i+=1
         self.ch_id.append( ch_id )
         self.ch_saturated.append( ch_saturated )
@@ -216,6 +259,12 @@ class RQWriter:
         self.ch_roi0_area_pe.append(roi0_a)
         self.ch_roi1_area_pe.append(roi1_a)
         self.ch_roi2_area_pe.append(roi2_a)
+        self.ch_roi0_low_pe.append(roi0_l)
+        self.ch_roi1_low_pe.append(roi1_l)
+        self.ch_roi2_low_pe.append(roi2_l)
+        self.ch_roi0_std_pe.append(roi0_s)
+        self.ch_roi1_std_pe.append(roi1_s)
+        self.ch_roi2_std_pe.append(roi2_s)
 
         # auxiliary channel
         n_aux_ch = len(wfm.cfg.non_signal_channels)
@@ -236,6 +285,15 @@ class RQWriter:
         self.pulse_area_sum_pe.append(pf.area_sum_pe)
         self.pulse_area_bot_pe.append(pf.area_bot_pe)
         self.pulse_area_side_pe.append(pf.area_side_pe)
+        self.pulse_area_row1_pe.append(pf.area_row1_pe)
+        self.pulse_area_row2_pe.append(pf.area_row2_pe)
+        self.pulse_area_row3_pe.append(pf.area_row3_pe)
+        self.pulse_area_row4_pe.append(pf.area_row4_pe)
+        self.pulse_area_col1_pe.append(pf.area_col1_pe)
+        self.pulse_area_col2_pe.append(pf.area_col2_pe)
+        self.pulse_area_col3_pe.append(pf.area_col3_pe)
+        self.pulse_area_col4_pe.append(pf.area_col4_pe)
+        self.pulse_area_user_pe.append(pf.area_user_pe)
         self.pulse_height_sum_pe.append(pf.height_sum_pe)
         self.pulse_height_bot_pe.append(pf.height_bot_pe)
         self.pulse_height_side_pe.append(pf.height_side_pe)
@@ -249,7 +307,6 @@ class RQWriter:
         # pulse x channel level
         # self.pulse_area_pe.append(pf.area_pe.tolist()) # actually adc*ns
         # self.pulse_height_pe.append(pf.height_pe)
-
         return None
 
     def close(self):
@@ -319,7 +376,12 @@ class RQWriter:
             'ch_roi0_area_pe': self.ch_roi0_area_pe,
             'ch_roi1_area_pe': self.ch_roi1_area_pe,
             'ch_roi2_area_pe': self.ch_roi2_area_pe,
-
+            'ch_roi0_low_pe': self.ch_roi0_low_pe,
+            'ch_roi1_low_pe': self.ch_roi1_low_pe,
+            'ch_roi2_low_pe': self.ch_roi2_low_pe,
+            'ch_roi0_std_pe': self.ch_roi0_std_pe,
+            'ch_roi1_std_pe': self.ch_roi1_std_pe,
+            'ch_roi2_std_pe': self.ch_roi2_std_pe,
             'aux_ch_id': self.aux_ch_id,
             'aux_ch_area_mV': self.aux_ch_area_mV
         }
@@ -331,6 +393,15 @@ class RQWriter:
             'area_sum_pe': self.pulse_area_sum_pe,
             'area_bot_pe': self.pulse_area_bot_pe,
             'area_side_pe': self.pulse_area_side_pe,
+            'area_row1_pe': self.pulse_area_row1_pe,
+            'area_row2_pe': self.pulse_area_row2_pe,
+            'area_row3_pe': self.pulse_area_row3_pe,
+            'area_row4_pe': self.pulse_area_row4_pe,
+            'area_col1_pe': self.pulse_area_col1_pe,
+            'area_col2_pe': self.pulse_area_col2_pe,
+            'area_col3_pe': self.pulse_area_col3_pe,
+            'area_col4_pe': self.pulse_area_col4_pe,
+            'area_user_pe': self.pulse_area_user_pe,
             'height_sum_pe': self.pulse_height_sum_pe,
             'height_bot_pe': self.pulse_height_bot_pe,
             'height_side_pe': self.pulse_height_side_pe,
