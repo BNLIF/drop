@@ -6,8 +6,18 @@
 - `daisy_chain`: bool. True if digitizer trigger are in daisy chain.
 - `dgtz_dynamic_range_mV`: int. Two acceptable options for V1730s: 2000 or 500.
 - `non_signal_channels`: list of str, or list of int. Non-signal channels are also called auxiliary channel in code. For example, muon paddles are not considered signal, but digitized to provide supplementary info. Need to know auxiliary channels to reconstruction them separately.
-- `bottom_pmt_channels`: list of str, or list of int.. List of channels for bottom PMTs.
-- `side_pmt_channels`: list of str, or list of int.. List of channels for side PMTs.
+- `bottom_pmt_channels`: list of str, or list of int. List of channels for bottom PMTs.
+- `side_pmt_channels`: list of str, or list of int. List of channels for side PMTs.
+- `row1_pmt_channels`: list of str, or list of int. Top row of side PMTs.
+- `row2_pmt_channels`: list of str, or list of int. Second row from the top of side PMTs.
+- `row3_pmt_channels`: list of str, or list of int. Third row from the top of side PMTs.
+- `row4_pmt_channels`: list of str, or list of int. Last row from the top of side PMTs.
+- `col1_pmt_channels`: list of str, or list of int. All b1_p* side pmts.
+- `col2_pmt_channels`: list of str, or list of int. All b2_p* side pmts.
+- `col3_pmt_channels`: list of str, or list of int. All b3_p* side pmts.
+- `col4_pmt_channels`: list of str, or list of int. All b4_p* side pmts.
+- `user_pmt_channels`: list of str, or list of int. User-defined list of channel to sum.
+- `ch_saturated_threshold`: int. Threshold below which a channel is considered saturated. Unit: ADC.
 
 ## Calibration info
 - `spe_fit_results_file`: str. SPE calibration are saved to a csv file. By default YamlReader looks for this file in yaml directory (same directory as this config file). Example: `bnl1t_spe_fit_results_220826.csv`

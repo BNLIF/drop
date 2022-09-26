@@ -6,12 +6,14 @@ X. Xiang <xxiang@bnl.gov>
 """
 import argparse
 import sys
-from numpy import array, isscalar
+from numpy import array, isscalar, uint16, uint32
 import numpy as np
 from enum import Enum
 import uproot
 import pandas as pd
 import os
+import re
+from datetime import datetime
 
 from yaml_reader import YamlReader
 from waveform import Waveform
@@ -60,6 +62,18 @@ class RunDROP():
             sys.exit('roi_end must be strictly larger than roi_start')
         return None
 
+    def extract_datetime_from_str(self, s):
+        """
+        Extract datatime from a str. The datetime must follow the fixed format:
+        YYmmddTHHMM
+        """
+        match = re.search(r'\d{6}T\d{4}', s)
+        try:
+            dt = datetime.strptime(match.group(), '%Y%m%dT%H%M')
+            return dt
+        except ValueError:
+            print('Fail finding the datetime string from path: %s' % s)
+
     def load_run_info(self):
         """
         Load run_info tree, which contains only one entry.
@@ -70,16 +84,22 @@ class RunDROP():
             `adc_b2_ch11`.
         """
         f = uproot.open(self.if_path)
+        dt = self.extract_datetime_from_str(self.if_path)
+        self.start_year = uint16(dt.year)
+        self.start_month = uint16(dt.month)
+        self.start_day= uint16(dt.day)
+        self.start_hour= uint16(dt.hour)
+        self.start_minute= uint16(dt.minute)
         b_names = ['n_boards', 'n_event_proc', 'n_trg_read', 'leftover_event_id', 'active_ch_id']
         a = f['run_info'].arrays(b_names, library='np')
-        self.n_boards = a['n_boards'][0]
-        self.n_trg_read=a['n_trg_read'][0]
-        self.n_event_proc = a['n_event_proc'][0]
-        self.leftover_event_id = a['leftover_event_id'][0]
+        self.n_boards = uint16(a['n_boards'][0])
+        self.n_trg_read= uint32(a['n_trg_read'][0])
+        self.n_event_proc = uint32(a['n_event_proc'][0])
+        self.leftover_event_id = uint32(a['leftover_event_id'][0])
         tmp = a['active_ch_id'][0]
         if isscalar(tmp): # if only 1 active channels, tmp is a scalar and sort will fail
             tmp = [tmp]
-        self.ch_id = sorted(tmp)
+        self.ch_id = sorted(uint16(tmp))
         self.ch_names = ["adc_b%d_ch%d" % (i // 100, i % 100) for i in self.ch_id]
         self.ch_name_to_id_dict = dict(zip(self.ch_names, self.ch_id))
         return None
@@ -220,6 +240,11 @@ def main(argv):
     # run rq includes from raw root data, and yaml config
     # (uproot cannot save string; so ASCII->int->ASCII for spe_fit_results_file)
     writer.dump_run_rq({
+        'start_year': [run.start_year],
+        'start_month': [run.start_month],
+        'start_day': [run.start_day],
+        'start_hour': [run.start_hour],
+        'start_minute': [run.start_minute],
         'n_boards': [run.n_boards],
         'n_trg_read': [run.n_trg_read],
         'n_event_proc': [run.n_event_proc],

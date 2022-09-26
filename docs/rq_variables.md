@@ -34,11 +34,16 @@ Run Info.
 
 | Tables		| type			 |		Description			|
 |:------------ 	|----------------------| -------------------------------------------|
-| n_boards      	| uint64 		 | number of digitizer boards			|
-| n_event_proc      	| uint64		 | number of events processed			|
-| n_trg_read 		| uint64      	  	 | number of triggers read from binary file	|
-| leftover_event_id	| uint64 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
-| active_ch_id		|  uint64[n_ch]	 | unique id for all active channels      	       |
+| start_year      	| uint16 		 | run start year		|
+| start_month      	| uint16 		 | run start month		|
+| start_day     	| uint16 		 | run start day				|
+| start_hour      	| uint16 		 |run start hour				|
+| start_minute      	| uint16 		 | run start minute			|
+| n_boards      	| uint16 		 | number of digitizer boards			|
+| n_event_proc      	| uint32		 | number of events processed			|
+| n_trg_read 		| uint32      	  	 | number of triggers read from binary file	|
+| leftover_event_id	| uint32 	 | the leftover event_id that are not saved to root file; some events/triggers may be droppd druing data readout |
+| active_ch_id		|  uint16[n_ch]	 | unique id for all active channels      	       |
 
 In addition, the yaml configuration file are also saved to run_info tree. They're labelled as `cfg_*`, The `cfg_*` names are self-explanatory. See [yaml/README.md] (https://github.com/BNLIF/drop/blob/main/yaml/README.md)).
 
@@ -63,7 +68,7 @@ Calibrated PMT info. Variables are from fit.
 Event info
 
 ### Event level variables
-One per event
+One per event.
 
 | Variable Name | type		| Description		|
 |:------------ |-------------| -----------------	|
@@ -71,6 +76,7 @@ One per event
 | event_ttt     | uint64	| trigger time tag (8 ns/counter)	|
 | event_sanity  | uint32        | sanity of an event    |
 | event_saturated  | bool        | True if any of the signal channels are saturated |
+| npulse	     | uint32		| number of pulses				|
 
 ### Channel level variables
 
@@ -104,31 +110,31 @@ Auxilary (non-signal) channels provide extra info. For example, paddle is consid
 
 
 ### Pulse level variables
-Every event has `npulse` number of variables. Pulse branches are dynamic arrays. Pulses are order by [prominence](https://en.wikipedia.org/wiki/Topographic_prominence), and in decending order.
+Pulse level variables are dynamic arrays -- we only know array during the data processing. The length of array is specified by `npulse` variable, defined as an the event-level variable above. Pulses are order by [prominence](https://en.wikipedia.org/wiki/Topographic_prominence), and in decending order, so the first pulse is normally the largest one.
 
 | Variable Name      | type		| Description					|
 |:------------      |---------------	| -----------------				|
-| npulse	     | uint32		| number of pulses				|
-| pulse_id	     | vector\<uint32\>	| unique pulse id.   	   			|
-| pulse_start        | vector\<uint32\>	| the start index of a pulse			|
-| pulse_end	     | vector\<uint32\>	| the end index of a pulse			|
-| pulse_area_sum_pe     | vector\<float32\>	| summed PMT area in pe. Area is integrated from `pulse_start` to `pulse_end`. 		|
-| pulse_area_bot_pe     | vector\<float32\>	| summed bottom PMT area in pe. Area is integrated from `pulse_start` to `pulse_end`.	|
-| pulse_area_side_pe     | vector\<float32\>	| summed side PMT area in pe. Area is integrated from  `pulse_start` to `pulse_end`.  |
-| pulse_area_row1_pe    | vector\<float32\>	| summed row 1 PMT area in pe.  Row 1 is the highest 4 side PMTs (ex. b1_p1, b2_p1, b3_p1, b4_p1). |
-| pulse_area_row2_pe    | vector\<float32\>	| summed row 2 PMT area in pe. Row 2 is the second highest 4 side PMTs (ex. b1_p2, b2_p2, b3_p2, b4_p2). |
-| pulse_area_row3_pe    | vector\<float32\>	| summed row 3 PMT area in pe. Row 3 is the third highest 4 side PMTs (ex. b1_p3, b2_p3, b3_p3, b4_p3). |
-| pulse_area_row4_pe    | vector\<float32\>	| summed row 4 PMT area in pe. Row 4 is the lowest 4 side PMTs (ex. b1_p4, b2_p4, b3_p4, b4_p4). |
-| pulse_area_col1_pe    | vector\<float32\>	| summed column 1 PMT area in pe.  Col 1 is the cloest 4 side PMTs to the darkroom door (ex. b1_p*). |
-| pulse_area_col2_pe    | vector\<float32\>	| summed column 2 PMT area in pe. Col 2 is the farest 4 side PMTs to the PC (ex. b2_p*). |
-| pulse_area_col3_pe    | vector\<float32\>	| summed column 3 PMT area in pe. Col 3 is the cloest 4 side PMTs to the PC (ex. b3_p*). |
-| pulse_area_col4_pe    | vector\<float32\>	| summed column 4 PMT area in pe. Col 4 is the farest 4 side PMTs to the darkroom door (ex. b4_p*). |
-| pulse_height_sum_pe     | vector\<float32\>	| max height of this pulse in the sum channel, unit pe/ns 		|
-| pulse_height_bot_pe     | vector\<float32\>	| max height of this pulse in the sum of bottom PMTs, unit pe/ns	|
-| pulse_height_side_pe     | vector\<float32\>	| max height of this pulse in the summed side PMTs, unit pe/ns  |
-| pulse_sba  | vector\<uint32\>	| side-to-bottom asymmetry: (`pulse_area_side_pe`-`pulse_area_bot_pe`)/`pulse_area_sum_pe` |
-| pulse_ptime_ns  | vector\<uint32\>	| peak time in ns |
-| pulse_coincidence  | vector\<uint32\>	| number of PMTs passing thresholds within `pulse_start` to `pulse_end` |
-| pulse_area_max_frac  | vector\<uint32\>	| max channel fraction. Area in max channel / total area, for all channels|
-| pulse_area_max_ch_id  | vector\<uint32\>	| The id for the channel that has the max area frac.  |
+| pulse_id	     | uint32[npulse]	| unique pulse id.   	   			|
+| pulse_start        | uint32[npulse]	| the start index of a pulse			|
+| pulse_end	     | uint32[npulse]	| the end index of a pulse			|
+| pulse_area_sum_pe     | float32[npulse]	| summed PMT area in pe. Area is integrated from `pulse_start` to `pulse_end`. 		|
+| pulse_area_bot_pe     | float32[npulse]	| summed bottom PMT area in pe. Area is integrated from `pulse_start` to `pulse_end`.	|
+| pulse_area_side_pe     | float32[npulse]	| summed side PMT area in pe. Area is integrated from  `pulse_start` to `pulse_end`.  |
+| pulse_area_row1_pe    | float32[npulse]	| summed row 1 PMT area in pe.  Row 1 is the highest 4 side PMTs (ex. b1_p1, b2_p1, b3_p1, b4_p1). |
+| pulse_area_row2_pe    | float32[npulse]	| summed row 2 PMT area in pe. Row 2 is the second highest 4 side PMTs (ex. b1_p2, b2_p2, b3_p2, b4_p2). |
+| pulse_area_row3_pe    | float32[npulse]	| summed row 3 PMT area in pe. Row 3 is the third highest 4 side PMTs (ex. b1_p3, b2_p3, b3_p3, b4_p3). |
+| pulse_area_row4_pe    | float32[npulse]	| summed row 4 PMT area in pe. Row 4 is the lowest 4 side PMTs (ex. b1_p4, b2_p4, b3_p4, b4_p4). |
+| pulse_area_col1_pe    | float32[npulse]	| summed column 1 PMT area in pe.  Col 1 is the cloest 4 side PMTs to the darkroom door (ex. b1_p*). |
+| pulse_area_col2_pe    | float32[npulse]	| summed column 2 PMT area in pe. Col 2 is the farest 4 side PMTs to the PC (ex. b2_p*). |
+| pulse_area_col3_pe    | float32[npulse]	| summed column 3 PMT area in pe. Col 3 is the cloest 4 side PMTs to the PC (ex. b3_p*). |
+| pulse_area_col4_pe    | float32[npulse]	| summed column 4 PMT area in pe. Col 4 is the farest 4 side PMTs to the darkroom door (ex. b4_p*). |
+| pulse_area_user_pe    | float32[npulse]	| summed of a list of channels defined by user. See yaml/config.yaml file. |
+| pulse_height_sum_pe     | float32[npulse]	| max height of this pulse in the sum channel, unit pe/ns 		|
+| pulse_height_bot_pe     | float32[npulse]	| max height of this pulse in the sum of bottom PMTs, unit pe/ns	|
+| pulse_height_side_pe     | float32[npulse]	| max height of this pulse in the summed side PMTs, unit pe/ns  |
+| pulse_sba  | uint32[npulse]	| side-to-bottom asymmetry: (`pulse_area_side_pe`-`pulse_area_bot_pe`)/`pulse_area_sum_pe` |
+| pulse_ptime_ns  | uint32[npulse]	| peak time in ns |
+| pulse_coincidence  | uint32[npulse]	| number of PMTs passing thresholds within `pulse_start` to `pulse_end` |
+| pulse_area_max_frac  | uint32[npulse]	| max channel fraction. Area in max channel / total area, for all channels|
+| pulse_area_max_ch_id  | uint32[npulse]	| The id for the channel that has the max area frac.  |
 | pulse_saturated  | vector\<bool\>	| True if this pulse is saturated. |
