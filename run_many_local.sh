@@ -11,7 +11,7 @@
 # Run Parameters
 do_raw_data_rooter=0
 do_run_drop=1
-drop_version=v1.0.0
+drop_version=v1.0.1
 subdir=muon
 config_file=config.yaml
 #====================================== 
