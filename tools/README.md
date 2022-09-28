@@ -1,7 +1,33 @@
 Useful tools for debugging, and assisting high-level analysis.
 
 # Event Display
-See `event_display_example.ipynb` for the usage. You will need to download the data and run locally though.
+EventDisplay class allows plotting waveform easily. It uses the same underlying algorthim as DROP, so what you see via EventDisplay, is what you get in RQ/ntuple. See `event_display_example.ipynb` for the usage. You will need to download the data and run locally though.
+
+# DQOM (Data Quality Offline Monitor)
+It's important to get timely feedback on the data quality. Live monitor may be a long way to go, this offline monitor is a temp solution.
+
+Usage. Enter the environment: `source env/bin/activate`, then do:
+python dqom.py path/to/your/data
+
+Alternative, use the bash script to run many at once:
+```bash
+. run_dqom.py file_list.txt
+```
+where file_list.txt is just file containing the path to data. For example, `file_list.txt` may look like this:
+
+```
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220921T1351_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220921T1609_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220921T2022_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220924T0748_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220923T0754_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220922T0007_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220923T1808_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220924T1753_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220925T0401_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220922T0814_rq.root
+/media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220923T2317_rq.root
+```
 
 # Print Binary Info 
 Sometimes we want to inspect the raw binary from DAQ software. 
@@ -10,6 +36,12 @@ Usage. After setting enviromental variables, do:
 ```bash
 python print_binary_info.py /path/to/raw_binary_file
 ```
+
+Alternatively, just use `xxd` which is very useful by itself. For the manual, see:
+```
+xxd --help
+```
+
 
 # RatDB file reader
 A python script that reads .ratdb (.geo) file as dictionary.
