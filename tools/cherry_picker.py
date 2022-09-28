@@ -24,7 +24,7 @@ def cherrypicking(file_path, user_event_id, output_path):
     a_new = {}
     for k in a_old.keys():
         a_new[k]=a_old[k][mask]
-    f_new = uproot.recreate("small.root")
+    f_new = uproot.recreate(output_path)
     t_run = uproot.open(run_path)
     f_new['run_info'] = t_run.arrays(library='np')
     f_new['daq']=a_new
