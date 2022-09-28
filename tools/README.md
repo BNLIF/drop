@@ -28,6 +28,16 @@ where file_list.txt is just file containing the path to data. For example, `file
 /media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220922T0814_rq.root
 /media/disk_a/CERNBOX/WbLS-DATA/rq/v1.0.1/muon/phase1_muon_wbls_1pct_220923T2317_rq.root
 ```
+# cherrypicker
+
+Loading the many raw root file is difficult. Sometimes we want to cherry-picking desired events and save them to an smaller root file for later usage. This script allows one to do that given a list of `event_id`. 
+
+Usage. In python environment, do:
+```python
+file_path='../data/phase1_muon_wbls_1pct_220921T1351.root'
+user_event_id = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+cherrypicking(file_path, user_event_id, 'small.root')
+```
 
 # Print Binary Info 
 Sometimes we want to inspect the raw binary from DAQ software. 
