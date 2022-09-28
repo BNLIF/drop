@@ -39,7 +39,7 @@ def plot_channel_npe(file_path, output_dir):
         nch = len(ch_id)
         ncol=5
         nrow=nch//ncol+1
-        fig, ax = plt.subplots(nrow, ncol, figsize=[3.6*ncol,2.7*nrow])
+        fig, ax = plt.subplots(nrow, ncol, figsize=[4*ncol,2.7*nrow])
         ax = ax.flatten()
         t_minute=rq['event_ttt']*8e-9/60
         tmax = np.max(t_minute)
@@ -48,7 +48,7 @@ def plot_channel_npe(file_path, output_dir):
         for r, ch in enumerate(ch_id):
             ch_mask=(rq['ch_id']==ch)
             ch_roi1_area_pe=rq['ch_roi1_area_pe'][ch_mask].flatten()
-            h0 = ax[r].hist2d(t_minute, ch_roi1_area_pe, bins=[nbinx, 100], range=((tmin,tmax),(0, 100)), norm=colors.LogNorm(), cmap='jet');
+            h0 = ax[r].hist2d(t_minute, ch_roi1_area_pe, bins=[nbinx, 50], range=((tmin,tmax),(0, 50)), norm=colors.LogNorm(), cmap='jet');
             ax[r].set_xlabel('Time elapsed since run start [min]', fontsize=12)
             ax[r].set_ylabel('Channel Npe', fontsize=12)
             ax[r].set_title("ch_id=%d" % ch)
@@ -61,9 +61,12 @@ def plot_channel_npe(file_path, output_dir):
 def plot_channel_noise(file_path, output_dir):
     start_dt = extract_datetime_from_str(file_path)
     with uproot.open(file_path) as f:
+        rq = f['event'].arrays(library='np')
+        ch_id = rq['ch_id'][0]
         ncol=5
+        nch = len(ch_id)
         nrow=nch//ncol+1
-        fig, ax = plt.subplots(nrow, ncol, figsize=[3.6*ncol,2.7*nrow])
+        fig, ax = plt.subplots(nrow, ncol, figsize=[4*ncol,2.7*nrow])
         ax = ax.flatten()
         t_minute=rq['event_ttt']*8e-9/60
         tmax = np.max(t_minute)
@@ -72,10 +75,10 @@ def plot_channel_noise(file_path, output_dir):
         for r, ch in enumerate(ch_id):
             ch_mask=(rq['ch_id']==ch)
             ch_roi0_std_pe=rq['ch_roi0_std_pe'][ch_mask].flatten()
-            h0 = ax[r].hist2d(t_minute, ch_roi1_area_pe, bins=[nbinx, 100], range=((tmin,tmax),(0, 100)), 
+            h0 = ax[r].hist2d(t_minute, ch_roi0_std_pe, bins=[nbinx, 50], range=((tmin,tmax),(0, 0.5)), 
                               norm=colors.LogNorm(), cmap='jet');
             ax[r].set_xlabel('Time elapsed since run start [min]', fontsize=12)
-            ax[r].set_ylabel('Channel Baseline Std [PE]', fontsize=12)
+            ax[r].set_ylabel('Channel Baseline Std [PE/ns]', fontsize=12)
             ax[r].set_title("ch_id=%d" % ch)
         plt.tight_layout()
     directory="%s/ChannelBaselineTrend" % output_dir
