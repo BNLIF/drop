@@ -22,3 +22,4 @@ uproot==4.1.9
 ipympl==0.9.1
 lazydocs-0.4.8
 pandas-1.4.3
+numba-0.56.0

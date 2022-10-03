@@ -203,7 +203,6 @@ class RunDROP():
         print("%dth batch, %.1f percent completed" % (self.batch_id, pct))
         return None
 
-
 def main(argv):
     """
     Main function

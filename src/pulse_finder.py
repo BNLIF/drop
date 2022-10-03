@@ -2,8 +2,13 @@ from numpy import array, zeros, sort, arange, ndarray, uint32, uint16, place, lo
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
+import os
+import sys
 from waveform import Waveform
-from yaml_reader import YamlReader, SAMPLE_TO_NS
+from yaml_reader import YamlReader, SAMPLE_TO_NS, MY_QUANTILES
+sys.path.append(os.environ['LIB_DIR'])
+from utilities import generate_colormap, digitial_butter_highpass_filter
+import utilities_numba as util_nb
 
 class PulseFinder():
     """
@@ -75,8 +80,15 @@ class PulseFinder():
         self.base_std_pe = {}
         self.base_med_pe = {}
         for ch, val in self.wfm.amp_pe.items():
+            if 'adc_' in ch:
+                continue
+            if 'sum_col' in ch:
+                continue
+            if 'sum_row' in ch:
+                continue
             a = self.wfm.amp_pe[ch]
-            qx = np.quantile(a[0:100], q=[0.16, 0.5, 0.84])
+            qx = util_nb.quantile_f8(a[0:100], MY_QUANTILES)
+            # qx = np.quantile(a[0:100], MY_QUANTILES)
             std = abs(qx[2]-qx[0])
             med = qx[1]
             self.base_med_pe[ch] = med
@@ -153,7 +165,8 @@ class PulseFinder():
                 a = self.wfm.amp_pe[ch]
                 a_int = self.wfm.amp_pe_int[ch]
                 area_pe[ch] = a_int[end]-a_int[start]
-                height_pe[ch] = np.max(a[start:end])
+                # height_pe[ch] = np.max(a[start:end])
+                height_pe[ch] = util_nb.max(a[start:end])
             self.height_ch_pe.append(height_pe)
             self.area_ch_pe.append(area_pe)
 
@@ -211,9 +224,12 @@ class PulseFinder():
             self.area_col3_pe.append(a_col3_int[end]-a_col3_int[start])
             self.area_col4_pe.append(a_col4_int[end]-a_col4_int[start])
             self.area_user_pe.append(a_user_int[end]-a_user_int[start])
-            self.height_sum_pe.append(np.max(a_sum[start:end]))
-            self.height_bot_pe.append(np.max(a_bot[start:end]))
-            self.height_side_pe.append(np.max(a_side[start:end]))
+            # self.height_sum_pe.append(np.max(a_sum[start:end]))
+            # self.height_bot_pe.append(np.max(a_bot[start:end]))
+            # self.height_side_pe.append(np.max(a_side[start:end]))
+            self.height_sum_pe.append(util_nb.max(a_sum[start:end]))
+            self.height_bot_pe.append(util_nb.max(a_bot[start:end]))
+            self.height_side_pe.append(util_nb.max(a_side[start:end]))
             self.ptime_ns.append( (argmax(a_sum[start:end])+start)*SAMPLE_TO_NS )
             sba = (self.area_side_pe[-1]-self.area_bot_pe[-1])/self.area_sum_pe[-1]
             self.sba.append( sba ) # side-to-bottom asymmetry

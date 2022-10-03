@@ -5,6 +5,7 @@ from numpy import array
 The following parameters do not change often. So hard coded here
 """
 SAMPLE_TO_NS=2
+MY_QUANTILES= array([0.15865, 0.5, 0.84135])
 
 class ScipyPeakFindingParam():
     """

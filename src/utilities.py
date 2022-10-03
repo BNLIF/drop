@@ -8,7 +8,6 @@ from matplotlib.colors import ListedColormap
 from matplotlib.cm import hsv
 from yaml_reader import SAMPLE_TO_NS
 
-
 def generate_colormap(n_colors=32):
     """
     This function is copied from:
@@ -43,7 +42,6 @@ def generate_colormap(n_colors=32):
     return ListedColormap(initial_cm)
 
 
-
 def digitial_butter_highpass_filter(data, cutoff_Hz=3e6):
     """
     data: 1d ndarray
@@ -56,23 +54,3 @@ def digitial_butter_highpass_filter(data, cutoff_Hz=3e6):
     Wn = cutoff_Hz/nyq
     b, a = signal.butter(order, Wn, btype='high', analog=False)
     return signal.filtfilt(b, a, data)
-
-def linear_interpolation(x_arr, y_arr, y, rising_edge=True):
-    """
-    Linear interpolation
-    Given fy, fx, and y, find x.
-    If multiple solution exist, return the first one.
-    rising_edge bool can be used to select rising slope or falling slope
-
-    Note:
-        this is similar but not identical to np.interp.
-    """
-    x_l = x_arr[:-1]; x_h = x_arr[1:]
-    y_l = y_arr[:-1]; y_h = y_arr[1:]
-    if rising_edge:
-        mask= (y_l<=y) & (y<y_h)
-    else:
-        mask= ((y<=y_l) & (y>y_h))
-    i = np.where(mask)[0][0]
-    print(y, x_l[i], (x_h[i]-x_l[i]), (y_h[i]-y_l[i])*(y-y_l[i]))
-    return x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
