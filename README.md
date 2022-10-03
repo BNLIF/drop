@@ -75,11 +75,11 @@ python src/run_drop.py --help
 ```
 Hopefully the help manual is clear how to run it. The ntuple (RQ) variables are documented [here](docs/rq_variables.md). A small but growing list of variables are added to the table. Production version matches git tag. For example, rq/v1.0.0/ contains data produced by git tag v1.0.0. 
 
-### Create Data Quality Offline Monitor (DQOM)
+### Create Data Quality Offline Monitor (DQOM) plots
 
 It's just a python script to take in the rq files, and produce a set of plots. Usage: 
 ```bash
-python tools/dqom.py ${fpath} ${output_dir}
+python tools/dqom.py [/path/to/your/files_rq.root] [output directory]
 ```
 It was considered an add-on tool. See `tools` directory README for more.
 
@@ -88,9 +88,22 @@ When you're done, exit the virtual env:
 deactivate
 ```
 
-### Run many
+### Process many runs at once
 
-There is a bash script named `run_many_local.sh` that can run raw_data_rooter, run_drop, and dqom individually, or alltogther in sereis.
+There is a bash script named `run_many_local.sh` that can individually run raw_data_rooter, run_drop, and dqom. Or it can runs them alltogther in series. Please open and inspect the `run_many_local.sh` script first --- the `run_script_option` controls what script to process.
+
+Usage:
+```bash
+bash run_many_local.sh file_list.txt
+```
+where `file_list.txt` is an ascii (plain text) file created by user to contain the run paths. For example, `file_list.txt` may look like this:
+```
+/media/disk_a/CERNBOX/WbLS-DATA/raw_binary/muon/phase1_muon_wbls_1pct_220930T0020.bin
+/media/disk_a/CERNBOX/WbLS-DATA/raw_binary/muon/phase1_muon_wbls_1pct_220930T0821.bin
+/media/disk_a/CERNBOX/WbLS-DATA/raw_binary/muon/phase1_muon_wbls_1pct_220930T1309.bin
+/media/disk_a/CERNBOX/WbLS-DATA/raw_binary/muon/phase1_muon_wbls_1pct_220930T2219.bin
+```
+
 
 # Contributing
 
