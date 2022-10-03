@@ -94,6 +94,8 @@ class RQWriter:
         self.pulse_coincidence = []
         self.pulse_area_max_frac = []
         self.pulse_area_max_ch_id = []
+        self.pulse_area_bot_max_frac = []
+        self.pulse_area_bot_max_ch_id = []
         self.pulse_saturated = []
 
         # channel x pulse variables (not yet implemented)
@@ -173,6 +175,8 @@ class RQWriter:
             'coincidence': type_uint,
             'area_max_frac': type_float,
             'area_max_ch_id': type_uint,
+            'area_bot_max_frac': type_float,
+            'area_bot_max_ch_id': type_uint,
             'saturated': type_bool,
         }
         type_event['pulse']=ak.zip(type_pulse).type
@@ -302,6 +306,8 @@ class RQWriter:
         self.pulse_coincidence.append(pf.coincidence)
         self.pulse_area_max_frac.append(pf.area_max_frac)
         self.pulse_area_max_ch_id.append(pf.area_max_ch_id)
+        self.pulse_area_bot_max_frac.append(pf.area_bot_max_frac)
+        self.pulse_area_bot_max_ch_id.append(pf.area_bot_max_ch_id)
         self.pulse_saturated.append(pf.pulse_saturated)
 
         # pulse x channel level
@@ -410,6 +416,8 @@ class RQWriter:
             'coincidence': self.pulse_coincidence,
             'area_max_frac': self.pulse_area_max_frac,
             'area_max_ch_id': self.pulse_area_max_ch_id,
+            'area_bot_max_frac': self.pulse_area_bot_max_frac,
+            'area_bot_max_ch_id': self.pulse_area_bot_max_ch_id,
             'saturated': self.pulse_saturated,
         }
         data_event['pulse']=ak.zip(data_pulse)
