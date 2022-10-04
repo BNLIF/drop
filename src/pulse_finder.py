@@ -84,7 +84,6 @@ class PulseFinder():
         Scipy find_peaks functions. The parameters can be tuned in the yaml file.
         """
         pars = self.cfg.scipy_pf_pars
-        self.base_std_pe = {}
         self.base_med_pe = {}
         for ch, val in self.wfm.amp_pe.items():
             if 'adc_' in ch:
@@ -94,13 +93,10 @@ class PulseFinder():
             if 'sum_row' in ch:
                 continue
             a = self.wfm.amp_pe[ch]
-            qx = util_nb.quantile_f8(a[0:100], MY_QUANTILES)
-            # qx = np.quantile(a[0:100], MY_QUANTILES)
+            qx = util_nb.quantile_f8(a[0:200], MY_QUANTILES)
             std = abs(qx[2]-qx[0])
             med = qx[1]
             self.base_med_pe[ch] = med
-            self.base_std_pe[ch] = std # save a copy
-            # std = self.wfm.flat_base_std_pe[ch]
             peaks, prop = find_peaks(a,
                 distance=pars.distance,
                 threshold=pars.threshold,
