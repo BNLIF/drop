@@ -93,7 +93,7 @@ class PulseFinder():
             if 'sum_row' in ch:
                 continue
             a = self.wfm.amp_pe[ch]
-            qx = util_nb.quantile_f8(a[0:200], MY_QUANTILES)
+            qx = util_nb.quantile_f8(a[0:150], MY_QUANTILES)
             std = abs(qx[2]-qx[0])
             med = qx[1]
             self.base_med_pe[ch] = med

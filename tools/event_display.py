@@ -223,8 +223,7 @@ class EventDisplay():
                         a += self.wfm_list[i].amp_pe[ch]
         else:
             print('ERROR: bad user_summed_channel_list!')
-        a_int = self.wfm_list[i].amp_pe_int['sum']
-        #a_int = np.cumsum(a)*(SAMPLE_TO_NS) # amp_mV_int does not exist
+        a_int = np.cumsum(a)*(SAMPLE_TO_NS) # amp_mV_int does not exist
         left_ylabel = "PE / 2ns"
         right_ylabel = 'PE'
 
@@ -282,11 +281,12 @@ class EventDisplay():
             a = self.wfm_list[i].amp_mV[ch]
             left_ylabel="mV / 2ns"
             right_ylabel="mV * ns"
+            a_int = np.cumsum(a)*SAMPLE_TO_NS
         else:
             a = self.wfm_list[i].amp_pe[ch]
             left_ylabel="PE / 2ns"
             right_ylabel="PE"
-        a_int = self.wfm_list[i].amp_pe_int[ch]
+            a_int = self.wfm_list[i].amp_pe_int[ch]
 
         t = np.arange(0, len(a)*2, 2)
         ax1.plot(t, a, label=ch[4:]) # remove adc_ from ch names
@@ -327,8 +327,8 @@ class EventDisplay():
         fig = plt.figure(figsize=[self.fig_width,self.fig_height])
         self.plot_counter += 1
         a = self.wfm_list[i].raw_data[ch]
-        plt.hlines(np.median(a), 0, len(a), linestyle='dashed', color='gray', linewidth=1, label='median')
         plt.plot(a, label=ch[4:])
+        plt.hlines(np.median(a), 0, len(a), linestyle='dashed', color='gray', label='median')
         plt.legend(loc=0)
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
@@ -523,7 +523,7 @@ class EventDisplay():
             area_max = np.max([val, area_max])
 
         # define color
-        cmap = plt.cm.jet
+        cmap = plt.cm.YlOrRd
         norm = matplotlib.colors.Normalize(vmin=0, vmax=area_max)
 
         # draw active PMT whose color scale with integral
