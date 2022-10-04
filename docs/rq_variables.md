@@ -129,6 +129,13 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_area_col3_pe    | float32[npulse]	| summed column 3 PMT area in pe. Col 3 is the cloest 4 side PMTs to the PC (ex. b3_p*). |
 | pulse_area_col4_pe    | float32[npulse]	| summed column 4 PMT area in pe. Col 4 is the farest 4 side PMTs to the darkroom door (ex. b4_p*). |
 | pulse_area_user_pe    | float32[npulse]	| summed of a list of channels defined by user. See yaml/config.yaml file. |
+| pulse_aft10_sum_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of total pulse area. Unit: ns  |
+| pulse_aft10_bot_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of bottom PMT pulse area. Unit: ns  |
+| pulse_aft10_side_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of side PMT pulse area. Unit: ns  |
+| pulse_aft10_row1_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row1 PMT pulse area. Unit: ns  |
+| pulse_aft10_row2_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row2 PMT pulse area. Unit: ns  |
+| pulse_aft10_row3_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row3 PMT pulse area. Unit: ns  |
+| pulse_aft10_row4_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row4 PMT pulse area. Unit: ns  |
 | pulse_height_sum_pe     | float32[npulse]	| max height of this pulse in the sum channel, unit pe/ns 		|
 | pulse_height_bot_pe     | float32[npulse]	| max height of this pulse in the sum of bottom PMTs, unit pe/ns	|
 | pulse_height_side_pe     | float32[npulse]	| max height of this pulse in the summed side PMTs, unit pe/ns  |
@@ -137,4 +144,6 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_coincidence  | uint32[npulse]	| number of PMTs passing thresholds within `pulse_start` to `pulse_end` |
 | pulse_area_max_frac  | uint32[npulse]	| max channel fraction. Area in max channel / total area, for all channels|
 | pulse_area_max_ch_id  | uint32[npulse]	| The id for the channel that has the max area frac.  |
+| pulse_area_bot_max_frac  | uint32[npulse]	| max channel fraction in bottom PMTs. Area in max channel / total area, for all channels|
+| pulse_area_bot_max_ch_id  | uint32[npulse]	| The id for the bottom channel that has the max area bot frac.  |
 | pulse_saturated  | vector\<bool\>	| True if this pulse is saturated. |
