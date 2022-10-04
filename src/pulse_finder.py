@@ -56,6 +56,13 @@ class PulseFinder():
         self.area_col3_pe = []
         self.area_col4_pe = []
         self.area_user_pe = []
+        self.aft10_sum_ns = []
+        self.aft10_bot_ns = []
+        self.aft10_side_ns = []
+        self.aft10_row1_ns = []
+        self.aft10_row2_ns = []
+        self.aft10_row3_ns = []
+        self.aft10_row4_ns = []
         self.height_sum_pe = []
         self.height_bot_pe = []
         self.height_side_pe = []
@@ -136,7 +143,7 @@ class PulseFinder():
                 left_thresh = self.base_med_pe['sum']
                 if a[pk_l]<=left_thresh or pk_l<=0:
                     break
-            for j in range(25):
+            for j in range(42):
                 pk_r += 1
                 right_thresh = self.base_med_pe['sum']
                 if a[pk_r]<=right_thresh or pk_r>=(len(a)-1):
@@ -182,6 +189,7 @@ class PulseFinder():
         area_max_frac: fraction of light in max PMTs
         ... [add more if you wish]
         """
+        t_ax = self.wfm.time_axis_ns
         height_thresh = self.cfg.spe_height_threshold
 
         # calcualte pulse level variables (one per pulse)
@@ -224,6 +232,13 @@ class PulseFinder():
             self.area_col3_pe.append(a_col3_int[end]-a_col3_int[start])
             self.area_col4_pe.append(a_col4_int[end]-a_col4_int[start])
             self.area_user_pe.append(a_user_int[end]-a_user_int[start])
+            self.aft10_sum_ns.append(util_nb.aft(t_ax[start:end], a_sum_int[start:end], 0.1))
+            self.aft10_bot_ns.append(util_nb.aft(t_ax[start:end], a_bot_int[start:end], 0.1))
+            self.aft10_side_ns.append(util_nb.aft(t_ax[start:end], a_side_int[start:end], 0.1))
+            self.aft10_row1_ns.append(util_nb.aft(t_ax[start:end], a_row1_int[start:end], 0.1))
+            self.aft10_row2_ns.append(util_nb.aft(t_ax[start:end], a_row2_int[start:end], 0.1))
+            self.aft10_row3_ns.append(util_nb.aft(t_ax[start:end], a_row3_int[start:end], 0.1))
+            self.aft10_row4_ns.append(util_nb.aft(t_ax[start:end], a_row4_int[start:end], 0.1))
             # self.height_sum_pe.append(np.max(a_sum[start:end]))
             # self.height_bot_pe.append(np.max(a_bot[start:end]))
             # self.height_side_pe.append(np.max(a_side[start:end]))

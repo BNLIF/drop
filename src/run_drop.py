@@ -170,6 +170,7 @@ class RunDROP():
             wfm.define_trigger_position()
             wfm.correct_daisy_chain_trg_delay()
             wfm.sum_channels()
+            wfm.define_time_axis()
             wfm.integrate_waveform()
             wfm.calc_roi_info()
             wfm.calc_aux_ch_info()

@@ -65,5 +65,21 @@ def linear_interpolation(x_arr, y_arr, y, rising_edge=True):
     i = np.where(mask)[0][0]
     return x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
 
+@cc.export('aft', 'f8(f8[:], f8[:], f8)')
+def aft(t, a_int, y):
+    """
+    Get Area Fraction Time (AFT) at 10 pct.
+    t, and a_int must have the same dimension
+
+    After the first three lines, it's the same as linear_interpolation
+    """
+    x_arr = t
+    y_arr = (a_int-a_int[0])/(a_int[-1]-a_int[0])
+    x_l = x_arr[:-1]; x_h = x_arr[1:]
+    y_l = y_arr[:-1]; y_h = y_arr[1:]
+    mask= (y_l<=y) & (y<y_h)
+    i = np.where(mask)[0][0]
+    return x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
+
 if __name__ == "__main__":
     cc.compile()

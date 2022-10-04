@@ -251,6 +251,15 @@ class Waveform():
         self.amp_pe['sum_user'] = user_pe
         return None
 
+    def define_time_axis(self):
+        """
+        This is the time axis after daisy chain correction
+        Not often use
+        """
+        n_samp = len(self.amp_pe['sum'])
+        t=np.linspace(0, (n_samp-1)*SAMPLE_TO_NS, n_samp)
+        self.time_axis_ns = t
+        
     def integrate_waveform(self):
         """
         Compute accumulated integral of the waveform. Do not forget to multiple by

@@ -86,6 +86,13 @@ class RQWriter:
         self.pulse_area_col3_pe = []
         self.pulse_area_col4_pe = []
         self.pulse_area_user_pe = []
+        self.pulse_aft10_sum_ns = []
+        self.pulse_aft10_bot_ns = []
+        self.pulse_aft10_side_ns = []
+        self.pulse_aft10_row1_ns = []
+        self.pulse_aft10_row2_ns = []
+        self.pulse_aft10_row3_ns = []
+        self.pulse_aft10_row4_ns = []
         self.pulse_height_sum_pe = []
         self.pulse_height_bot_pe = []
         self.pulse_height_side_pe = []
@@ -167,6 +174,13 @@ class RQWriter:
             'area_col3_pe': type_float,
             'area_col4_pe': type_float,
             'area_user_pe': type_float,
+            'aft10_sum_ns': type_float,
+            'aft10_bot_ns': type_float,
+            'aft10_side_ns': type_float,
+            'aft10_row1_ns': type_float,
+            'aft10_row2_ns': type_float,
+            'aft10_row3_ns': type_float,
+            'aft10_row4_ns': type_float,
             'height_sum_pe': type_float,
             'height_bot_pe': type_float,
             'height_side_pe': type_float,
@@ -298,6 +312,13 @@ class RQWriter:
         self.pulse_area_col3_pe.append(pf.area_col3_pe)
         self.pulse_area_col4_pe.append(pf.area_col4_pe)
         self.pulse_area_user_pe.append(pf.area_user_pe)
+        self.pulse_aft10_sum_ns.append(pf.aft10_sum_ns)
+        self.pulse_aft10_bot_ns.append(pf.aft10_bot_ns)
+        self.pulse_aft10_side_ns.append(pf.aft10_side_ns)
+        self.pulse_aft10_row1_ns.append(pf.aft10_row1_ns)
+        self.pulse_aft10_row2_ns.append(pf.aft10_row2_ns)
+        self.pulse_aft10_row3_ns.append(pf.aft10_row3_ns)
+        self.pulse_aft10_row4_ns.append(pf.aft10_row4_ns)
         self.pulse_height_sum_pe.append(pf.height_sum_pe)
         self.pulse_height_bot_pe.append(pf.height_bot_pe)
         self.pulse_height_side_pe.append(pf.height_side_pe)
@@ -408,6 +429,13 @@ class RQWriter:
             'area_col3_pe': self.pulse_area_col3_pe,
             'area_col4_pe': self.pulse_area_col4_pe,
             'area_user_pe': self.pulse_area_user_pe,
+            'aft10_sum_ns': self.pulse_aft10_sum_ns,
+            'aft10_bot_ns': self.pulse_aft10_bot_ns,
+            'aft10_side_ns': self.pulse_aft10_side_ns,
+            'aft10_row1_ns': self.pulse_aft10_row1_ns,
+            'aft10_row2_ns': self.pulse_aft10_row2_ns,
+            'aft10_row3_ns': self.pulse_aft10_row3_ns,
+            'aft10_row4_ns': self.pulse_aft10_row4_ns,
             'height_sum_pe': self.pulse_height_sum_pe,
             'height_bot_pe': self.pulse_height_bot_pe,
             'height_side_pe': self.pulse_height_side_pe,
