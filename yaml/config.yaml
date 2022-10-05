@@ -18,7 +18,7 @@ user_pmt_channels: [102, 103, 104, 107, 108, 109, 110, 111, 114, 115, 200, 201, 
 ch_saturated_threshold: 0 # threshold below which a channel is considered saturated. Unit: adc
 
 # PMT calibration file (DROP looks for this file in yaml directory)
-spe_fit_results_file: 'bnl1t_spe_fit_results_220819b.csv'
+spe_fit_results_file: 'spe/bnl1t_spe_fit_results_220819b.csv'
 
 # Noise filter
 apply_high_pass_filter: False
