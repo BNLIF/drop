@@ -68,7 +68,7 @@ def linear_interpolation(x_arr, y_arr, y, rising_edge=True):
 @cc.export('aft', 'f8(f8[:], f8[:], f8)')
 def aft(t, a_int, y):
     """
-    Get Area Fraction Time (AFT) at 10 pct.
+    Get Area Fraction Time (AFT) at y*100 pct.
     t, and a_int must have the same dimension
 
     After the first three lines, it's the same as linear_interpolation

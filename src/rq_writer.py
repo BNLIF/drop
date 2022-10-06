@@ -93,6 +93,20 @@ class RQWriter:
         self.pulse_aft10_row2_ns = []
         self.pulse_aft10_row3_ns = []
         self.pulse_aft10_row4_ns = []
+        self.pulse_aft90_sum_ns = []
+        self.pulse_aft90_bot_ns = []
+        self.pulse_aft90_side_ns = []
+        self.pulse_aft90_row1_ns = []
+        self.pulse_aft90_row2_ns = []
+        self.pulse_aft90_row3_ns = []
+        self.pulse_aft90_row4_ns = []
+        self.pulse_fp40_sum = []
+        self.pulse_fp40_bot = []
+        self.pulse_fp40_side = []
+        self.pulse_fp40_row1 = []
+        self.pulse_fp40_row2 = []
+        self.pulse_fp40_row3 = []
+        self.pulse_fp40_row4 = []
         self.pulse_height_sum_pe = []
         self.pulse_height_bot_pe = []
         self.pulse_height_side_pe = []
@@ -181,6 +195,20 @@ class RQWriter:
             'aft10_row2_ns': type_float,
             'aft10_row3_ns': type_float,
             'aft10_row4_ns': type_float,
+            'aft90_sum_ns': type_float,
+            'aft90_bot_ns': type_float,
+            'aft90_side_ns': type_float,
+            'aft90_row1_ns': type_float,
+            'aft90_row2_ns': type_float,
+            'aft90_row3_ns': type_float,
+            'aft90_row4_ns': type_float,
+            'fp40_sum': type_float,
+            'fp40_bot': type_float,
+            'fp40_side': type_float,
+            'fp40_row1': type_float,
+            'fp40_row2': type_float,
+            'fp40_row3': type_float,
+            'fp40_row4': type_float,
             'height_sum_pe': type_float,
             'height_bot_pe': type_float,
             'height_side_pe': type_float,
@@ -319,6 +347,20 @@ class RQWriter:
         self.pulse_aft10_row2_ns.append(pf.aft10_row2_ns)
         self.pulse_aft10_row3_ns.append(pf.aft10_row3_ns)
         self.pulse_aft10_row4_ns.append(pf.aft10_row4_ns)
+        self.pulse_aft90_sum_ns.append(pf.aft90_sum_ns)
+        self.pulse_aft90_bot_ns.append(pf.aft90_bot_ns)
+        self.pulse_aft90_side_ns.append(pf.aft90_side_ns)
+        self.pulse_aft90_row1_ns.append(pf.aft90_row1_ns)
+        self.pulse_aft90_row2_ns.append(pf.aft90_row2_ns)
+        self.pulse_aft90_row3_ns.append(pf.aft90_row3_ns)
+        self.pulse_aft90_row4_ns.append(pf.aft90_row4_ns)
+        self.pulse_fp40_sum.append(pf.fp40_sum)
+        self.pulse_fp40_bot.append(pf.fp40_bot)
+        self.pulse_fp40_side.append(pf.fp40_side)
+        self.pulse_fp40_row1.append(pf.fp40_row1)
+        self.pulse_fp40_row2.append(pf.fp40_row2)
+        self.pulse_fp40_row3.append(pf.fp40_row3)
+        self.pulse_fp40_row4.append(pf.fp40_row4)
         self.pulse_height_sum_pe.append(pf.height_sum_pe)
         self.pulse_height_bot_pe.append(pf.height_bot_pe)
         self.pulse_height_side_pe.append(pf.height_side_pe)
@@ -436,6 +478,20 @@ class RQWriter:
             'aft10_row2_ns': self.pulse_aft10_row2_ns,
             'aft10_row3_ns': self.pulse_aft10_row3_ns,
             'aft10_row4_ns': self.pulse_aft10_row4_ns,
+            'aft90_sum_ns': self.pulse_aft90_sum_ns,
+            'aft90_bot_ns': self.pulse_aft90_bot_ns,
+            'aft90_side_ns': self.pulse_aft90_side_ns,
+            'aft90_row1_ns': self.pulse_aft90_row1_ns,
+            'aft90_row2_ns': self.pulse_aft90_row2_ns,
+            'aft90_row3_ns': self.pulse_aft90_row3_ns,
+            'aft90_row4_ns': self.pulse_aft90_row4_ns,
+            'fp40_sum': self.pulse_fp40_sum,
+            'fp40_bot': self.pulse_fp40_bot,
+            'fp40_side': self.pulse_fp40_side,
+            'fp40_row1': self.pulse_fp40_row1,
+            'fp40_row2': self.pulse_fp40_row2,
+            'fp40_row3': self.pulse_fp40_row3,
+            'fp40_row4': self.pulse_fp40_row4,
             'height_sum_pe': self.pulse_height_sum_pe,
             'height_bot_pe': self.pulse_height_bot_pe,
             'height_side_pe': self.pulse_height_side_pe,
