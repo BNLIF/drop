@@ -80,7 +80,7 @@ One per event.
 
 ### Channel level variables
 
-PMTs channel variables. Each branch is a static array of fixed size `n_ch`.
+PMTs channel variables. Each branch is a static array of fixed size `n_ch`. ROI stands for region of interval, or region of interest. There are three ROIs per waveform. The ROI start and end time are defined in the yaml config file. ROI 0/1/2 suppose to contain intervals before/at/after trigger position. Quantities computed within the ROIs are area, height (peak height with respect to baseline), low (valley bottom with respect to baseline), std (standard deviation)
 
 | Variable Name      | type			| Description						|
 |:------------      |---------------		| ---------------------------------------		|
@@ -95,9 +95,10 @@ PMTs channel variables. Each branch is a static array of fixed size `n_ch`.
 | ch_roi0_low_pe   | float32[n_ch]	| lowest height (valley) in pe/ns within roi 0		|
 | ch_roi1_low_pe   | float32[n_ch] 	| lowest height (valley) in pe/ns within roi 1 		|
 | ch_roi2_low_pe   | float32[n_ch] 	| lowest height (valley) in pe/ns within roi 2 		|
-| ch_roi0_std_pe   | float32[n_ch]	| standard devition in pe/ns within roi 0		|
-| ch_roi1_std_pe   | float32[n_ch] 	| standard devition in pe/ns within roi 1		|
-| ch_roi2_std_pe   | float32[n_ch] 	| standard devition in pe/ns within roi 2		|
+| ch_roi0_std_pe   | float32[n_ch]	| standard deviation in pe/ns within roi 0		|
+| ch_roi1_std_pe   | float32[n_ch] 	| standard deviation in pe/ns within roi 1		|
+| ch_roi2_std_pe   | float32[n_ch] 	| standard deviation in pe/ns within roi 2		|
+| ch_roi0_std_mV   | float32[n_ch] 	| standard deviation in mV within roi 0. Remove SPE normalization helps gauge baseline noise.|
 
 ### Auxilary channel variables
 

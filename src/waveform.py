@@ -259,7 +259,8 @@ class Waveform():
         n_samp = len(self.amp_pe['sum'])
         t=np.linspace(0, (n_samp-1)*SAMPLE_TO_NS, n_samp)
         self.time_axis_ns = t
-        
+        self.n_samp = n_samp
+
     def integrate_waveform(self):
         """
         Compute accumulated integral of the waveform. Do not forget to multiple by
@@ -286,40 +287,40 @@ class Waveform():
         whose start_ns and end_ns are defined in yaml config file
 
         The following info are calculated:
-        - area
-        - height
-        - low
-        - std
+        - area, in unit of PE
+        - height, in unit of PE/ns
+        - low, in uint of PE/ns
+        - std, in unit of PE/ns and mV
         """
         self.roi_area_pe=[]
         self.roi_height_pe=[]
         self.roi_low_pe=[]
         self.roi_std_pe=[]
+        self.roi_std_mV=[]
         for i in range(len(self.cfg.roi_start_ns)):
             start= self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
             end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
-
-            if start<0:
-                start=0
-            height={}
-            area = {}
-            low = {}
-            std = {}
+            start=max(0, start)
+            end = min(self.n_samp-1, end)
+            height_pe={}
+            area_pe = {}
+            low_pe = {}
+            std_pe = {}
+            std_mV = {}
             for ch, a in self.amp_pe.items():
-                if end>=len(a):
-                    end = len(a)-1
-                # height[ch] = np.max(a[start:end])
-                # low[ch] = np.min(a[start:end])
-                # std[ch] = np.std(a[start:end])
-                height[ch] = util_nb.max(a[start:end])
-                low[ch] = util_nb.min(a[start:end])
-                std[ch] = util_nb.std(a[start:end])
+                if ch[0:4]!='adc_':
+                    continue
+                height_pe[ch] = util_nb.max(a[start:end])
+                low_pe[ch] = util_nb.min(a[start:end])
+                std_pe[ch] = util_nb.std(a[start:end])
+                std_mV[ch] = std_pe[ch]*50*self.spe_mean[ch]
                 a_int =  self.amp_pe_int[ch]
-                area[ch] = a_int[end]-a_int[start]
-            self.roi_height_pe.append(height)
-            self.roi_area_pe.append(area)
-            self.roi_low_pe.append(low)
-            self.roi_std_pe.append(std)
+                area_pe[ch] = a_int[end]-a_int[start]
+            self.roi_height_pe.append(height_pe)
+            self.roi_area_pe.append(area_pe)
+            self.roi_low_pe.append(low_pe)
+            self.roi_std_pe.append(std_pe)
+            self.roi_std_mV.append(std_mV)
         return None
 
     def calc_aux_ch_info(self):
