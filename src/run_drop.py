@@ -144,6 +144,7 @@ class RunDROP():
                         p1 = p
             if p1 is None:
                 self._set_spe_result(p0)
+                print('Info: using calibration results from', p0)
             else:
                 self._set_spe_result(p0)
                 df0 = pd.read_csv(p0)
@@ -156,8 +157,10 @@ class RunDROP():
                     x1 = df1['spe_mean'][ch]
                     self.spe_mean[ch] = x0 + (x1-x0)/(t0+t1) * t0
                     self.spe_fit_results['spe_mean'][ch] = self.spe_mean[ch]
+                print('Info: Intepolate from calibration results', p0, 'and', p1)
         else:
             self._set_spe_result(fpath)
+            print('Info: using calibration results from', fpath)
 
     def process_batch(self, batch, writer:RQWriter):
         '''
