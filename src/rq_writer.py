@@ -64,6 +64,7 @@ class RQWriter:
         self.ch_roi0_std_pe = []
         self.ch_roi1_std_pe = []
         self.ch_roi2_std_pe = []
+        self.ch_roi0_std_mV = []
 
         # non-signal channel info (auxiliary channels)
         self.aux_ch_id = []
@@ -164,6 +165,7 @@ class RQWriter:
             'ch_roi0_std_pe': type_ch_float,
             'ch_roi1_std_pe': type_ch_float,
             'ch_roi2_std_pe': type_ch_float,
+            'ch_roi0_std_mV': type_ch_float,
 
             'aux_ch_id': type_aux_ch_uint16,
             'aux_ch_area_mV': type_aux_ch_float,
@@ -277,6 +279,7 @@ class RQWriter:
         roi0_s = zeros(n_ch)
         roi1_s = zeros(n_ch)
         roi2_s = zeros(n_ch)
+        roi0_s_mV = zeros(n_ch)
         i=0
         for ch in wfm.ch_names:
             if ch in wfm.cfg.non_signal_channels:
@@ -295,7 +298,7 @@ class RQWriter:
             roi0_s[i] = wfm.roi_std_pe[0][ch]
             roi1_s[i] = wfm.roi_std_pe[1][ch]
             roi2_s[i] = wfm.roi_std_pe[2][ch]
-
+            roi0_s_mV[i] = wfm.roi_std_mV[0][ch]
             i+=1
         self.ch_id.append( ch_id )
         self.ch_saturated.append( ch_saturated )
@@ -311,6 +314,7 @@ class RQWriter:
         self.ch_roi0_std_pe.append(roi0_s)
         self.ch_roi1_std_pe.append(roi1_s)
         self.ch_roi2_std_pe.append(roi2_s)
+        self.ch_roi0_std_mV.append(roi0_s_mV)
 
         # auxiliary channel
         n_aux_ch = len(wfm.cfg.non_signal_channels)
@@ -451,6 +455,7 @@ class RQWriter:
             'ch_roi0_std_pe': self.ch_roi0_std_pe,
             'ch_roi1_std_pe': self.ch_roi1_std_pe,
             'ch_roi2_std_pe': self.ch_roi2_std_pe,
+            'ch_roi0_std_mV': self.ch_roi0_std_mV,
             'aux_ch_id': self.aux_ch_id,
             'aux_ch_area_mV': self.aux_ch_area_mV
         }

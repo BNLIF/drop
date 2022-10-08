@@ -13,6 +13,7 @@ import uproot
 import pandas as pd
 import os
 import re
+import glob
 from datetime import datetime
 
 from yaml_reader import YamlReader
@@ -104,13 +105,7 @@ class RunDROP():
         self.ch_name_to_id_dict = dict(zip(self.ch_names, self.ch_id))
         return None
 
-    def load_pmt_info(self):
-        """
-        PMT calibration results are saved in a csv file
-        The path to the csv file is specified in yaml config file
-        """
-        fpath = YAML_DIR + '/' +self.cfg.spe_fit_results_file
-        self.spe_mean = {}
+    def _set_spe_result(self, fpath):
         try:
             df = pd.read_csv(fpath)
             df.set_index('ch_name', inplace=True)
@@ -119,10 +114,50 @@ class RunDROP():
             for ch in ch_names:
                 self.spe_mean[ch] = float(df['spe_mean'][ch])
         except:
-            for ch in self.ch_names:
-                self.spe_mean[ch] = 1.6
-            print("WARNING: your spe_fit_results_file cannot be load properly!")
-            print('WARNING: Use 1.6 pC as spe_mean for all PMTs')
+            sys.exit("your spe_fit_results_file cannot be loaded properly!")
+
+    def load_pmt_info(self):
+        """
+        PMT calibration results are saved in a csv file
+        The path to the csv file is specified in yaml config file
+        When interpolate_spe is True, it looks for the two most recent led and
+        interpolate.
+        """
+        self.spe_mean = {}
+        fpath = YAML_DIR + '/' +self.cfg.spe_fit_results_file
+        if self.cfg.interpolate_spe:
+            dt = self.extract_datetime_from_str(self.if_path)
+            fdir = os.path.dirname(fpath)
+            led_paths=glob.glob("%s/*.csv" % fdir)
+            p0, p1 = None, None
+            t0, t1 = 999999, 999999 # arbitary large
+            for p in led_paths:
+                delta = dt-self.extract_datetime_from_str(p)
+                delta_min = delta.total_seconds()/60
+                if delta_min>=0:
+                    if abs(delta_min)<t0:
+                        t0 = abs(delta_min)
+                        p0 = p
+                else:
+                    if abs(delta_min)<t1:
+                        t1 = abs(delta_min)
+                        p1 = p
+            if p1 is None:
+                self._set_spe_result(p0)
+            else:
+                self._set_spe_result(p0)
+                df0 = pd.read_csv(p0)
+                df1 = pd.read_csv(p1)
+                df0.set_index('ch_name', inplace=True)
+                df1.set_index('ch_name', inplace=True)
+                ch_names = df0.index
+                for ch in ch_names:
+                    x0 = df0['spe_mean'][ch]
+                    x1 = df1['spe_mean'][ch]
+                    self.spe_mean[ch] = x0 + (x1-x0)/(t0+t1) * t0
+                    self.spe_fit_results['spe_mean'][ch] = self.spe_mean[ch]
+        else:
+            self._set_spe_result(fpath)
 
     def process_batch(self, batch, writer:RQWriter):
         '''
@@ -257,6 +292,7 @@ def main(argv):
         'cfg_bottom_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.bottom_pmt_channels]],
         'cfg_side_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.side_pmt_channels]],
         'cfg_spe_fit_results_file': [[ord(i) for i in run.cfg.spe_fit_results_file]],
+        'cfg_interpolate_spe': [run.cfg.interpolate_spe],
         'cfg_daisy_chainr': [run.cfg.daisy_chain],
         'cfg_apply_high_pass_filter': [run.cfg.apply_high_pass_filter],
         'cfg_high_pass_cutoff_Hz': [run.cfg.high_pass_cutoff_Hz],
