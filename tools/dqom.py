@@ -108,15 +108,18 @@ def plot_npe(file_path, output_dir):
         t_minute=rq['event_ttt']*8e-9/60
         tmax = np.max(t_minute)
         tmin = np.min(t_minute)
+        ymax=1000
         nbinx = int((tmax-tmin)/5+0.5) # every 5 minutes a bin
         for r, b in enumerate(branchs):
+            if '_row' in b or '_col' in b:
+                ymax=400
             a = []
             t = []
             for i in range(len(rq[b])):
                 if rq['npulse'][i]>0:
                     t.append(t_minute[i])
                     a.append(rq[b][i][0])
-            h0 = ax[r].hist2d(t, a, bins=[nbinx, 100], range=((tmin,tmax),(0, 1000)), norm=colors.LogNorm(), cmap='jet');
+            h0 = ax[r].hist2d(t, a, bins=[nbinx, 100], range=((tmin,tmax),(0, ymax)), norm=colors.LogNorm(), cmap='jet');
             ax[r].set_xlabel('Time elapsed since run start [min]', fontsize=12)
             ax[r].set_ylabel('PE', fontsize=12)
             ax[r].set_title("%s" % b)
