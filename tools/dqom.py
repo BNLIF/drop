@@ -30,7 +30,7 @@ def extract_datetime_from_str(s):
         return dt
     except ValueError:
         print('Fail finding the datetime string from path: %s' % s)
-        
+
 def plot_channel_npe(file_path, output_dir):
     start_dt = extract_datetime_from_str(file_path)
     with uproot.open(file_path) as f:
@@ -70,15 +70,15 @@ def plot_channel_noise(file_path, output_dir):
         ax = ax.flatten()
         t_minute=rq['event_ttt']*8e-9/60
         tmax = np.max(t_minute)
-        tmin = np.min(t_minute)        
-        nbinx = int((tmax-tmin)/5+0.5) # every 5 minutes a bin 
+        tmin = np.min(t_minute)
+        nbinx = int((tmax-tmin)/5+0.5) # every 5 minutes a bin
         for r, ch in enumerate(ch_id):
             ch_mask=(rq['ch_id']==ch)
-            ch_roi0_std_pe=rq['ch_roi0_std_pe'][ch_mask].flatten()
-            h0 = ax[r].hist2d(t_minute, ch_roi0_std_pe, bins=[nbinx, 50], range=((tmin,tmax),(0, 0.5)), 
+            ch_roi0_std_pe=rq['ch_roi0_std_mV'][ch_mask].flatten()
+            h0 = ax[r].hist2d(t_minute, ch_roi0_std_pe, bins=[nbinx, 50], range=((tmin,tmax),(0, 5)),
                               norm=colors.LogNorm(), cmap='jet');
             ax[r].set_xlabel('Time elapsed since run start [min]', fontsize=12)
-            ax[r].set_ylabel('Channel Baseline Std [PE/ns]', fontsize=12)
+            ax[r].set_ylabel('Channel Baseline Std [mV]', fontsize=12)
             ax[r].set_title("ch_id=%d" % ch)
         plt.tight_layout()
     directory="%s/ChannelBaselineTrend" % output_dir
@@ -98,9 +98,9 @@ def plot_npe(file_path, output_dir):
         rq = f['event'].arrays(var_names, library='np')
 
         branchs= ['pulse_area_sum_pe', 'pulse_area_bot_pe', 'pulse_area_side_pe',
-                 'pulse_area_row1_pe', 'pulse_area_row2_pe', 'pulse_area_row3_pe','pulse_area_row4_pe', 
+                 'pulse_area_row1_pe', 'pulse_area_row2_pe', 'pulse_area_row3_pe','pulse_area_row4_pe',
                  'pulse_area_col1_pe', 'pulse_area_col2_pe', 'pulse_area_col3_pe','pulse_area_col4_pe']
-        
+
         ncol=3
         nrow=len(branchs)//ncol+1
         fig, ax = plt.subplots(nrow, ncol, figsize=[4*ncol,3*nrow])
@@ -108,7 +108,7 @@ def plot_npe(file_path, output_dir):
         t_minute=rq['event_ttt']*8e-9/60
         tmax = np.max(t_minute)
         tmin = np.min(t_minute)
-        nbinx = int((tmax-tmin)/5+0.5) # every 5 minutes a bin                                                                                                                                                               
+        nbinx = int((tmax-tmin)/5+0.5) # every 5 minutes a bin
         for r, b in enumerate(branchs):
             a = []
             t = []
@@ -125,7 +125,7 @@ def plot_npe(file_path, output_dir):
         if not os.path.exists(directory):
             os.makedirs(directory)
         plt.savefig('%s/%s.pdf' % (directory, start_dt.strftime("%y%m%dT%H%M")))
-        
+
 if __name__ == "__main__":
     if len(sys.argv)==3:
         plot_channel_npe(str(sys.argv[1]), str(sys.argv[2]))
