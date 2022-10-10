@@ -75,7 +75,7 @@ def plot_channel_noise(file_path, output_dir):
         for r, ch in enumerate(ch_id):
             ch_mask=(rq['ch_id']==ch)
             ch_roi0_std_pe=rq['ch_roi0_std_mV'][ch_mask].flatten()
-            h0 = ax[r].hist2d(t_minute, ch_roi0_std_pe, bins=[nbinx, 50], range=((tmin,tmax),(0, 5)),
+            h0 = ax[r].hist2d(t_minute, ch_roi0_std_pe, bins=[nbinx, 50], range=((tmin,tmax),(0, 10)),
                               norm=colors.LogNorm(), cmap='jet');
             ax[r].set_xlabel('Time elapsed since run start [min]', fontsize=12)
             ax[r].set_ylabel('Channel Baseline Std [mV]', fontsize=12)
