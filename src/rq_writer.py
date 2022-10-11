@@ -108,6 +108,12 @@ class RQWriter:
         self.pulse_fp40_row2 = []
         self.pulse_fp40_row3 = []
         self.pulse_fp40_row4 = []
+        self.pulse_fp30_sum = []
+        self.pulse_fp30_bot = []
+        self.pulse_fp30_side = []
+        self.pulse_fp20_sum = []
+        self.pulse_fp20_bot = []
+        self.pulse_fp20_side = []
         self.pulse_height_sum_pe = []
         self.pulse_height_bot_pe = []
         self.pulse_height_side_pe = []
@@ -211,6 +217,12 @@ class RQWriter:
             'fp40_row2': type_float,
             'fp40_row3': type_float,
             'fp40_row4': type_float,
+            'fp30_sum': type_float,
+            'fp30_bot': type_float,
+            'fp30_side': type_float,
+            'fp20_sum': type_float,
+            'fp20_bot': type_float,
+            'fp20_side': type_float,
             'height_sum_pe': type_float,
             'height_bot_pe': type_float,
             'height_side_pe': type_float,
@@ -365,6 +377,12 @@ class RQWriter:
         self.pulse_fp40_row2.append(pf.fp40_row2)
         self.pulse_fp40_row3.append(pf.fp40_row3)
         self.pulse_fp40_row4.append(pf.fp40_row4)
+        self.pulse_fp30_sum.append(pf.fp30_sum)
+        self.pulse_fp30_bot.append(pf.fp30_bot)
+        self.pulse_fp30_side.append(pf.fp30_side)
+        self.pulse_fp20_sum.append(pf.fp20_sum)
+        self.pulse_fp20_bot.append(pf.fp20_bot)
+        self.pulse_fp20_side.append(pf.fp20_side)
         self.pulse_height_sum_pe.append(pf.height_sum_pe)
         self.pulse_height_bot_pe.append(pf.height_bot_pe)
         self.pulse_height_side_pe.append(pf.height_side_pe)
@@ -497,6 +515,12 @@ class RQWriter:
             'fp40_row2': self.pulse_fp40_row2,
             'fp40_row3': self.pulse_fp40_row3,
             'fp40_row4': self.pulse_fp40_row4,
+            'fp30_sum': self.pulse_fp30_sum,
+            'fp30_bot': self.pulse_fp30_bot,
+            'fp30_side': self.pulse_fp30_side,
+            'fp20_sum': self.pulse_fp20_sum,
+            'fp20_bot': self.pulse_fp20_bot,
+            'fp20_side': self.pulse_fp20_side,
             'height_sum_pe': self.pulse_height_sum_pe,
             'height_bot_pe': self.pulse_height_bot_pe,
             'height_side_pe': self.pulse_height_side_pe,

@@ -77,6 +77,12 @@ class PulseFinder():
         self.fp40_row2 = []
         self.fp40_row3 = []
         self.fp40_row4 = []
+        self.fp30_sum = []
+        self.fp30_bot = []
+        self.fp30_side = []
+        self.fp20_sum = []
+        self.fp20_bot = []
+        self.fp20_side = []
         self.height_sum_pe = []
         self.height_bot_pe = []
         self.height_side_pe = []
@@ -257,6 +263,8 @@ class PulseFinder():
             self.aft90_row3_ns.append(util_nb.aft(t_ax[start:end], a_row3_int[start:end], 0.9))
             self.aft90_row4_ns.append(util_nb.aft(t_ax[start:end], a_row4_int[start:end], 0.9))
             end_fp40 = min(start+20, end);
+            end_fp30 = min(start+15, end);
+            end_fp20 = min(start+10, end);
             self.fp40_sum.append((a_sum_int[end_fp40]-a_sum_int[start])/self.area_sum_pe[-1])
             self.fp40_bot.append((a_bot_int[end_fp40]-a_bot_int[start])/self.area_bot_pe[-1])
             self.fp40_side.append((a_side_int[end_fp40]-a_side_int[start])/self.area_side_pe[-1])
@@ -264,6 +272,12 @@ class PulseFinder():
             self.fp40_row2.append((a_row2_int[end_fp40]-a_row4_int[start])/self.area_row2_pe[-1])
             self.fp40_row3.append((a_row3_int[end_fp40]-a_row4_int[start])/self.area_row3_pe[-1])
             self.fp40_row4.append((a_row4_int[end_fp40]-a_row4_int[start])/self.area_row4_pe[-1])
+            self.fp30_sum.append((a_sum_int[end_fp30]-a_sum_int[start])/self.area_sum_pe[-1])
+            self.fp30_bot.append((a_bot_int[end_fp30]-a_bot_int[start])/self.area_bot_pe[-1])
+            self.fp30_side.append((a_side_int[end_fp30]-a_side_int[start])/self.area_side_pe[-1])
+            self.fp20_sum.append((a_sum_int[end_fp20]-a_sum_int[start])/self.area_sum_pe[-1])
+            self.fp20_bot.append((a_bot_int[end_fp20]-a_bot_int[start])/self.area_bot_pe[-1])
+            self.fp20_side.append((a_side_int[end_fp20]-a_side_int[start])/self.area_side_pe[-1])
             # self.height_sum_pe.append(np.max(a_sum[start:end]))
             # self.height_bot_pe.append(np.max(a_bot[start:end]))
             # self.height_side_pe.append(np.max(a_side[start:end]))
