@@ -17,8 +17,9 @@ col4_pmt_channels: [312, 313, 314, 315]
 user_pmt_channels: [102, 103, 104, 107, 108, 109, 110, 111, 114, 115, 200, 201, 202, 203, 207, 208, 209]
 ch_saturated_threshold: 0 # threshold below which a channel is considered saturated. Unit: adc
 
-# PMT calibration file (DROP looks for this file in yaml directory)
-spe_fit_results_file: 'bnl1t_spe_fit_results_220819b.csv'
+# relative path to the PMT calibration file (DROP looks for this in yaml directory)
+spe_fit_results_file: 'spe/b/bnl1t_spe_fit_results_220819T1401.csv'
+interpolate_spe: True # bool
 
 # Noise filter
 apply_high_pass_filter: False
@@ -30,8 +31,8 @@ pre_pulse: 1
 post_pulse: 5
 
 # ROI stands for Region of Interest. Ex. Several variables (ex. max height, integral) are computed within ROI.
-roi_start_ns: [-200, -20, 160]
-roi_end_ns: [-120, 60, 4000]
+roi_start_ns: [-200, -22, 200]
+roi_end_ns: [-100, 78, 4000]
 
 # PulseFinder: scipy peak finding
 pulse_finder_algo: 0

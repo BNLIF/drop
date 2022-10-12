@@ -240,7 +240,6 @@ class EventDisplay():
         plt.xlabel('Time [ns]')
         plt.grid(linewidth=0.5, alpha=0.5)
 
-
         ax2 = ax1.twinx()
         ax2.plot(t, a_int, color='k', label='accumulated', linewidth=1)
         ax2.legend(loc='center right')
@@ -282,11 +281,12 @@ class EventDisplay():
             a = self.wfm_list[i].amp_mV[ch]
             left_ylabel="mV / 2ns"
             right_ylabel="mV * ns"
+            a_int = np.cumsum(a)*SAMPLE_TO_NS
         else:
             a = self.wfm_list[i].amp_pe[ch]
             left_ylabel="PE / 2ns"
             right_ylabel="PE"
-        a_int = np.cumsum(a)*(SAMPLE_TO_NS) # amp_mV_int does not exist
+            a_int = self.wfm_list[i].amp_pe_int[ch]
 
         t = np.arange(0, len(a)*2, 2)
         ax1.plot(t, a, label=ch[4:]) # remove adc_ from ch names
@@ -328,6 +328,7 @@ class EventDisplay():
         self.plot_counter += 1
         a = self.wfm_list[i].raw_data[ch]
         plt.plot(a, label=ch[4:])
+        plt.hlines(np.median(a), 0, len(a), linestyle='dashed', color='gray', label='median')
         plt.legend(loc=0)
         plt.title('event_id=%d' % self.grabbed_event_id[i])
         ymin, ymax = plt.ylim()
@@ -522,7 +523,7 @@ class EventDisplay():
             area_max = np.max([val, area_max])
 
         # define color
-        cmap = plt.cm.jet
+        cmap = plt.cm.YlOrRd
         norm = matplotlib.colors.Normalize(vmin=0, vmax=area_max)
 
         # draw active PMT whose color scale with integral

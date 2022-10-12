@@ -10,10 +10,12 @@
 #======================================
 # Run Parameters
 run_script_option=0 #0: run all; 1: run raw_data_rooter.py; 2: run_drop.py; 3: dqom.py
-drop_version=v1.0.1
+drop_version=v1.0.1e
 subdir=muon
-config_file=config.yaml
 #====================================== 
+
+# name of the yaml config file you passed in
+config_file=$2
 
 function do_raw_data_rooter() {
     local file_path=$1

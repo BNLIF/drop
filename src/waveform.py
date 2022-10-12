@@ -11,14 +11,12 @@ from numpy import median, cumsum
 import numpy as np
 import matplotlib.pylab as plt
 from matplotlib import cm
-from numpy.lib.stride_tricks import sliding_window_view
-from utilities import generate_colormap, digitial_butter_highpass_filter
-import re
+import os
 import sys
-
-from yaml_reader import SAMPLE_TO_NS, YamlReader
-
-EPS=1e-6
+sys.path.append(os.environ['LIB_DIR'])
+import utilities_numba as util_nb
+from yaml_reader import YamlReader, SAMPLE_TO_NS, MY_QUANTILES
+from utilities import generate_colormap, digitial_butter_highpass_filter
 
 class Waveform():
     """
@@ -109,7 +107,7 @@ class Waveform():
         else:
             print('Sorry pal. Fan-out not yet implemented.')
 
-    def get_flat_baseline(self, val):
+    def get_flat_baseline(self, val, summed_channel=False):
         """
         Define a flat baseline. Find the median and std, and return them
 
@@ -119,7 +117,11 @@ class Waveform():
         Return:
             float, float
         """
-        qx = quantile(val, [0.15865, 0.5, 0.84135]) #med, and central 68%
+        # qx = np.quantile(val, MY_QUANTILES)
+        if summed_channel:
+            qx = util_nb.quantile_f8(val, MY_QUANTILES)
+        else:
+            qx = util_nb.quantile_u2(val, MY_QUANTILES)
         return qx[1], abs(qx[2]-qx[0])/2
 
     def subtract_flat_baseline(self):
@@ -233,7 +235,7 @@ class Waveform():
                 if ch in self.cfg.user_pmt_channels:
                     user_pe += val
         self.amp_pe['sum'] = tot_pe
-        med, std = self.get_flat_baseline(tot_pe)
+        med, std = self.get_flat_baseline(tot_pe, summed_channel=True)
         self.flat_base_pe['sum'] = med
         self.flat_base_std_pe['sum'] = std
         self.amp_pe['sum_bot'] = bt_pe
@@ -248,6 +250,16 @@ class Waveform():
         self.amp_pe['sum_col4'] = c4_pe
         self.amp_pe['sum_user'] = user_pe
         return None
+
+    def define_time_axis(self):
+        """
+        This is the time axis after daisy chain correction
+        Not often use
+        """
+        n_samp = len(self.amp_pe['sum'])
+        t=np.linspace(0, (n_samp-1)*SAMPLE_TO_NS, n_samp)
+        self.time_axis_ns = t
+        self.n_samp = n_samp
 
     def integrate_waveform(self):
         """
@@ -275,37 +287,40 @@ class Waveform():
         whose start_ns and end_ns are defined in yaml config file
 
         The following info are calculated:
-        - area
-        - height
-        - low
-        - std
+        - area, in unit of PE
+        - height, in unit of PE/ns
+        - low, in uint of PE/ns
+        - std, in unit of PE/ns and mV
         """
         self.roi_area_pe=[]
         self.roi_height_pe=[]
         self.roi_low_pe=[]
         self.roi_std_pe=[]
+        self.roi_std_mV=[]
         for i in range(len(self.cfg.roi_start_ns)):
             start= self.trg_pos + (self.cfg.roi_start_ns[i]//int(SAMPLE_TO_NS))
             end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
-
-            if start<0:
-                start=0
-            height={}
-            area = {}
-            low = {}
-            std = {}
+            start=max(0, start)
+            end = min(self.n_samp-1, end)
+            height_pe={}
+            area_pe = {}
+            low_pe = {}
+            std_pe = {}
+            std_mV = {}
             for ch, a in self.amp_pe.items():
-                if end>=len(a):
-                    end = len(a)-1
-                height[ch] = np.max(a[start:end])
-                low[ch] = np.min(a[start:end])
-                std[ch] = np.std(a[start:end])
+                if ch[0:4]!='adc_':
+                    continue
+                height_pe[ch] = util_nb.max(a[start:end])
+                low_pe[ch] = util_nb.min(a[start:end])
+                std_pe[ch] = util_nb.std(a[start:end])
+                std_mV[ch] = std_pe[ch]*50*self.spe_mean[ch]
                 a_int =  self.amp_pe_int[ch]
-                area[ch] = a_int[end]-a_int[start]
-            self.roi_height_pe.append(height)
-            self.roi_area_pe.append(area)
-            self.roi_low_pe.append(low)
-            self.roi_std_pe.append(std)
+                area_pe[ch] = a_int[end]-a_int[start]
+            self.roi_height_pe.append(height_pe)
+            self.roi_area_pe.append(area_pe)
+            self.roi_low_pe.append(low_pe)
+            self.roi_std_pe.append(std_pe)
+            self.roi_std_mV.append(std_mV)
         return None
 
     def calc_aux_ch_info(self):

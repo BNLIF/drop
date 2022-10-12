@@ -5,6 +5,7 @@ from numpy import array
 The following parameters do not change often. So hard coded here
 """
 SAMPLE_TO_NS=2
+MY_QUANTILES= array([0.15865, 0.5, 0.84135])
 
 class ScipyPeakFindingParam():
     """
@@ -87,6 +88,7 @@ class YamlReader():
         self.ch_saturated_threshold = int(self.data['ch_saturated_threshold'])
 
         self.spe_fit_results_file = self.data['spe_fit_results_file']
+        self.interpolate_spe = bool(self.data['interpolate_spe'])
 
         self.daisy_chain = bool(self.data['daisy_chain'])
         self.apply_high_pass_filter = bool(self.data['apply_high_pass_filter'])
