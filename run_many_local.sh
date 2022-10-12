@@ -14,7 +14,7 @@ drop_version=v1.0.2
 subdir=muon
 #====================================== 
 
-# name of the yaml config file you passed in
+# path to the yaml config file
 config_file=$2
 
 function do_raw_data_rooter() {
@@ -36,7 +36,7 @@ function do_run_drop() {
 	case "$fpath" in \#*) continue ;; esac
 	echo " "
 	echo "processing $fpath ..."
-	python src/run_drop.py -i ${fpath} -c yaml/${config_file} --output_dir=${output_dir}
+	python src/run_drop.py -i ${fpath} -c ${config_file} --output_dir=${output_dir}
     done < $file_path
 }
 
