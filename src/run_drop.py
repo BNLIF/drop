@@ -124,7 +124,7 @@ class RunDROP():
         interpolate.
         """
         self.spe_mean = {}
-        fpath = YAML_DIR + '/' +self.cfg.spe_fit_results_file
+        fpath = self.cfg.spe_fit_results_file
         if self.cfg.interpolate_spe:
             dt = self.extract_datetime_from_str(self.if_path)
             fdir = os.path.dirname(fpath)
