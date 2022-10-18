@@ -20,8 +20,8 @@
 - `ch_saturated_threshold`: int. Threshold below which a channel is considered saturated. Unit: ADC.
 
 ## Calibration info
-- `spe_fit_results_file`: str. SPE calibration are saved to a csv file. By default YamlReader looks for this file in yaml/spe directory. Specify the relative path with respect to yaml directory. For Example: `spe/b/bnl1t_spe_fit_results_220826.csv`
-- `interpolate_spe`: bool. If `False`, use calibrated PMT info specified by `spe_fit_results_file` to do the spe normalization. If `True`, DROP will neglect `spe_fit_results_file` and automatically search for the two most recent led calibration results (one before and one after) in `yaml/spe/b/` directory according to the date. It will then do a linear interpolation between the two calibration results. The subdirectory `b/` just tracks PMT SPE fitting algorithm (ex. suppose one day we decide to use more sophisticated algorithm than simple Gaussian fit, we will create a new subdirectory for new calibration results). **Note: Be careful when HV is adjusted. You must take two consecutive LED runs, one with the original HV, and another with new HV value**
+- `spe_fit_results_file`: str. SPE calibration are saved to a csv file. Specify the absolute path to the file. All PMT calibration results are saved in CERNBOX under `WbLS-DATA/db/spe`.
+- `interpolate_spe`: bool. If `False`, use calibrated PMT info specified by `spe_fit_results_file` to do the spe normalization. If `True`, DROP will use the directory specified by `spe_fit_results_file` and automatically search for the two most recent led calibration results by datetime (one before and one after) in it. It will then do a linear interpolation between the two calibration results. The subdirectory `b/` just tracks PMT SPE fitting algorithm (ex. suppose one day we decide to use more sophisticated algorithm than simple Gaussian fit, we will create a new subdirectory for new calibration results). **Note: Be careful when HV is adjusted. You must take two consecutive LED runs, one with the original HV, and another with new HV value**
 
 ## Event Reconstruction Config
 
