@@ -30,6 +30,7 @@ function do_raw_data_rooter() {
 
 function do_run_drop() {
     local file_path=$1
+    local config_file=$2
     output_dir=/media/disk_a/CERNBOX/WbLS-DATA/rq/${drop_version}/${subdir}
     mkdir -p $output_dir
     while read fpath; do
@@ -59,7 +60,7 @@ if [ $run_script_option -eq 1 ]; then
 fi
 
 if [ $run_script_option -eq 2 ]; then
-    do_run_drop $file_path
+    do_run_drop $file_path $config_file
 fi
 
 if [ $run_script_option -eq 3 ]; then
@@ -73,7 +74,7 @@ if [ $run_script_option -eq 0 ]; then
     
     sed -i -e 's/binary/root/g' $tmp
     sed -i -e 's/.bin/.root/g' $tmp
-    do_run_drop $tmp
+    do_run_drop $tmp $config_file
 
     olddir="raw_root/${subdir}"
     newdir="rq/${drop_version}/${subdir}"
