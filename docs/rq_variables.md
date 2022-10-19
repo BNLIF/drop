@@ -156,10 +156,6 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_fp40_sum         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in summed PMT. Unit: dimensionless  |
 | pulse_fp40_bot         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in bottom PMT. Unit: dimensionless  |
 | pulse_fp40_side         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in side PMT. Unit: dimensionless  |
-| pulse_fp40_row1         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in row1 PMT. Unit: dimensionless  |
-| pulse_fp40_row2         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in row2 PMT. Unit: dimensionless  |
-| pulse_fp40_row3         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in row3 PMT. Unit: dimensionless  |
-| pulse_fp40_row4         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in row4 PMT. Unit: dimensionless  |
 | pulse_height_sum_pe     | float32[npulse]	| max height of this pulse in the sum channel, unit pe/ns 		|
 | pulse_height_bot_pe     | float32[npulse]	| max height of this pulse in the sum of bottom PMTs, unit pe/ns	|
 | pulse_height_side_pe     | float32[npulse]	| max height of this pulse in the summed side PMTs, unit pe/ns  |

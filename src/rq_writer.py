@@ -104,10 +104,6 @@ class RQWriter:
         self.pulse_fp40_sum = []
         self.pulse_fp40_bot = []
         self.pulse_fp40_side = []
-        self.pulse_fp40_row1 = []
-        self.pulse_fp40_row2 = []
-        self.pulse_fp40_row3 = []
-        self.pulse_fp40_row4 = []
         self.pulse_fp30_sum = []
         self.pulse_fp30_bot = []
         self.pulse_fp30_side = []
@@ -213,10 +209,6 @@ class RQWriter:
             'fp40_sum': type_float,
             'fp40_bot': type_float,
             'fp40_side': type_float,
-            'fp40_row1': type_float,
-            'fp40_row2': type_float,
-            'fp40_row3': type_float,
-            'fp40_row4': type_float,
             'fp30_sum': type_float,
             'fp30_bot': type_float,
             'fp30_side': type_float,
@@ -373,10 +365,6 @@ class RQWriter:
         self.pulse_fp40_sum.append(pf.fp40_sum)
         self.pulse_fp40_bot.append(pf.fp40_bot)
         self.pulse_fp40_side.append(pf.fp40_side)
-        self.pulse_fp40_row1.append(pf.fp40_row1)
-        self.pulse_fp40_row2.append(pf.fp40_row2)
-        self.pulse_fp40_row3.append(pf.fp40_row3)
-        self.pulse_fp40_row4.append(pf.fp40_row4)
         self.pulse_fp30_sum.append(pf.fp30_sum)
         self.pulse_fp30_bot.append(pf.fp30_bot)
         self.pulse_fp30_side.append(pf.fp30_side)
@@ -511,10 +499,6 @@ class RQWriter:
             'fp40_sum': self.pulse_fp40_sum,
             'fp40_bot': self.pulse_fp40_bot,
             'fp40_side': self.pulse_fp40_side,
-            'fp40_row1': self.pulse_fp40_row1,
-            'fp40_row2': self.pulse_fp40_row2,
-            'fp40_row3': self.pulse_fp40_row3,
-            'fp40_row4': self.pulse_fp40_row4,
             'fp30_sum': self.pulse_fp30_sum,
             'fp30_bot': self.pulse_fp30_bot,
             'fp30_side': self.pulse_fp30_side,

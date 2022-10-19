@@ -73,10 +73,6 @@ class PulseFinder():
         self.fp40_sum = []
         self.fp40_bot = []
         self.fp40_side = []
-        self.fp40_row1 = []
-        self.fp40_row2 = []
-        self.fp40_row3 = []
-        self.fp40_row4 = []
         self.fp30_sum = []
         self.fp30_bot = []
         self.fp30_side = []
@@ -268,10 +264,6 @@ class PulseFinder():
             self.fp40_sum.append((a_sum_int[end_fp40]-a_sum_int[start])/self.area_sum_pe[-1])
             self.fp40_bot.append((a_bot_int[end_fp40]-a_bot_int[start])/self.area_bot_pe[-1])
             self.fp40_side.append((a_side_int[end_fp40]-a_side_int[start])/self.area_side_pe[-1])
-            self.fp40_row1.append((a_row1_int[end_fp40]-a_row4_int[start])/self.area_row1_pe[-1])
-            self.fp40_row2.append((a_row2_int[end_fp40]-a_row4_int[start])/self.area_row2_pe[-1])
-            self.fp40_row3.append((a_row3_int[end_fp40]-a_row4_int[start])/self.area_row3_pe[-1])
-            self.fp40_row4.append((a_row4_int[end_fp40]-a_row4_int[start])/self.area_row4_pe[-1])
             self.fp30_sum.append((a_sum_int[end_fp30]-a_sum_int[start])/self.area_sum_pe[-1])
             self.fp30_bot.append((a_bot_int[end_fp30]-a_bot_int[start])/self.area_bot_pe[-1])
             self.fp30_side.append((a_side_int[end_fp30]-a_side_int[start])/self.area_side_pe[-1])
