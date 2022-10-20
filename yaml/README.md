@@ -17,6 +17,7 @@
 - `col3_pmt_channels`: list of str, or list of int. All b3_p* side pmts.
 - `col4_pmt_channels`: list of str, or list of int. All b4_p* side pmts.
 - `user_pmt_channels`: list of str, or list of int. User-defined list of channel to sum.
+- `skip_pmt_channels`: list of str, or list of int. Channels in this list will be neglected in sum channel calculation. Usually empty. But sometimes we want to skip bad PMTs (gain instability etc).  
 - `ch_saturated_threshold`: int. Threshold below which a channel is considered saturated. Unit: ADC.
 
 ## Calibration info
