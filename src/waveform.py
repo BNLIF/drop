@@ -201,6 +201,8 @@ class Waveform():
             - "sum" means the sum of all PMTs
             - "bot" means the sum of all bottom PMTs
             - "side" means the sum of all side PMTs
+            - 'user' means a costumized list
+            - all in skip
         """
         tot_pe = 0
         bt_pe = 0
@@ -211,6 +213,8 @@ class Waveform():
         user_pe = 0
         for ch, val in self.amp_pe.items():
             if 'adc_' in ch:
+                if ch in self.cfg.skip_pmt_channels:
+                    continue
                 tot_pe += val
                 if ch in self.cfg.bottom_pmt_channels:
                     bt_pe += val
