@@ -74,7 +74,7 @@ class RawDataFile:
                 w = self.get_next_n_words(1)
                 if w is None:
                     return None
-                if not w:
+                if not w.tolist():
                     return None
                 i0 = w[0]
                 if i0 == self.expected_first_4_bytes:
