@@ -42,7 +42,6 @@ class RunDROP():
         self.if_path = args.if_path # save a copy of input file path
         # config
         self.cfg  = YamlReader(args.yaml)
-
         # variable
         self.batch_id = 0
         self.batch = None
@@ -179,7 +178,6 @@ class RunDROP():
             self.pf_list = []
         else:
             writer.reset()
-
         # create waveform, PulseFinder,
         wfm = Waveform(self.cfg)
         wfm.ch_names = self.ch_names
@@ -187,7 +185,6 @@ class RunDROP():
         wfm.ch_name_to_id_dict=self.ch_name_to_id_dict
         wfm.n_boards = self.n_boards
         wfm.spe_mean = self.spe_mean
-
         # create PulseFinder
         pf = PulseFinder(self.cfg, wfm)
 
@@ -197,7 +194,6 @@ class RunDROP():
             event_ttt = batch[i].event_ttt
             if event_id<self.start_id or event_id>=self.end_id:
                 continue
-
             # waveform
             wfm.reset()
             wfm.set_raw_data(batch[i])
@@ -225,7 +221,6 @@ class RunDROP():
                 self.pf_list.append(pf)
             else:
                 writer.fill(wfm, pf)
-
         if writer is not None:
             writer.dump_event_rq()
         self.batch_id += 1
@@ -269,7 +264,6 @@ def main(argv):
     writer.create_output()
 
     batch_list = uproot.iterate('%s:daq' % args.if_path, step_size=run.cfg.batch_size)
-
     for batch in batch_list:
         run.process_batch(batch, writer)
         run.show_progress()
@@ -322,9 +316,7 @@ def main(argv):
         'cfg_scipy_pf_pars_prominence': [run.cfg.scipy_pf_pars.prominence],
         'cfg_spe_height_threshold': [run.cfg.spe_height_threshold],
     })
-
     writer.dump_pmt_info(run.spe_fit_results)
-
     # remeber to close file
     writer.close()
 

@@ -75,6 +75,7 @@ class RawDataFile:
                 if w is None:
                     return None
                 if not w.tolist():
+                    print(w)
                     return None
                 i0 = w[0]
                 if i0 == self.expected_first_4_bytes:

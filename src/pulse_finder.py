@@ -203,7 +203,6 @@ class PulseFinder():
         """
         t_ax = self.wfm.time_axis_ns
         height_thresh = self.cfg.spe_height_threshold
-
         # calcualte pulse level variables (one per pulse)
         for i in self.id:
             start = self.start[i] # start of pulse i in sample
@@ -279,7 +278,6 @@ class PulseFinder():
             self.ptime_ns.append( (argmax(a_sum[start:end])+start)*SAMPLE_TO_NS )
             sba = (self.area_side_pe[-1]-self.area_bot_pe[-1])/self.area_sum_pe[-1]
             self.sba.append( sba ) # side-to-bottom asymmetry
-
             area_max_frac = 0
             area_max_ch_id = 0
             area_bot_max_frac = 0
