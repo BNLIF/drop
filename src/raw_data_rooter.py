@@ -242,6 +242,7 @@ class RawDataRooter():
                 if ch in self.event_queue[trg_id]:
                     # duplicated, send warning
                     print("WARNING: duplicated trigger ???")
+                    self.skipped_event_id = trg_id
                     return RunStatus.SKIP
                 else:
                     self.event_queue[trg_id][ch] = val
