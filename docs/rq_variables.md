@@ -73,7 +73,7 @@ So what is an event?
 The short version: an event is a muon (most of the time) passing through the top paddles and produce detectable lights in the liquid (water or WbLS).
 
 The long version:
-- **Triggering**. We have two scintillator paddles (dimension: 5 x 4 inch) on top of the tank. The two paddles are oriented 90 degree with each other. The two paddles are connected to discriminators (50 ns length), and whenever there is a coincidence between the two discriminators, we have a trigger signal. The three v1730s digitizers are in daisy chain. When a trigger signal is received by the first board (master), it’s propagated to the second board (slave 1), and subsequently propagated to the third board (slave 2). The default DAQ length for muon data is 4 us per board (500 ns before, and 3.5us after trigger). The trigger propagation within a board has a 48 ns delay, so the waveform recorded by three boards will have offset in time (DROP took care of them when calculating ntuple variables). 
+- **Triggering**. We have two scintillator paddles (dimension: 5 x 4 inch) on top of the tank. The two paddles are oriented 90 degree with each other. The two paddles are connected to discriminators (50 ns length), and whenever there is a coincidence between the two discriminators, we have a trigger signal. The three v1730s digitizers are in daisy chain. When a trigger signal is received by the first board (master), it’s propagated to the second board (slave 1), and subsequently propagated to the third board (slave 2). The default DAQ length for muon data is 4 us per board (500 ns before, and 3.5us after trigger). The trigger propagation within a board has a 48 ns delay, so the waveform recorded by three boards will have offset in time (DROP took care of them when calculating ntuple variables).
 - **Data processing**. All three boards data are stored in the same binary file. During the conversion from raw binary to raw root format, board 1, 2, 3 are matched based on their event Id. An event in raw data are really just the adc traces from the 48 all channels (3 boards, 16ch each) — 46 channels are used for PMTs, and 2 are used for the bottom paddles. Then DROP converts the raw waveform into ntuple format, and that’s the variables you see in this document.
 
 ### Event level variables
@@ -153,6 +153,9 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_aft90_row2_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row2 PMT pulse area. Unit: ns  |
 | pulse_aft90_row3_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row3 PMT pulse area. Unit: ns  |
 | pulse_aft90_row4_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row4 PMT pulse area. Unit: ns  |
+| pulse_rise_sum_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using all PMTs. No fit. Unit: ns  |
+| pulse_rise_bot_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using bottom PMTs. No fit. Unit: ns  |
+| pulse_rise_side_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using side PMTs. No fit. Unit: ns  |
 | pulse_fp40_sum         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in summed PMT. Unit: dimensionless  |
 | pulse_fp40_bot         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in bottom PMT. Unit: dimensionless  |
 | pulse_fp40_side         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in side PMT. Unit: dimensionless  |

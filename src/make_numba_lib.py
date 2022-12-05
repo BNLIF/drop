@@ -81,5 +81,29 @@ def aft(t, a_int, y):
     i = np.where(mask)[0][0]
     return x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
 
+@cc.export('rise_time', 'f8(f8[:], f8[:])')
+def rise_time(x_arr, y_arr):
+    """
+    Get rise time (10% to 90% height).
+    Similar to linear_interpolation only rising edge.
+
+    Args:
+        x_arr: this is time axis
+        y_arr: this is baseline subtracted waveform (baseline must be at ~0).
+    """
+    x_l = x_arr[:-1]; x_h = x_arr[1:]
+    y_l = y_arr[:-1]; y_h = y_arr[1:]
+    # time rise to 10% height
+    y = np.max(y_arr)*0.1
+    msk= (y_l<=y) & (y<y_h)
+    i = np.where(msk)[0][0]
+    t_10 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
+    # time rise to 90% height
+    y = np.max(y_arr)*0.9
+    msk= (y_l<=y) & (y<y_h)
+    i = np.where(msk)[0][0]
+    t_90 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
+    return t_90-t_10
+
 if __name__ == "__main__":
     cc.compile()
