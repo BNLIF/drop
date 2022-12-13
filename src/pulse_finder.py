@@ -260,9 +260,11 @@ class PulseFinder():
             self.aft90_row2_ns.append(util_nb.aft(t_ax[start:end], a_row2_int[start:end], 0.9))
             self.aft90_row3_ns.append(util_nb.aft(t_ax[start:end], a_row3_int[start:end], 0.9))
             self.aft90_row4_ns.append(util_nb.aft(t_ax[start:end], a_row4_int[start:end], 0.9))
+            # print('debug: ', t_ax[start:end], a_sum[start:end], a_bot[start:end], a_side[start:end])
             self.rise_sum_ns.append(util_nb.rise_time(t_ax[start:end], a_sum[start:end]))
             self.rise_bot_ns.append(util_nb.rise_time(t_ax[start:end], a_bot[start:end]))
             self.rise_side_ns.append(util_nb.rise_time(t_ax[start:end], a_side[start:end]))
+
             end_fp40 = min(start+20, end);
             end_fp30 = min(start+15, end);
             end_fp20 = min(start+10, end);

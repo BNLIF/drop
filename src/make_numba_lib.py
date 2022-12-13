@@ -96,13 +96,17 @@ def rise_time(x_arr, y_arr):
     """
     x_l = x_arr[:-1]; x_h = x_arr[1:]
     y_l = y_arr[:-1]; y_h = y_arr[1:]
+    ymax = np.max(y_arr)
+    imax = np.argmax(y_arr)
+    if ymax<0.125 or imax==0:
+        return -1
     # time rise to 10% height
-    y = np.max(y_arr)*0.1
+    y = ymax*0.1
     msk= (y_l<=y) & (y<y_h)
     i = np.where(msk)[0][0]
     t_10 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
     # time rise to 90% height
-    y = np.max(y_arr)*0.9
+    y = ymax*0.9
     msk= (y_l<=y) & (y<y_h)
     i = np.where(msk)[0][0]
     t_90 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
