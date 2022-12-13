@@ -84,33 +84,36 @@ def aft(t, a_int, y):
         i = np.where(mask)[0][0]
         return x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
 
-@cc.export('rise_time', 'f8(f8[:], f8[:])')
-def rise_time(x_arr, y_arr):
+@cc.export('rise_time', 'f8(f8[:], f8[:], f8)')
+def rise_time(x_arr, y_arr, spe_thresh=0.125):
     """
     Get rise time (10% to 90% height).
     Similar to linear_interpolation only rising edge.
 
     Args:
-        x_arr: this is time axis
-        y_arr: this is baseline subtracted waveform (baseline must be at ~0).
+        x_arr: this is time axis. Array.
+        y_arr: this is baseline subtracted waveform (baseline must be at ~0). Array.
+        spe_thresh: SPE threshold. float
     """
+    # if peak is below thresold to be considered a SPE
+    ymax = np.max(y_arr)
+    if ymax<spe_thresh:
+        return -1
+    # if peak is the first element
+    imax = np.argmax(y_arr)
+    if imax==0:
+        return 0
+    y10 = ymax*0.1 # 10% of max height
+    y90 = ymax*0.9 # 90% of max height
     x_l = x_arr[:-1]; x_h = x_arr[1:]
     y_l = y_arr[:-1]; y_h = y_arr[1:]
-    ymax = np.max(y_arr)
-    imax = np.argmax(y_arr)
-    if ymax<0.125 or imax==0:
-        return -1
-    # time rise to 10% height
-    y = ymax*0.1
-    msk= (y_l<=y) & (y<y_h)
-    i = np.where(msk)[0][0]
-    t_10 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
-    # time rise to 90% height
-    y = ymax*0.9
-    msk= (y_l<=y) & (y<y_h)
-    i = np.where(msk)[0][0]
-    t_90 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y-y_l[i])
-    return t_90-t_10
+    msk10 = np.where((y_l<=y10) & (y10<y_h))[0]
+    msk90 = np.where((y_l<=y90) & (y90<y_h))[0]
+    if msk10.size==0 or msk90.size==0:
+        return -2
+    i = msk10[0]; t10 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y10-y_l[i])
+    i = msk90[0]; t90 = x_l[i]+(x_h[i]-x_l[i])/(y_h[i]-y_l[i])*(y90-y_l[i])
+    return t90-t10
 
 if __name__ == "__main__":
     cc.compile()

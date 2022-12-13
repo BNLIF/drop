@@ -205,7 +205,7 @@ class PulseFinder():
         ... [add more if you wish]
         """
         t_ax = self.wfm.time_axis_ns
-        height_thresh = self.cfg.spe_height_threshold
+        spe_thr = self.cfg.spe_height_threshold
         # calcualte pulse level variables (one per pulse)
         for i in self.id:
             start = self.start[i] # start of pulse i in sample
@@ -261,9 +261,9 @@ class PulseFinder():
             self.aft90_row3_ns.append(util_nb.aft(t_ax[start:end], a_row3_int[start:end], 0.9))
             self.aft90_row4_ns.append(util_nb.aft(t_ax[start:end], a_row4_int[start:end], 0.9))
             # print('debug: ', t_ax[start:end], a_sum[start:end], a_bot[start:end], a_side[start:end])
-            self.rise_sum_ns.append(util_nb.rise_time(t_ax[start:end], a_sum[start:end]))
-            self.rise_bot_ns.append(util_nb.rise_time(t_ax[start:end], a_bot[start:end]))
-            self.rise_side_ns.append(util_nb.rise_time(t_ax[start:end], a_side[start:end]))
+            self.rise_sum_ns.append(util_nb.rise_time(t_ax[start:end], a_sum[start:end], spe_thr))
+            self.rise_bot_ns.append(util_nb.rise_time(t_ax[start:end], a_bot[start:end], spe_thr))
+            self.rise_side_ns.append(util_nb.rise_time(t_ax[start:end], a_side[start:end], spe_thr))
 
             end_fp40 = min(start+20, end);
             end_fp30 = min(start+15, end);
@@ -297,7 +297,7 @@ class PulseFinder():
                     a = self.wfm.amp_pe[ch]
                     a_int = self.wfm.amp_pe_int[ch]
                     area = a_int[end]-a_int[start]
-                    if self.height_ch_pe[i][ch]>height_thresh:
+                    if self.height_ch_pe[i][ch]>spe_thr:
                         coin += 1
                     if area>area_max_frac:
                         area_max_frac = area
