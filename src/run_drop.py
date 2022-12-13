@@ -155,7 +155,8 @@ class RunDROP():
                     x0 = df0['spe_mean'][ch]
                     x1 = df1['spe_mean'][ch]
                     self.spe_mean[ch] = x0 + (x1-x0)/(t0+t1) * t0
-                    self.spe_fit_results['spe_mean'][ch] = self.spe_mean[ch]
+                    # self.spe_fit_results['spe_mean'][ch] = self.spe_mean[ch]
+                    self.spe_fit_results.loc[ch, 'spe_mean'] = self.spe_mean[ch]
                 print('Info: Intepolate from calibration results', p0, 'and', p1)
         else:
             self._set_spe_result(fpath)
