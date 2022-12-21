@@ -73,6 +73,9 @@ class PulseFinder():
         self.rise_sum_ns = []
         self.rise_bot_ns = []
         self.rise_side_ns = []
+        self.fall_time_sum_ns = []
+        self.fall_time_bot_ns = []
+        self.fall_time_side_ns = []
         self.fp40_sum = []
         self.fp40_bot = []
         self.fp40_side = []
@@ -264,7 +267,9 @@ class PulseFinder():
             self.rise_sum_ns.append(util_nb.rise_time(t_ax[start:end], a_sum[start:end], spe_thr))
             self.rise_bot_ns.append(util_nb.rise_time(t_ax[start:end], a_bot[start:end], spe_thr))
             self.rise_side_ns.append(util_nb.rise_time(t_ax[start:end], a_side[start:end], spe_thr))
-
+            self.fall_sum_ns.append(util_nb.fall_time(t_ax[start:end], a_sum[start:end], spe_thr))
+            self.fall_bot_ns.append(util_nb.fall_time(t_ax[start:end], a_bot[start:end], spe_thr))
+            self.fall_side_ns.append(util_nb.fall_time(t_ax[start:end], a_side[start:end], spe_thr))
             end_fp40 = min(start+20, end);
             end_fp30 = min(start+15, end);
             end_fp20 = min(start+10, end);
