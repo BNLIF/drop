@@ -126,7 +126,7 @@ class EventDisplay():
 
         self.wfm_list = []
         self.pf_list = []
-        batch_list = uproot.iterate('%s:daq' % self.args.if_path, step_size=1000)
+        batch_list = uproot.iterate('%s:daq' % self.args.if_path, step_size=100)
         for batch in batch_list:
             arr = batch.event_id.to_numpy()
             mask = np.isin(arr, wanted_event_id)
