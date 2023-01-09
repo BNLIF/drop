@@ -104,6 +104,9 @@ class RQWriter:
         self.pulse_rise_sum_ns = []
         self.pulse_rise_bot_ns = []
         self.pulse_rise_side_ns= []
+        self.pulse_fall_sum_ns = []
+        self.pulse_fall_bot_ns = []
+        self.pulse_fall_side_ns= []
         self.pulse_fp40_sum = []
         self.pulse_fp40_bot = []
         self.pulse_fp40_side = []
@@ -212,6 +215,9 @@ class RQWriter:
             'rise_sum_ns': type_float,
             'rise_bot_ns': type_float,
             'rise_side_ns': type_float,
+            'fall_sum_ns': type_float,
+            'fall_bot_ns': type_float,
+            'fall_side_ns': type_float,
             'fp40_sum': type_float,
             'fp40_bot': type_float,
             'fp40_side': type_float,
@@ -371,6 +377,9 @@ class RQWriter:
         self.pulse_rise_sum_ns.append(pf.rise_sum_ns)
         self.pulse_rise_bot_ns.append(pf.rise_bot_ns)
         self.pulse_rise_side_ns.append(pf.rise_side_ns)
+        self.pulse_fall_sum_ns.append(pf.fall_sum_ns)
+        self.pulse_fall_bot_ns.append(pf.fall_bot_ns)
+        self.pulse_fall_side_ns.append(pf.fall_side_ns)
         self.pulse_fp40_sum.append(pf.fp40_sum)
         self.pulse_fp40_bot.append(pf.fp40_bot)
         self.pulse_fp40_side.append(pf.fp40_side)
@@ -508,6 +517,9 @@ class RQWriter:
             'rise_sum_ns': self.pulse_rise_sum_ns,
             'rise_bot_ns': self.pulse_rise_bot_ns,
             'rise_side_ns': self.pulse_rise_side_ns,
+            'fall_sum_ns': self.pulse_fall_sum_ns,
+            'fall_bot_ns': self.pulse_fall_bot_ns,
+            'fall_side_ns': self.pulse_fall_side_ns,
             'fp40_sum': self.pulse_fp40_sum,
             'fp40_bot': self.pulse_fp40_bot,
             'fp40_side': self.pulse_fp40_side,

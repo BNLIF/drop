@@ -156,6 +156,9 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_rise_sum_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using all PMTs. No fit. Unit: ns  |
 | pulse_rise_bot_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using bottom PMTs. No fit. Unit: ns  |
 | pulse_rise_side_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using side PMTs. No fit. Unit: ns  |
+| pulse_fall_sum_ns    | float32[npulse]	| Simple fall-time (delta time from 90% to 10% pulse height), computed using all PMTs. No fit. Unit: ns  |
+| pulse_fall_bot_ns    | float32[npulse]	| Simple fall-time (delta time from 90% to 10% pulse height), computed using bottom PMTs. No fit. Unit: ns  |
+| pulse_fall_side_ns    | float32[npulse]	| Simple fall-time (delta time from 90% to 10% pulse height), computed using side PMTs. No fit. Unit: ns  |
 | pulse_fp40_sum         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in summed PMT. Unit: dimensionless  |
 | pulse_fp40_bot         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in bottom PMT. Unit: dimensionless  |
 | pulse_fp40_side         | float32[npulse]	| Pulse prompt fraction. The fraction of PE in the first 40ns in side PMT. Unit: dimensionless  |
