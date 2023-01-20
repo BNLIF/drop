@@ -11,7 +11,7 @@ The write access to this gitlab repoistory is grant to the WbLS group, or indivi
 ## Prerequisites
 
 - Minimal Python3 Dependence:
-  - uproot 4.1.0+
+  - uproot 4.1.0+ (latest uproot 5 is out. DROP was developed using uproot4. uproot5 has not been tested)
   - numpy 1.20.0+
   - pyYAML 5.1+
   - scipy, matplotlib (?+)
