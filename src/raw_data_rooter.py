@@ -32,15 +32,12 @@ from caen_reader import RawDataFile
 #-----------------------------------
 # Global Parameters are Captialized
 #-----------------------------------
-N_BOARDS = 3
-DAQ_SOFTWARE = "ToolDaq"
+N_BOARDS = 4
+DAQ_SOFTWARE = "ToolDaq" # the other option is LabVIEW, but we don't use LabView anymore.
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 DUMP_SIZE = 3000 # number of triggers to accumulate in queue before dump
 INITIAL_BASKET_CAPACITY=1000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
-EXPECTED_FIRST_4_BYTES=0xa0003e84 # first word (4-byte);
-#EXPECTED_FIRST_4_BYTES=0xa0000fa4 # 16x500/2+4=4004=>0xfa4, so first 4-byte is 0xa00000fa4
-#EXPECTED_FIRST_4_BYTES=0xa0000644 # 16x200/2+4=4004=>0xfa4, so first 4-byte is 0xa00000fa4
 
 if DUMP_SIZE<=10:
     print("Info: write small baskets is not recommended by Jim \
@@ -69,8 +66,6 @@ class RawDataRooter():
         self.start_id = int(args.start_id)
         self.end_id = int(args.end_id)
         self.raw_data_file = RawDataFile(args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
-        if EXPECTED_FIRST_4_BYTES is not None:
-            self.raw_data_file.expected_first_4_bytes=EXPECTED_FIRST_4_BYTES
         if args.output_dir=="":
             if args.if_path[-4:]=='.bin':
                 self.of_path = args.if_path[:-4] +'.root'
@@ -100,8 +95,6 @@ class RawDataRooter():
         '''
         # Check a few triggers first from binary file
         raw_data_file = RawDataFile(self.args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
-        if EXPECTED_FIRST_4_BYTES is not None:
-            raw_data_file.expected_first_4_bytes=EXPECTED_FIRST_4_BYTES
         for i in range(N_BOARDS):
             trg = raw_data_file.getNextTrigger()
             if i==0:
@@ -129,8 +122,6 @@ class RawDataRooter():
         self.boardId = set()
         n_samples = set()
         raw_data_file = RawDataFile(self.args.if_path, n_boards=N_BOARDS, ETTT_flag=False, DAQ_Software=DAQ_SOFTWARE)
-        if EXPECTED_FIRST_4_BYTES is not None:
-            raw_data_file.expected_first_4_bytes=EXPECTED_FIRST_4_BYTES
 
         for i in range(100):
             trg = raw_data_file.getNextTrigger()
@@ -151,7 +142,9 @@ class RawDataRooter():
         print("Info: current active channels are:")
         print(self.ch_names)
         if len(self.boardId) != N_BOARDS:
-            print("WARNING: N_BOARDS does not match!")
+            print("-----> Attention <-----"")
+            print("WARNING:  N_BOARDS does not match! preview_file read",len(self.boardId), 'boards, but N_BOARDS=', N_BOARDS)
+            print("-----------------------"")
         raw_data_file.close()
         return None
 

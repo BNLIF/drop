@@ -30,16 +30,25 @@ class RawDataFile:
             self.timeTagRollover[i+1]=0
         self.DAQ_Software = DAQ_Software
         self.trigger_counter=0
-        self.expected_first_4_bytes=0xa0000fa4 #0xa0000fa4: when all 3 boards, 48 channels are active
 
-    def get_next_n_words(self, n_words=4):
-        """ a word is 4 byte """
+    def get_next_n_words(self, n_words=4, skip_word=0xffffffff):
+        """
+        CAEN binary is 32-bit (4-byte) per word. Get next n words from binary file.
+
+        Args:
+            n_words: int
+            skip_word: skip this word during the read. Read next from file and append. 
+        """
         if self.DAQ_Software=='LabVIEW':
             order_type='>u4'
         else:
             order_type='<u4'
         try:
             w = fromfile(self.file, dtype=order_type, count=n_words)
+            n_skip = sum(w==skip_word)
+            if n_skip>0:
+                w=w[w!=skip_word]
+                w = np.append(w, fromfile(self.file, dtype=order_type, count=n_skip))
             return w
         except ValueError:
             return None
@@ -68,7 +77,7 @@ class RawDataFile:
             trigger.sanity = 0 # not good, but let's keep going
             print('Info: Read did not pass sanity check')
             print('Info: Last read headers:')
-            print(bin(i0), bin(i1), bin(i2), bin(i3))
+            print(hex(i0), hex(i1), hex(i2), hex(i3))
             print("Start skipping...4 bytes at a time...until the next good first 4-bytes...")
             while (True):
                 w = self.get_next_n_words(1)
@@ -78,7 +87,7 @@ class RawDataFile:
                     print(w)
                     return None
                 i0 = w[0]
-                if i0 == self.expected_first_4_bytes:
+                if (i0 & 0xF0000000 == 0xa0000000):
                     i1, i2, i3 = self.get_next_n_words(3)
                     break
 
@@ -234,7 +243,7 @@ class RawTrigger:
         self.triggerTime = 0.
         self.eventCounter = 0
         self.sanity = 0
-        
+
         #Xin added
         self.boardId = 0
         self.size = 0
