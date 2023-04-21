@@ -10,12 +10,19 @@
 - `side_pmt_channels`: list of str, or list of int. List of channels for side PMTs.
 - `row1_pmt_channels`: list of str, or list of int. Top row of side PMTs.
 - `row2_pmt_channels`: list of str, or list of int. Second row from the top of side PMTs.
-- `row3_pmt_channels`: list of str, or list of int. Third row from the top of side PMTs.
-- `row4_pmt_channels`: list of str, or list of int. Last row from the top of side PMTs.
+- `row3_pmt_channels`: list of str, or list of int. Sixth row from the top of side PMTs.
+- `row4_pmt_channels`: list of str, or list of int. Seventh row from the top of side PMTs.
+- `row5_pmt_channels`: list of str, or list of int. Third row from the top of side PMTs. Added in second batch of installed PMTs.
+- `row6_pmt_channels`: list of str, or list of int. Fourth row from the top of side PMTs. Added in second batch of installed PMTs
+- `row7_pmt_channels`: list of str, or list of int. Fifth row from the top of side PMTs. Added in second batch of installed PMTs
 - `col1_pmt_channels`: list of str, or list of int. All b1_p* side pmts.
 - `col2_pmt_channels`: list of str, or list of int. All b2_p* side pmts.
 - `col3_pmt_channels`: list of str, or list of int. All b3_p* side pmts.
 - `col4_pmt_channels`: list of str, or list of int. All b4_p* side pmts.
+- `col5_pmt_channels`: list of str, or list of int. All b5_p* side pmts. Added in second batch of installed PMTs.
+- `col6_pmt_channels`: list of str, or list of int. All b6_p* side pmts. Added in second batch of installed PMTs.
+- `col7_pmt_channels`: list of str, or list of int. All b7_p* side pmts. Added in second batch of installed PMTs.
+- `col8_pmt_channels`: list of str, or list of int. All b8_p* side pmts. Added in second batch of installed PMTs.
 - `user_pmt_channels`: list of str, or list of int. User-defined list of channel to sum.
 - `skip_pmt_channels`: list of str, or list of int. Channels in this list will be neglected in sum channel calculation. Usually empty. But sometimes we want to skip bad PMTs (gain instability etc).  
 - `ch_saturated_threshold`: int. Threshold below which a channel is considered saturated. Unit: ADC.

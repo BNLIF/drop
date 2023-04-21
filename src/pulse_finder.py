@@ -47,29 +47,49 @@ class PulseFinder():
         self.area_sum_pe = []
         self.area_bot_pe = []
         self.area_side_pe = []
+        
         self.area_row1_pe = []
         self.area_row2_pe = []
         self.area_row3_pe = []
         self.area_row4_pe = []
+        self.area_row5_pe = []
+        self.area_row6_pe = []
+        self.area_row7_pe = []
+        
         self.area_col1_pe = []
         self.area_col2_pe = []
         self.area_col3_pe = []
         self.area_col4_pe = []
+        self.area_col5_pe = []
+        self.area_col6_pe = []
+        self.area_col7_pe = []
+        self.area_col8_pe = []
+        
         self.area_user_pe = []
         self.aft10_sum_ns = []
         self.aft10_bot_ns = []
         self.aft10_side_ns = []
+        
         self.aft10_row1_ns = []
         self.aft10_row2_ns = []
         self.aft10_row3_ns = []
         self.aft10_row4_ns = []
+        self.aft10_row5_ns = []
+        self.aft10_row6_ns = []
+        self.aft10_row7_ns = []
+        
         self.aft90_sum_ns = []
         self.aft90_bot_ns = []
         self.aft90_side_ns = []
+        
         self.aft90_row1_ns = []
         self.aft90_row2_ns = []
         self.aft90_row3_ns = []
         self.aft90_row4_ns = []
+        self.aft90_row5_ns = []
+        self.aft90_row6_ns = []
+        self.aft90_row7_ns = []
+        
         self.rise_sum_ns = []
         self.rise_bot_ns = []
         self.rise_side_ns = []
@@ -219,50 +239,89 @@ class PulseFinder():
             a_bot_int = self.wfm.amp_pe_int['sum_bot']
             a_side = self.wfm.amp_pe['sum_side']
             a_side_int = self.wfm.amp_pe_int['sum_side']
+            
             a_row1 = self.wfm.amp_pe['sum_row1']
             a_row2 = self.wfm.amp_pe['sum_row2']
             a_row3 = self.wfm.amp_pe['sum_row3']
             a_row4 = self.wfm.amp_pe['sum_row4']
+            a_row5 = self.wfm.amp_pe['sum_row5']
+            a_row6 = self.wfm.amp_pe['sum_row6']
+            a_row7 = self.wfm.amp_pe['sum_row7']
+            
             a_row1_int = self.wfm.amp_pe_int['sum_row1']
             a_row2_int = self.wfm.amp_pe_int['sum_row2']
             a_row3_int = self.wfm.amp_pe_int['sum_row3']
             a_row4_int = self.wfm.amp_pe_int['sum_row4']
+            a_row5_int = self.wfm.amp_pe_int['sum_row5']
+            a_row6_int = self.wfm.amp_pe_int['sum_row6']
+            a_row7_int = self.wfm.amp_pe_int['sum_row7']
+            
             a_col1 = self.wfm.amp_pe['sum_col1']
             a_col2 = self.wfm.amp_pe['sum_col2']
             a_col3 = self.wfm.amp_pe['sum_col3']
             a_col4 = self.wfm.amp_pe['sum_col4']
+            a_col5 = self.wfm.amp_pe['sum_col5']
+            a_col6 = self.wfm.amp_pe['sum_col6']
+            a_col7 = self.wfm.amp_pe['sum_col7']
+            a_col8 = self.wfm.amp_pe['sum_col8']
+            
             a_col1_int = self.wfm.amp_pe_int['sum_col1']
             a_col2_int = self.wfm.amp_pe_int['sum_col2']
             a_col3_int = self.wfm.amp_pe_int['sum_col3']
             a_col4_int = self.wfm.amp_pe_int['sum_col4']
+            a_col5_int = self.wfm.amp_pe_int['sum_col5']
+            a_col6_int = self.wfm.amp_pe_int['sum_col6']
+            a_col7_int = self.wfm.amp_pe_int['sum_col7']
+            a_col8_int = self.wfm.amp_pe_int['sum_col8']
+            
             a_user = self.wfm.amp_pe['sum_user']
             a_user_int = self.wfm.amp_pe_int['sum_user']
             self.area_sum_pe.append(a_sum_int[end]-a_sum_int[start])
             self.area_bot_pe.append(a_bot_int[end]-a_bot_int[start])
             self.area_side_pe.append(a_side_int[end]-a_side_int[start])
+            
             self.area_row1_pe.append(a_row1_int[end]-a_row1_int[start])
             self.area_row2_pe.append(a_row2_int[end]-a_row2_int[start])
             self.area_row3_pe.append(a_row3_int[end]-a_row3_int[start])
             self.area_row4_pe.append(a_row4_int[end]-a_row4_int[start])
+            self.area_row5_pe.append(a_row5_int[end]-a_row5_int[start])
+            self.area_row6_pe.append(a_row6_int[end]-a_row6_int[start])
+            self.area_row7_pe.append(a_row7_int[end]-a_row7_int[start])
+            
             self.area_col1_pe.append(a_col1_int[end]-a_col1_int[start])
             self.area_col2_pe.append(a_col2_int[end]-a_col2_int[start])
             self.area_col3_pe.append(a_col3_int[end]-a_col3_int[start])
             self.area_col4_pe.append(a_col4_int[end]-a_col4_int[start])
+            self.area_col5_pe.append(a_col5_int[end]-a_col5_int[start])
+            self.area_col6_pe.append(a_col6_int[end]-a_col6_int[start])
+            self.area_col7_pe.append(a_col7_int[end]-a_col7_int[start])
+            self.area_col8_pe.append(a_col8_int[end]-a_col8_int[start])
+            
             self.area_user_pe.append(a_user_int[end]-a_user_int[start])
             self.aft10_sum_ns.append(util_nb.aft(t_ax[start:end], a_sum_int[start:end], 0.1))
             self.aft10_bot_ns.append(util_nb.aft(t_ax[start:end], a_bot_int[start:end], 0.1))
             self.aft10_side_ns.append(util_nb.aft(t_ax[start:end], a_side_int[start:end], 0.1))
+            
             self.aft10_row1_ns.append(util_nb.aft(t_ax[start:end], a_row1_int[start:end], 0.1))
             self.aft10_row2_ns.append(util_nb.aft(t_ax[start:end], a_row2_int[start:end], 0.1))
             self.aft10_row3_ns.append(util_nb.aft(t_ax[start:end], a_row3_int[start:end], 0.1))
             self.aft10_row4_ns.append(util_nb.aft(t_ax[start:end], a_row4_int[start:end], 0.1))
+            self.aft10_row5_ns.append(util_nb.aft(t_ax[start:end], a_row5_int[start:end], 0.1))
+            self.aft10_row6_ns.append(util_nb.aft(t_ax[start:end], a_row6_int[start:end], 0.1))
+            self.aft10_row7_ns.append(util_nb.aft(t_ax[start:end], a_row7_int[start:end], 0.1))
+            
             self.aft90_sum_ns.append(util_nb.aft(t_ax[start:end], a_sum_int[start:end], 0.9))
             self.aft90_bot_ns.append(util_nb.aft(t_ax[start:end], a_bot_int[start:end], 0.9))
             self.aft90_side_ns.append(util_nb.aft(t_ax[start:end], a_side_int[start:end], 0.9))
+            
             self.aft90_row1_ns.append(util_nb.aft(t_ax[start:end], a_row1_int[start:end], 0.9))
             self.aft90_row2_ns.append(util_nb.aft(t_ax[start:end], a_row2_int[start:end], 0.9))
             self.aft90_row3_ns.append(util_nb.aft(t_ax[start:end], a_row3_int[start:end], 0.9))
             self.aft90_row4_ns.append(util_nb.aft(t_ax[start:end], a_row4_int[start:end], 0.9))
+            self.aft90_row5_ns.append(util_nb.aft(t_ax[start:end], a_row5_int[start:end], 0.9))
+            self.aft90_row6_ns.append(util_nb.aft(t_ax[start:end], a_row6_int[start:end], 0.9))
+            self.aft90_row7_ns.append(util_nb.aft(t_ax[start:end], a_row7_int[start:end], 0.9))
+            
             # print('debug: ', t_ax[start:end], a_sum[start:end], a_bot[start:end], a_side[start:end])
             self.rise_sum_ns.append(util_nb.rise_time(t_ax[start:end], a_sum[start:end], spe_thr))
             self.rise_bot_ns.append(util_nb.rise_time(t_ax[start:end], a_bot[start:end], spe_thr))
