@@ -186,7 +186,7 @@ class Waveform():
                 a_corr=a[dS*2:]
             elif "_b2" in ch:
                 a_corr=a[dS:-dS]
-            elif "_b3" in ch:
+            elif ("_b3" in ch) or ("_b4" in ch):
                 a_corr=a[0:-dS*2]
             else:
                 print("ERROR in correct_trg_delay: invalid boardId")
@@ -208,8 +208,8 @@ class Waveform():
         bt_pe = 0
         ir_pe = 0
         side_pe=0
-        r1_pe, r2_pe, r3_pe, r4_pe = 0, 0, 0, 0
-        c1_pe, c2_pe, c3_pe, c4_pe = 0, 0, 0, 0
+        r1_pe, r2_pe, r3_pe, r4_pe, r5_pe, r6_pe, r7_pe = 0, 0, 0, 0, 0, 0, 0
+        c1_pe, c2_pe, c3_pe, c4_pe, c5_pe, c6_pe, c7_pe, c8_pe = 0, 0, 0, 0, 0, 0, 0, 0
         user_pe = 0
         for ch, val in self.amp_pe.items():
             if 'adc_' in ch:
@@ -228,6 +228,12 @@ class Waveform():
                     r3_pe += val
                 if ch in self.cfg.row4_pmt_channels:
                     r4_pe += val
+                if ch in self.cfg.row5_pmt_channels:
+                    r5_pe += val
+                if ch in self.cfg.row6_pmt_channels:
+                    r6_pe += val
+                if ch in self.cfg.row7_pmt_channels:
+                    r7_pe += val
                 if ch in self.cfg.col1_pmt_channels:
                     c1_pe += val
                 if ch in self.cfg.col2_pmt_channels:
@@ -236,6 +242,14 @@ class Waveform():
                     c3_pe += val
                 if ch in self.cfg.col4_pmt_channels:
                     c4_pe += val
+                if ch in self.cfg.col5_pmt_channels:
+                    c5_pe += val
+                if ch in self.cfg.col6_pmt_channels:
+                    c6_pe += val
+                if ch in self.cfg.col7_pmt_channels:
+                    c7_pe += val
+                if ch in self.cfg.col8_pmt_channels:
+                    c8_pe += val
                 if ch in self.cfg.user_pmt_channels:
                     user_pe += val
         self.amp_pe['sum'] = tot_pe
@@ -248,10 +262,17 @@ class Waveform():
         self.amp_pe['sum_row2'] = r2_pe
         self.amp_pe['sum_row3'] = r3_pe
         self.amp_pe['sum_row4'] = r4_pe
+        self.amp_pe['sum_row5'] = r5_pe
+        self.amp_pe['sum_row6'] = r6_pe
+        self.amp_pe['sum_row7'] = r7_pe
         self.amp_pe['sum_col1'] = c1_pe
         self.amp_pe['sum_col2'] = c2_pe
         self.amp_pe['sum_col3'] = c3_pe
         self.amp_pe['sum_col4'] = c4_pe
+        self.amp_pe['sum_col5'] = c5_pe
+        self.amp_pe['sum_col6'] = c6_pe
+        self.amp_pe['sum_col7'] = c7_pe
+        self.amp_pe['sum_col8'] = c8_pe
         self.amp_pe['sum_user'] = user_pe
         return None
 

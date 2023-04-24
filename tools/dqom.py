@@ -99,7 +99,9 @@ def plot_npe(file_path, output_dir):
 
         branchs= ['pulse_area_sum_pe', 'pulse_area_bot_pe', 'pulse_area_side_pe',
                  'pulse_area_row1_pe', 'pulse_area_row2_pe', 'pulse_area_row3_pe','pulse_area_row4_pe',
-                 'pulse_area_col1_pe', 'pulse_area_col2_pe', 'pulse_area_col3_pe','pulse_area_col4_pe']
+                 'pulse_area_row5_pe', 'pulse_area_row6_pe', 'pulse_area_row7_pe', 
+                 'pulse_area_col1_pe', 'pulse_area_col2_pe', 'pulse_area_col3_pe','pulse_area_col4_pe'
+                 'pulse_area_col5_pe', 'pulse_area_col6_pe', 'pulse_area_col7_pe','pulse_area_col8_pe']
 
         ncol=3
         nrow=len(branchs)//ncol+1
