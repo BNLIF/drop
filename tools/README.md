@@ -63,3 +63,12 @@ from ratdb_reader import RatDBReader
 r = RatDBReader(file_path=/path/to/your/file.ratdb)
 ```
 That's it. The data are saved in `r.tables`. See `test()` example how to access it.
+
+# Log to CSV converter
+
+A python script that converts CAEN GECO log data into csv file format. Data visualization is a lot easier after the conversion.
+
+Usage. In python kernel, do
+```python
+python log2csv.py /path/to/your/file.log
+```
