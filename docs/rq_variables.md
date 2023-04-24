@@ -137,7 +137,6 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_area_row5_pe    | float32[npulse]	| summed row 5 PMT area in pe.  Row 5 is the third highest 4 side PMTs (ex. b5_p1, b6_p1, b7_p1, b8_p1). |
 | pulse_area_row6_pe    | float32[npulse]	| summed row 6 PMT area in pe. Row 6 is the fourth highest 4 side PMTs (ex. b5_p2, b6_p2, b7_p2, b8_p2). |
 | pulse_area_row7_pe    | float32[npulse]	| summed row 7 PMT area in pe. Row 7 is the fifth highest 4 side PMTs (ex. b5_p3, b6_p3, b7_p3, b8_p3). |
-
 | pulse_area_col1_pe    | float32[npulse]	| summed column 1 PMT area in pe. Col 1 is the closest 4 side PMTs to the darkroom door (ex. b1_p*). |
 | pulse_area_col2_pe    | float32[npulse]	| summed column 2 PMT area in pe. Col 2 is the farthest 4 side PMTs to the PC (ex. b2_p*). |
 | pulse_area_col3_pe    | float32[npulse]	| summed column 3 PMT area in pe. Col 3 is the closest 4 side PMTs to the PC (ex. b3_p*). |
