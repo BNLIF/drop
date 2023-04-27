@@ -46,7 +46,6 @@ if DUMP_SIZE<=10:
     100 kb/basket/branch. See: \
     https://github.com/scikit-hep/uproot4/pull/428")
 
-
 class RunStatus(Enum):
     NORMAL = 0 # all good, keep going
     STOP = 1 # stop the run

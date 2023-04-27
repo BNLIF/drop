@@ -15,10 +15,21 @@ sys.path.append(src_path)
 from caen_reader import RawDataFile
 
 if_path=str(sys.argv[1])
-raw_data_file = RawDataFile(if_path)
+
+
+n_boards=int(input("Enter an integer for the number of boards:"))
+tmp=input("Enter a bool for ETTT flag (True or False)?")
+if tmp.lower()=='true' or tmp.lower()=='t':
+    ETTT_flag=True
+else:
+    ETTT_flag=False
+
+print("haha", ETTT_flag)
+
+raw_data_file = RawDataFile(if_path, n_boards, ETTT_flag=ETTT_flag)
 width=9
 prev_ttt=0
-for i in range(1000):
+for i in range(200):
     trigger = raw_data_file.getNextTrigger()
     if trigger is None:
         print("Done")
