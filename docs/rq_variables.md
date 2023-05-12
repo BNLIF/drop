@@ -137,7 +137,6 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_area_row5_pe    | float32[npulse]	| summed row 5 PMT area in pe.  Row 5 is the third highest 4 side PMTs (ex. b5_p1, b6_p1, b7_p1, b8_p1). |
 | pulse_area_row6_pe    | float32[npulse]	| summed row 6 PMT area in pe. Row 6 is the fourth highest 4 side PMTs (ex. b5_p2, b6_p2, b7_p2, b8_p2). |
 | pulse_area_row7_pe    | float32[npulse]	| summed row 7 PMT area in pe. Row 7 is the fifth highest 4 side PMTs (ex. b5_p3, b6_p3, b7_p3, b8_p3). |
-
 | pulse_area_col1_pe    | float32[npulse]	| summed column 1 PMT area in pe. Col 1 is the closest 4 side PMTs to the darkroom door (ex. b1_p*). |
 | pulse_area_col2_pe    | float32[npulse]	| summed column 2 PMT area in pe. Col 2 is the farthest 4 side PMTs to the PC (ex. b2_p*). |
 | pulse_area_col3_pe    | float32[npulse]	| summed column 3 PMT area in pe. Col 3 is the closest 4 side PMTs to the PC (ex. b3_p*). |
@@ -146,12 +145,10 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_area_col6_pe    | float32[npulse]	| summed column 6 PMT area in pe. Col 6 is the 3 side PMTs between cols. 1 and 3 (ex. b6_p*). |
 | pulse_area_col7_pe    | float32[npulse]	| summed column 7 PMT area in pe. Col 7 is the 3 side PMTs between cols. 2 and 4 (ex. b7_p*). |
 | pulse_area_col8_pe    | float32[npulse]	| summed column 8 PMT area in pe. Col 8 is the 3 side PMTs between cols. 3 and 4 (ex. b8_p*). |
-
 | pulse_area_user_pe    | float32[npulse]	| summed of a list of channels defined by user. See yaml/config.yaml file. |
 | pulse_aft10_sum_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of total pulse area. Unit: ns  |
 | pulse_aft10_bot_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of bottom PMT pulse area. Unit: ns  |
 | pulse_aft10_side_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of side PMT pulse area. Unit: ns  |
-
 | pulse_aft10_row1_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row1 PMT pulse area. Unit: ns  |
 | pulse_aft10_row2_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row2 PMT pulse area. Unit: ns  |
 | pulse_aft10_row3_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row3 PMT pulse area. Unit: ns  |
@@ -159,11 +156,9 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_aft10_row5_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row5 PMT pulse area. Unit: ns  |
 | pulse_aft10_row6_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row6 PMT pulse area. Unit: ns  |
 | pulse_aft10_row7_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 10% of row7 PMT pulse area. Unit: ns  |
-
 | pulse_aft90_sum_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of total pulse area. Unit: ns  |
 | pulse_aft90_bot_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of bottom PMT pulse area. Unit: ns  |
 | pulse_aft90_side_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of side PMT pulse area. Unit: ns  |
-
 | pulse_aft90_row1_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row1 PMT pulse area. Unit: ns  |
 | pulse_aft90_row2_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row2 PMT pulse area. Unit: ns  |
 | pulse_aft90_row3_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row3 PMT pulse area. Unit: ns  |
@@ -171,7 +166,6 @@ Pulse level variables are dynamic arrays -- we only know array during the data p
 | pulse_aft90_row5_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row5 PMT pulse area. Unit: ns  |
 | pulse_aft90_row6_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row6 PMT pulse area. Unit: ns  |
 | pulse_aft90_row7_ns    | float32[npulse]	| Area Fraction Time (AFT) is the time reaching 90% of row7 PMT pulse area. Unit: ns  |
-
 | pulse_rise_sum_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using all PMTs. No fit. Unit: ns  |
 | pulse_rise_bot_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using bottom PMTs. No fit. Unit: ns  |
 | pulse_rise_side_ns    | float32[npulse]	| Simple rise-time (delta time from 10% to 90% pulse height), computed using side PMTs. No fit. Unit: ns  |

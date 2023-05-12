@@ -120,7 +120,7 @@ class RawDataFile:
         trigger.eventCounter = i2 & eventCounterMask
 
         # The trigger time-tag (timestamp) is the 31-bit of 4th world
-        pattern_bits = i1 & 0xFFFF00
+        pattern_bits = (i1 >> 8) & 0xffff
         rollover_bit = i3 >> 31
         if self.ETTT_flag:
             ttt = pattern_bits * 2**32 + i3

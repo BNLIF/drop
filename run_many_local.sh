@@ -12,6 +12,7 @@
 run_script_option=0 #0: run all; 1: run raw_data_rooter.py; 2: run_drop.py; 3: dqom.py
 drop_version=v1.0.2
 subdir=muon
+MVD_DIR=/media/disk_a/BNLBOX/WbLS-DATA
 #====================================== 
 
 # path to the yaml config file
@@ -19,7 +20,7 @@ config_file=$2
 
 function do_raw_data_rooter() {
     local file_path=$1
-    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/raw_root/${subdir}/
+    output_dir=${MVD_DIR}/raw_root/${subdir}/
     while read fpath; do
 	case "$fpath" in \#*) continue ;; esac
 	echo " "
@@ -31,7 +32,7 @@ function do_raw_data_rooter() {
 function do_run_drop() {
     local file_path=$1
     local config_file=$2
-    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/rq/${drop_version}/${subdir}
+    output_dir=${MVD_DIR}/rq/${drop_version}/${subdir}
     mkdir -p $output_dir
     while read fpath; do
 	case "$fpath" in \#*) continue ;; esac
@@ -43,7 +44,7 @@ function do_run_drop() {
 
 function do_dqom() {
     local file_path=$1
-    output_dir=/media/disk_a/CERNBOX/WbLS-DATA/dqom/${drop_version}/${subdir}
+    output_dir=${MVD_DIR}/dqom/${drop_version}/${subdir}
     mkdir -p $output_dir
     file_path=$1
     while read fpath; do
