@@ -3,7 +3,7 @@ batch_size: 1000 # int, how many events to process at a time
 post_trigger: 0.875 # float, between 0 and 1
 daisy_chain: True # bool
 dgtz_dynamic_range_mV: 2000 # Digitizer dynamic range in mV. 2000 or 500
-non_signal_channels: ['b1_ch0', 'b2_ch15'] # some channels are used for paddles, exclude them for reconstructing variables
+non_signal_channels: ['b1_ch0', 'b2_ch15','b4_ch12'] # some channels are used for paddles, exclude them for reconstructing variables
 bottom_pmt_channels: [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214]
 side_pmt_channels: [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411]
 row1_pmt_channels: [300, 304, 308, 312]
