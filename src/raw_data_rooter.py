@@ -39,6 +39,7 @@ DUMP_SIZE = 3000 # number of triggers to accumulate in queue before dump
 INITIAL_BASKET_CAPACITY=1000 # number of basket per file
 MAX_EVENT_QUEUE = 10000 # throw warning if event queue is getting too big. No action yet.
 ETTT_FLAG=True # False: use the default 32-bit time counter; True: use extended trigger time tag (ETTT) which is is a 48-bit time counter. 
+VERBOSITY=0 # Integer. 0 is quiet mode (less print out). Higher is more. 
 
 if DUMP_SIZE<=10:
     print("Info: write small baskets is not recommended by Jim \
@@ -66,6 +67,7 @@ class RawDataRooter():
         self.start_id = int(args.start_id)
         self.end_id = int(args.end_id)
         self.raw_data_file = RawDataFile(args.if_path, n_boards=N_BOARDS, ETTT_flag=ETTT_FLAG, DAQ_Software=DAQ_SOFTWARE)
+        self.raw_data_file.verbosity=VERBOSITY
         if args.output_dir=="":
             if args.if_path[-4:]=='.bin':
                 self.of_path = args.if_path[:-4] +'.root'
@@ -374,9 +376,10 @@ def main(argv):
         if status==RunStatus.STOP:
             if len(rooter.event_queue)>0:
                 rooter.dump_events()
-                print("Leftover in queue (event_id, keys):")
-                for i, ev in rooter.event_queue.items():
-                    print(i, ev.keys())
+                if VERBOSITY>=1:
+                    print("Leftover in queue (event_id, keys):")
+                    for i, ev in rooter.event_queue.items():
+                        print(i, ev.keys())
             break
         elif status==RunStatus.SKIP:
             tot_n_evt_proc = len(rooter.dumped_event_id)
