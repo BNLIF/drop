@@ -30,7 +30,8 @@ class RawDataFile:
             self.timeTagRollover[i+1]=0
         self.DAQ_Software = DAQ_Software
         self.trigger_counter=0
-
+        self.verbosity=1
+        
     def get_next_n_words(self, n_words=4, skip_word=0xffffffff):
         """
         CAEN binary is 32-bit (4-byte) per word. Get next n words from binary file.
@@ -75,10 +76,11 @@ class RawDataFile:
             trigger.sanity = 0 # normal
         else:
             trigger.sanity = 0 # not good, but let's keep going
-            print('Info: Read did not pass sanity check')
-            print('Info: Last read headers:')
-            print(hex(i0), hex(i1), hex(i2), hex(i3))
-            print("Start skipping...4 bytes at a time...until the next good first 4-bytes...")
+            if self.verbosity>=1:
+                print('Info: Read did not pass sanity check')
+                print('Info: Last read headers:')
+                print(hex(i0), hex(i1), hex(i2), hex(i3))
+                print("Start skipping...4 bytes at a time...until the next good first 4-bytes...")
             while (True):
                 w = self.get_next_n_words(1)
                 if w is None:
