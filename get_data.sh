@@ -51,7 +51,7 @@ echo "Start transfering data taken on $DATE"
 function transfer_data() {
     if [ $RUN_TYPE != "geco" ]; then
 		output_dir=${MVD_DIR}/raw_binary/${MVD_SUB_FOLDER}
-      	scp ${DAQ_USER}@${DAQ_IP}:${DAQ_DIR}/*${RUN_TYPE}_*${DATE}*.bin $output_dir
+		scp ${DAQ_USER}@${DAQ_IP}:${DAQ_DIR}/*${RUN_TYPE}_*${DATE}*.bin $output_dir
 		find ${output_dir}/*${RUN_TYPE}_*${DATE}*.bin -type f > tmp.list
     else
 		output_dir=${MVD_DIR}/db/geco
