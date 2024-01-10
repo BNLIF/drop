@@ -4,7 +4,7 @@
 
 ![Data Flowchart](fig/data_flowchart.png)
 
-The write access to this gitlab repoistory is grant to the WbLS group, or individual invitation-only. For developer & maintainer access, please contact Xin: <xxiang@bnl.gov>
+The write access to this gitlab repoistory is grant to the WbLS group, or individual invitation-only. For developer & maintainer access, please contact Xin: <xxiang89@icloud.com>
 
 # Getting Started
 
