@@ -17,7 +17,7 @@ class RawDataFile:
             fileName: str. the path to binary file.
             n_boards: int, number of boards
             ETTT_flag: bool (default: False)
-            DAQ_Software: str. (options: LabVIEW, ToolDAQ, defalt to ToolDAQ)
+            DAQ_Software: str. (options: LabVIEW, ToolDAQ, default to ToolDAQ)
         """
         self.fileName = path.abspath(fileName)
         self.file = open(self.fileName, 'rb')
@@ -53,6 +53,34 @@ class RawDataFile:
             return w
         except ValueError:
             return None
+
+    def decode_V1740_data(self, words):
+        """
+        The V1740 outputs data 12 bits at a time, but the data can't be read out in 12-bit words.
+        The data also gets read out channel by channel in 3 sample increments
+        (ch0s0, ch0s1, ch0s2, ch1s0, ch1s1, etc)
+        So we must decode the data 9 32-bit words at a time.
+
+        Returns 24 samples (3 for each channel in group).
+        """
+        # Make sure number of words is 9
+        if (len(words) != 9):
+            print("Number of words read must be 9")
+            print(len(words))
+            return None
+        samps = []
+        for i in range(len(words)//3):
+            s0 = (words[i*3] & 0x00000FFF)
+            s1 = (words[i*3] & 0x00FFF000) >> (3*4)
+            s2 = ((words[i*3+1] & 0x0000000F) << (2*4)) + ((words[i*3] & 0xFF000000) >> (6*4))
+            s3 = (words[i*3+1] & 0x0000FFF0) >> (1*4)
+            s4 = (words[i*3+1] & 0x0FFF0000) >> (4*4)
+            s5 = ((words[i*3+2] & 0x000000FF) << (1*4)) + ((words[i*3+1] & 0xF0000000) >> (7*4))
+            s6 = (words[i*3+2] & 0x000FFF00) >> (2*4)
+            s7 = (words[i*3+2] & 0xFFF00000) >> (5*4)
+
+            samps += [s0, s1, s2, s3, s4, s5, s6, s7]
+        return samps
 
     def getNextTrigger(self):
         """
@@ -99,22 +127,42 @@ class RawDataFile:
         # extract the board ID and channel map from the second header long-word
         boardId = (i1 & 0xf8000000) >> 27
         trigger.boardId = boardId #Xin
+        if boardId == 5:
+            trigger.brdtype = "V1740"
+        else:
+            trigger.brdtype = "V1730"
 
-        # For 16ch boards, the channelMask is split over two header words, ref: Tab. 8.2 in V1730 manual
-        # To get the second half of the channelMask to line up properly with the first, we only shift it by
-        # 16bits instead of 24.
-        channelUse = (i1 & 0x000000ff) + ((i2 & 0xff000000) >> 16)
+        if trigger.brdtype == "V1730":
+            # For 16ch boards, the channelMask is split over two header words, ref: Tab. 8.2 in V1730 manual
+            # To get the second half of the channelMask to line up properly with the first, we only shift it by
+            # 16bits instead of 24.
+            channelUse = (i1 & 0x000000ff) + ((i2 & 0xff000000) >> 16)
 
-        # convert channel map into an array of 0's or 1's indicating which channels are in use
-        whichChan = [1 if (channelUse & 1 << k) else 0 for k in range(16)]
+            # convert channel map into an array of 0's or 1's indicating which channels are in use
+            whichChan = [1 if (channelUse & 1 << k) else 0 for k in range(16)]
 
-        # determine the number of channels that are in the event by summing whichChan
-        numChannels = int(sum(whichChan))
+            # determine the number of channels that are in the event by summing whichChan
+            numChannels = int(sum(whichChan))
 
-        if numChannels<=0:
-            return None
+            if numChannels<=0:
+                return None
+
+        elif trigger.brdtype == "V1740":
+            # For V1740, there are 8 groups of 8 channels each. If a group is enabled, all channels in that group are enabled
+            # The groupMask is only in the second header word.
+            groupMask = i1 & 0x000000ff
+
+            # convert group map into array of 1s and 0s indicating which groups are enabled
+            whichGroups = [1 if (groupMask & 1 << k) else 0 for k in range(8)]
+
+            # determine the number of groups that are enabled by summing whichGroups
+            numGroups = int(sum(whichGroups))
+
+            if numGroups<=0:
+                return None
 
         # Test for zero-length encoding by looking at one bit in the second header long-word
+        # Is this being used????
         zLE = True if i1 & 0x01000000 != 0 else False
 
         # Create an event counter mask and then extract the counter value from the third header long-word
@@ -151,74 +199,113 @@ class RawDataFile:
         trigger.triggerTime = trigger.triggerTimeTag * 8e-3
 
         # Calculate length of each trace, using eventSize (in long words) and removing the 4 long words from the header
-        size = int(4 * eventSize - 16)
-        self.recordLen = size//(2*numChannels) # Xin: save the length of traces
+        size = int(4 * eventSize - 16) # Event size in bytes minus the header
 
-        # looping over the entries in the whichChan list, only reading data if the entry is 1
-        for ind, k in enumerate(whichChan):
-            if k == 1:
-                # create a name for each channel according to the board and channel numbers
-                traceName = "b" + str(boardId) + "_ch" + str(ind)
+        if trigger.brdtype == "V1730":
+            self.recordLen = size//(2*numChannels) # Xin: save the length of traces
 
-                # If the data are not zero-length encoded (default)
-                if not zLE:
-                    # create a data-type of unsigned 16bit integers with the correct ordering
-                    if self.DAQ_Software=='LabVIEW':
-                        dt = dtype('>H')
+            # looping over the entries in the whichChan list, only reading data if the entry is 1
+            for ind, k in enumerate(whichChan):
+                if k == 1:
+                    # create a name for each channel according to the board and channel numbers
+                    traceName = "b" + str(boardId) + "_ch" + str(ind)
+
+                    # If the data are not zero-length encoded (default)
+                    if not zLE:
+                        # create a data-type of unsigned 16bit integers with the correct ordering
+                        if self.DAQ_Software=='LabVIEW':
+                            dt = dtype('>H')
+                        else:
+                            dt = dtype('<H') # Xin: LabVIEW and ToolDAQ have different ordering
+
+                        # Use numpy's fromfile to read binary data and convert into a numpy array all at once
+                        trace = fromfile(self.file, dtype=dt, count=size//(2*numChannels))
+
+                        # sanity check again (the left two bits should be empty)
+                        l2 = np.right_shift(trace, 14)
+                        if np.any(l2 > 0):
+                            trigger.sanity = 1
+
                     else:
-                        dt = dtype('<H') # Xin: LabVIEW and ToolDAQ have different ordering
+                        # initialize an array of length self.recordLen, then set all values to nan
+                        trace = zeros(self.recordLen)
+                        trace[:] = nan
 
-                    # Use numpy's fromfile to read binary data and convert into a numpy array all at once
-                    trace = fromfile(self.file, dtype=dt, count=size//(2*numChannels))
+                        # The ZLE encoding uses a keyword to indicate if data to follow, otherwise number of samples to skip
+                        (trSize,) = fromfile(self.file, dtype='I', count=1)
 
-                    # sanity check again (the left two bits should be empty)
-                    l2 = np.right_shift(trace, 14)
-                    if np.any(l2 > 0):
-                        trigger.sanity = 1
+                        # create two counting indices, m and trInd, for keeping track of our position in the trace and
+                        m = 1
+                        trInd = 0
 
-                else:
-                    # initialize an array of length self.recordLen, then set all values to nan
-                    trace = zeros(self.recordLen)
-                    trace[:] = nan
+                        # create a data-type for reading the binary data
+                        dt = dtype('<H')
 
-                    # The ZLE encoding uses a keyword to indicate if data to follow, otherwise number of samples to skip
-                    (trSize,) = fromfile(self.file, dtype='I', count=1)
+                        # loop while the m counter is less than the total size of the trace
+                        while m < trSize:
+                            # extract the control word from the data
+                            (controlWord,) = fromfile(self.file, dtype='I', count=1)
 
-                    # create two counting indices, m and trInd, for keeping track of our position in the trace and
-                    m = 1
-                    trInd = 0
+                            # determine the number of bytes to read, and convert into samples (x2)
+                            length = (controlWord & 0x001FFFFF) * 2
 
-                    # create a data-type for reading the binary data
-                    dt = dtype('<H')
+                            # determine whether that which follows are data or number of samples to skip
+                            good = controlWord & 0x80000000
 
-                    # loop while the m counter is less than the total size of the trace
-                    while m < trSize:
-                        # extract the control word from the data
-                        (controlWord,) = fromfile(self.file, dtype='I', count=1)
+                            # If they are data...
+                            if good:
 
-                        # determine the number of bytes to read, and convert into samples (x2)
-                        length = (controlWord & 0x001FFFFF) * 2
+                                # Read and convert the data (length is
+                                tmp = fromfile(self.file, dtype=dt, count=length)
+                                # insert the read data into the empty trace otherwise full of NaNs
+                                trace[trInd:trInd + length] = tmp
 
-                        # determine whether that which follows are data or number of samples to skip
-                        good = controlWord & 0x80000000
+                            # Increment both the trInd and m indexes by their appropriate amounts
+                            trInd += length
+                            m += 1 + (length/2 if good else 0)
 
-                        # If they are data...
-                        if good:
+                    # create a dictionary entry for the trace using traceName as the key
+                    trigger.traces[traceName] = trace
 
-                            # Read and convert the data (length is
-                            tmp = fromfile(self.file, dtype=dt, count=length)
-                            # insert the read data into the empty trace otherwise full of NaNs
-                            trace[trInd:trInd + length] = tmp
+            self.trigger_counter += 1
+            return trigger
 
-                        # Increment both the trInd and m indexes by their appropriate amounts
-                        trInd += length
-                        m += 1 + (length/2 if good else 0)
+        elif trigger.brdtype == "V1740":
+            # 1.5 bytes per sample, 8 channels per group
+            self.recordLen = size//(12*numGroups)
 
-                # create a dictionary entry for the trace using traceName as the key
-                trigger.traces[traceName] = trace
+            # Looping over the entries in whichGroups, only reading data if entry is 1
+            for ind, k in enumerate(whichGroups):
+                if k == 1:
+                    # Looping over all 8 channels in group
+                    for chan in range(8):
+                        # Create a name for each channel according to board, group, and channel
+                        traceName = "b" + str(boardId) + "_ch" + str(ind*8 + chan)
+                        trigger.traces[traceName] = []
 
-        self.trigger_counter += 1
-        return trigger
+                    # If not zero length encoded
+                    if not zLE:
+                        # Create a 32-bit datatype with correct endianness
+                        dt = dtype('<u4')
+
+                        # Loop over all samples in group
+                        for j in range(self.recordLen//3):
+                            # Read 9 words
+                            words = self.get_next_n_words(9)
+
+                            # Decode 24 samples
+                            samps = self.decode_V1740_data(words)
+
+                            # Add samples to trace
+                            for k in range(len(samps)//3):
+                                name = "b" + str(boardId) + "_ch" + str(ind*8 + k)
+                                trigger.traces[name] += samps[3*k:3*k+3]
+
+                    else:
+                        print("Error! Zero-Length Encoding not implemented for V1740")
+
+            self.trigger_counter += 1
+            return trigger
 
     def close(self):
         """
@@ -245,6 +332,7 @@ class RawTrigger:
         self.triggerTime = 0.
         self.eventCounter = 0
         self.sanity = 0
+        self.brdtype = "V1730"
 
         #Xin added
         self.boardId = 0
@@ -283,6 +371,6 @@ class RawTrigger:
         plt.ylim(ymax=ymax + (ymax-ymin)*.15)
 
         plt.xlabel('Samples')
-        plt.ylabel('Channel')
+        plt.ylabel('ADU')
         plt.grid()
-        # plt.show()
+        plt.show()

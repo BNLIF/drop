@@ -13,14 +13,19 @@
 #======================================
 # GLOBAL PARAMETERS (you don't need to change it very often)
 DAQ_DIR=/home/rootless/ToolApplication
+#DAQ_DIR=/data/0/BNLBOX/WbLS-DATA/phase_2
 GECO_DIR=/home/rootless/GECO_Logging
-MVD_DIR=/media/disk_a/BNLBOX/WbLS-DATA
+#MVD_DIR=/media/disk_a/BNLBOX/WbLS-DATA
+MVD_DIR=/media/disk_c/WbLS-DATA
 DAQ_USER=rootless
 DAQ_IP=130.199.33.252
 #======================================
 
 echo "Enter a run type (muon, alpha, led, geco)"
 read RUN_TYPE
+
+echo "Enter a run phase (phase0, phase1, phase2)"
+read RUN_PHASE
 
 # note:
 #     muon stores muon data
@@ -50,7 +55,7 @@ echo "Start transfering data taken on $DATE"
 
 function transfer_data() {
     if [ $RUN_TYPE != "geco" ]; then
-		output_dir=${MVD_DIR}/raw_binary/${MVD_SUB_FOLDER}
+		output_dir=${MVD_DIR}/raw_binary/${RUN_PHASE}/${MVD_SUB_FOLDER}
 		scp ${DAQ_USER}@${DAQ_IP}:${DAQ_DIR}/*${RUN_TYPE}_*${DATE}*.bin $output_dir
 		find ${output_dir}/*${RUN_TYPE}_*${DATE}*.bin -type f > tmp.list
     else
@@ -63,12 +68,12 @@ function transfer_data() {
 
 function run_rooter() {
 
-	output_dir=${MVD_DIR}/raw_root/${MVD_SUB_FOLDER}/
+	output_dir=${MVD_DIR}/raw_root/${RUN_PHASE}/${MVD_SUB_FOLDER}/
 	while read fpath; do
 	    case "$fpath" in \#*) continue ;; esac
 	    echo " "
 	    echo "processing $fpath ..."
-	    python src/raw_data_rooter.py --if_path=${fpath} --output_dir=${output_dir}
+	    python src/raw_data_rooter_v1740.py --if_path=${fpath} --output_dir=${output_dir}
 	done < tmp.list
 }
 
@@ -87,11 +92,11 @@ transfer_data
 
 # execute the rooter
 if [ $DO_ROOTER -eq 1 ]; then
-    source env/bin/activate
+    source drop_env/bin/activate
     run_rooter
 fi
 
 if [ $DO_CSV -eq 1 ]; then
-    source env/bin/activate
+    source drop_env/bin/activate
     run_log2csv
 fi
