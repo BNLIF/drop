@@ -32,7 +32,7 @@ class RawDataFile:
         self.trigger_counter=0
         self.verbosity=1
         
-    def get_next_n_words(self, n_words=4, skip_word=0xffffffff):
+    def get_next_n_words(self, n_words=4):
         """
         CAEN binary is 32-bit (4-byte) per word. Get next n words from binary file.
 
@@ -46,10 +46,6 @@ class RawDataFile:
             order_type='<u4'
         try:
             w = fromfile(self.file, dtype=order_type, count=n_words)
-            n_skip = sum(w==skip_word)
-            if n_skip>0:
-                w=w[w!=skip_word]
-                w = np.append(w, fromfile(self.file, dtype=order_type, count=n_skip))
             return w
         except ValueError:
             return None
