@@ -6,6 +6,7 @@ dgtz_dynamic_range_mV: 2000 # Digitizer dynamic range in mV. 2000 or 500
 non_signal_channels: ['b1_ch0', 'b2_ch15','b4_ch12'] # some channels are used for paddles, exclude them for reconstructing variables
 bottom_pmt_channels: [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214]
 side_pmt_channels: [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411]
+hodoscope_pmt_channels: [416, 417, 418, 419, 420, 421, 422, 423, 424, 425, 426, 427, 428, 429, 430, 431, 432, 433, 434, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 446, 447,448, 449, 450, 451, 452, 453, 454, 455, 456, 457, 458, 459, 460, 461, 462, 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479]
 row1_pmt_channels: [300, 304, 308, 312]
 row2_pmt_channels: [301, 305, 309, 313]
 row3_pmt_channels: [302, 306, 310, 314]
@@ -22,13 +23,14 @@ col6_pmt_channels: [403, 404, 405]
 col7_pmt_channels: [406, 407, 408]
 col8_pmt_channels: [409, 410, 411]
 user_pmt_channels: [102, 103, 104, 107, 108, 109, 110, 111, 114, 115, 200, 201, 202, 203, 207, 208, 209]
-skip_pmt_channels: []
+skip_pmt_channels: [412, 413, 414, 415]
 ch_saturated_threshold: 0 # threshold below which a channel is considered saturated. Unit: adc
 
 # absolute path to the PMT calibration file
-spe_fit_results_file: '/media/disk_a/CERNBOX/WbLS-DATA/db/spe/b/bnl1t_spe_fit_results_220819T1401.csv'
+#spe_fit_results_file: '/media/disk_a/CERNBOX/WbLS-DATA/db/spe/b/bnl1t_spe_fit_results_220819T1401.csv'
+spe_fit_results_file: '/home/guang/work/bnl1t/drop/drop_jan26_24_pull/drop/yaml/bnl1t_spe_fit_results_230420T1832_1740.csv'
 
-interpolate_spe: True # bool
+interpolate_spe: False # bool
 
 # Noise filter
 apply_high_pass_filter: False
@@ -40,8 +42,10 @@ pre_pulse: 1
 post_pulse: 5
 
 # ROI stands for Region of Interest. Ex. Several variables (ex. max height, integral) are computed within ROI.
-roi_start_ns: [-200, -22, 200]
-roi_end_ns: [-100, 78, 4000]
+#roi_start_ns: [-200, -22, 200]
+#roi_end_ns: [-100, 78, 4000]
+roi_start_ns: [-2000]
+roi_end_ns: [4000]
 
 # PulseFinder: scipy peak finding
 pulse_finder_algo: 0
