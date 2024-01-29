@@ -93,6 +93,7 @@ class YamlReader():
         self.col8_pmt_channels= self.get_ch_names( self.data['col8_pmt_channels'] )
         self.user_pmt_channels=self.get_ch_names( self.data['user_pmt_channels'] )
         self.skip_pmt_channels=self.get_ch_names( self.data['skip_pmt_channels'] )
+        self.hodoscope_pmt_channels=self.get_ch_names( self.data['hodoscope_pmt_channels'] )
         self.ch_saturated_threshold = int(self.data['ch_saturated_threshold'])
 
         self.spe_fit_results_file = self.data['spe_fit_results_file']

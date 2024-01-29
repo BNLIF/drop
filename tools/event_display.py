@@ -78,7 +78,17 @@ class EventDisplay():
         #self.cmap=plt.get_cmap('tab20')
         self.user_ch_colors =['b', 'g', 'r', 'c', 'm', 'y',
         'tab:blue', 'tab:orange', 'lime', 'lightcoral', 'tab:purple', 'tab:brown',
-        'tab:pink', 'tab:gray', 'navy', 'gold']
+        'tab:pink', 'tab:gray', 'navy', 'gold', 
+        'b', 'g', 'r', 'c', 'm', 'y',
+        'tab:blue', 'tab:orange', 'lime', 'lightcoral', 'tab:purple', 'tab:brown',
+        'tab:pink', 'tab:gray', 'navy', 'gold',
+        'b', 'g', 'r', 'c', 'm', 'y',
+        'tab:blue', 'tab:orange', 'lime', 'lightcoral', 'tab:purple', 'tab:brown',
+        'tab:pink', 'tab:gray', 'navy', 'gold',
+        'b', 'g', 'r', 'c', 'm', 'y',
+        'tab:blue', 'tab:orange', 'lime', 'lightcoral', 'tab:purple', 'tab:brown',
+        'tab:pink', 'tab:gray', 'navy', 'gold',
+        ]
         self.fig_width=8
         self.fig_height=4
         self.xlim = None
@@ -267,6 +277,21 @@ class EventDisplay():
             plt.show()
         return None
 
+    def get_waveform(self, event_id, ch):
+        if isinstance(event_id, int):
+            if event_id in self.grabbed_event_id:
+                i = self.grabbed_event_id.index(event_id)
+            else:
+                n = self.grab_events(event_id)
+                if n==1:
+                    i=0
+                else:
+                    return None
+
+            return self.wfm_list[i].amp_pe[ch]
+        else:
+            return None
+    
     def _display_ch_waveform(self, i, ch, no_show=False):
         """
             Notes: function starts with _ are not meant for users to call. This
@@ -363,22 +388,45 @@ class EventDisplay():
         fig, axes = plt.subplots(n_boards, 1, figsize=[8,4*n_boards], sharex=True)
 
         for b, b_id in enumerate(active_board_id):
-            for ch in self.run.ch_names:
-                if ch in self.run.cfg.non_signal_channels:
-                    continue
-                if int(ch[5]) == b_id:
-                    #ch_id is the end digit
-                    ch_id = int(re.match('.*?([0-9]+)$', ch).group(1))
-                    a = self.wfm_list[i].amp_pe[ch]
-                    t = np.arange(0, len(a)*2, 2)
-                    axes[b].plot(t, a, label=ch[7:], linewidth=1, color=self.user_ch_colors[ch_id])
-                    axes[b].plot(t, np.zeros(len(a)), '--', color='gray', linewidth=1)
-            if b==0:
-                axes[b].set_title('event_id=%d' % self.grabbed_event_id[i])
-            axes[b].set_xlabel('Time [ns]')
-            axes[b].set_ylabel("PE / 2ns")
-            axes[b].grid(linewidth=0.5, alpha=0.5)
-            axes[b].legend(loc='best', title="board_id: %d" % b_id, ncol=2, fontsize=8)
+            #print ("board id ",b)
+            if b == 4:
+                for ch in self.run.ch_names:
+                    if 'ch32' in ch:
+                        break
+                    if ch in self.run.cfg.non_signal_channels:
+                        continue
+                    if int(ch[5]) == b_id:
+                        #ch_id is the end digit
+                        ch_id = int(re.match('.*?([0-9]+)$', ch).group(1))
+                        a = self.wfm_list[i].amp_pe[ch]
+                        t = np.arange(0, len(a)*16, 16)
+                        #print ("ch_id ", ch_id)
+                        axes[b].plot(t, a, label=ch[7:], linewidth=1, color=self.user_ch_colors[ch_id])
+                        axes[b].plot(t, np.zeros(len(a)), '--', color='gray', linewidth=1)
+                if b==0:
+                    axes[b].set_title('event_id=%d' % self.grabbed_event_id[i])
+                axes[b].set_xlabel('Time [ns]')
+                axes[b].set_ylabel("PE / 16ns")
+                axes[b].grid(linewidth=0.5, alpha=0.5)
+                axes[b].legend(loc='best', title="board_id: %d" % b_id, ncol=2, fontsize=8)
+            else:
+                for ch in self.run.ch_names:
+                    if ch in self.run.cfg.non_signal_channels:
+                        continue
+                    if int(ch[5]) == b_id:
+                        #ch_id is the end digit
+                        ch_id = int(re.match('.*?([0-9]+)$', ch).group(1))
+                        a = self.wfm_list[i].amp_pe[ch]
+                        t = np.arange(0, len(a)*2, 2)
+                        #print ("ch_id ", ch_id)
+                        axes[b].plot(t, a, label=ch[7:], linewidth=1, color=self.user_ch_colors[ch_id])
+                        axes[b].plot(t, np.zeros(len(a)), '--', color='gray', linewidth=1)
+                if b==0:
+                    axes[b].set_title('event_id=%d' % self.grabbed_event_id[i])
+                axes[b].set_xlabel('Time [ns]')
+                axes[b].set_ylabel("PE / 2ns")
+                axes[b].grid(linewidth=0.5, alpha=0.5)
+                axes[b].legend(loc='best', title="board_id: %d" % b_id, ncol=2, fontsize=8)
             # user config
             if self.xlim is not None:
                 axes[b].set_xlim(self.xlim)

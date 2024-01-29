@@ -68,6 +68,9 @@ class RunDROP():
         YYmmddTHHMM
         """
         match = re.search(r'\d{6}T\d{4}', s)
+        if match is None:
+            return None
+        print (match)
         try:
             dt = datetime.strptime(match.group(), '%y%m%dT%H%M')
             return dt
@@ -111,6 +114,7 @@ class RunDROP():
             self.spe_fit_results  = df # to be saved in root
             ch_names = df.index
             for ch in ch_names:
+                print ("channel: ", ch)
                 self.spe_mean[ch] = float(df['spe_mean'][ch])
         except:
             sys.exit("your spe_fit_results_file cannot be loaded properly!")
@@ -306,6 +310,7 @@ def main(argv):
         'cfg_col8_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.col8_pmt_channels]],
         'cfg_user_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.user_pmt_channels]],
         'cfg_skip_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.skip_pmt_channels]],
+        'cfg_hodoscope_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.hodoscope_pmt_channels]],
         'cfg_spe_fit_results_file': [[ord(i) for i in run.cfg.spe_fit_results_file]],
         'cfg_interpolate_spe': [run.cfg.interpolate_spe],
         'cfg_daisy_chainr': [run.cfg.daisy_chain],
@@ -317,6 +322,8 @@ def main(argv):
         'cfg_post_pulse': [run.cfg.post_pulse],
         'cfg_roi_start_ns': [run.cfg.roi_start_ns],
         'cfg_roi_end_ns': [run.cfg.roi_end_ns],
+        'cfg_roi_start2_ns': [run.cfg.roi_start2_ns],
+        'cfg_roi_end2_ns': [run.cfg.roi_end2_ns],
         'cfg_pulse_finder_algo': [run.cfg.pulse_finder_algo],
         'cfg_scipy_pf_pars_distance': [run.cfg.scipy_pf_pars.distance],
         'cfg_scipy_pf_pars_threshold': [run.cfg.scipy_pf_pars.threshold],

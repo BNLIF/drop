@@ -183,11 +183,13 @@ class Waveform():
         for ch, a in self.amp_pe.items():
             a_corr = a.copy()
             if "_b1" in ch:
-                a_corr=a[dS*2:]
+                a_corr=a[dS*3:]
             elif "_b2" in ch:
-                a_corr=a[dS:-dS]
-            elif ("_b3" in ch) or ("_b4" in ch):
-                a_corr=a[0:-dS*2]
+                a_corr=a[dS*2:-dS]
+            elif ("_b3" in ch):
+                a_corr=a[dS:-dS*2]
+            elif ("_b4" in ch):
+                a_corr=a[0:-dS*3]
             else:
                 print("ERROR in correct_trg_delay: invalid boardId")
                 return None
@@ -211,10 +213,16 @@ class Waveform():
         r1_pe, r2_pe, r3_pe, r4_pe, r5_pe, r6_pe, r7_pe = 0, 0, 0, 0, 0, 0, 0
         c1_pe, c2_pe, c3_pe, c4_pe, c5_pe, c6_pe, c7_pe, c8_pe = 0, 0, 0, 0, 0, 0, 0, 0
         user_pe = 0
+        #print ("hodoscope channels: ", self.cfg.hodoscope_pmt_channels)
+        #print ("skipping channels : ", self.cfg.skip_pmt_channels)
         for ch, val in self.amp_pe.items():
             if 'adc_' in ch:
                 if ch in self.cfg.skip_pmt_channels:
                     continue
+                if 'b5' in ch:
+                    continue
+    
+                #print (ch)
                 tot_pe += val
                 if ch in self.cfg.bottom_pmt_channels:
                     bt_pe += val
@@ -327,6 +335,8 @@ class Waveform():
             end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
             start=max(0, start)
             end = min(self.n_samp-1, end)
+            start2 = 0
+            end2 = 200
             height_pe={}
             area_pe = {}
             low_pe = {}
@@ -335,12 +345,21 @@ class Waveform():
             for ch, a in self.amp_pe.items():
                 if ch[0:4]!='adc_':
                     continue
-                height_pe[ch] = util_nb.max(a[start:end])
-                low_pe[ch] = util_nb.min(a[start:end])
-                std_pe[ch] = util_nb.std(a[start:end])
-                std_mV[ch] = std_pe[ch]*50*self.spe_mean[ch]
-                a_int =  self.amp_pe_int[ch]
-                area_pe[ch] = a_int[end]-a_int[start]
+                #print ("roi ch. ", ch)
+                if 'b5' in ch:
+                    height_pe[ch] = util_nb.max(a[start2:end2])
+                    low_pe[ch] = util_nb.min(a[start2:end2])
+                    std_pe[ch] = util_nb.std(a[start2:end2])
+                    std_mV[ch] = std_pe[ch]*50*self.spe_mean[ch]
+                    a_int =  self.amp_pe_int[ch]
+                    area_pe[ch] = a_int[end2]-a_int[start2]
+                else:
+                    height_pe[ch] = util_nb.max(a[start:end])
+                    low_pe[ch] = util_nb.min(a[start:end])
+                    std_pe[ch] = util_nb.std(a[start:end])
+                    std_mV[ch] = std_pe[ch]*50*self.spe_mean[ch]
+                    a_int =  self.amp_pe_int[ch]
+                    area_pe[ch] = a_int[end]-a_int[start]
             self.roi_height_pe.append(height_pe)
             self.roi_area_pe.append(area_pe)
             self.roi_low_pe.append(low_pe)
