@@ -163,6 +163,275 @@ class Waveform():
             self.flat_base_std_pe[ch] = self.flat_base_std_mV[ch]/50/spe_mean
         return None
 
+    def correct_chn_time_delay(self):
+        with open('%s/alpha_time_correction.json' % os.environ['YAML_DIR'], 'r') as myfile:
+            data=myfile.read()
+        obj = json.loads(data)
+        for ch, a in self.amp_pe.items():
+            a_corr = a.copy()
+            if "b1_ch1" in ch:
+                dS = obj["bt_p1"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch2" in ch:
+                dS = obj["bt_p2"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch3" in ch:
+                dS = obj["bt_p3"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch4" in ch:
+                dS = obj["bt_p4"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch5" in ch:
+                dS = obj["bt_p5"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch6" in ch:
+                dS = obj["bt_p6"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch7" in ch:
+                dS = obj["bt_p7"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch8" in ch:
+                dS = obj["bt_p8"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch9" in ch:
+                dS = obj["bt_p9"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch10" in ch:
+                dS = obj["bt_p10"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch11" in ch:
+                dS = obj["bt_p11"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch12" in ch:
+                dS = obj["bt_p12"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch13" in ch:
+                dS = obj["bt_p13"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch14" in ch:
+                dS = obj["bt_p14"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch15" in ch:
+                dS = obj["bt_p15"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch0" in ch:
+                dS = obj["bt_p16"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch1" in ch:
+                dS = obj["bt_p17"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch2" in ch:
+                dS = obj["bt_p18"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch3" in ch:
+                dS = obj["bt_p19"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch4" in ch:
+                dS = obj["bt_p20"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch5" in ch:
+                dS = obj["bt_p21"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch6" in ch:
+                dS = obj["bt_p22"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch7" in ch:
+                dS = obj["bt_p23"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch8" in ch:
+                dS = obj["bt_p24"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch9" in ch:
+                dS = obj["bt_p25"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch10" in ch:
+                dS = obj["bt_p26"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch11" in ch:
+                dS = obj["bt_p27"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch12" in ch:
+                dS = obj["bt_p28"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch13" in ch:
+                dS = obj["bt_p29"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch14" in ch:
+                dS = obj["bt_p30"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b3" in ch or "b4" in ch:
+                a_corr=a[0:1900]
+            self.amp_pe[ch] = a_corr
+
+
+    def correct_chn_time_delay(self):
+        with open('/home/guang/work/bnl1t/drop/src/alpha_time_correction.json', 'r') as myfile:
+            data=myfile.read()
+        obj = json.loads(data)
+        for ch, a in self.amp_pe.items():
+            a_corr = a.copy()
+            #print(a.shape)
+            #print(len(a))
+            if "b1_ch1" in ch:
+                #print("before: ",a_corr)
+
+                dS = obj["bt_p1"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                #print("dS and bt_p1 ",dS," ",obj["bt_p1"])
+                a_corr=a[dS:1900+dS]
+                #print("after: ",a_corr)
+                #print("shape after: ",a_corr.shape)
+            if "b1_ch2" in ch:
+                dS = obj["bt_p2"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch3" in ch:
+                dS = obj["bt_p3"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch4" in ch:
+                dS = obj["bt_p4"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch5" in ch:
+                dS = obj["bt_p5"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch6" in ch:
+                dS = obj["bt_p6"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch7" in ch:
+                dS = obj["bt_p7"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch8" in ch:
+                dS = obj["bt_p8"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch9" in ch:
+                dS = obj["bt_p9"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch10" in ch:
+                dS = obj["bt_p10"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch11" in ch:
+                dS = obj["bt_p11"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch12" in ch:
+                dS = obj["bt_p12"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch13" in ch:
+                dS = obj["bt_p13"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch14" in ch:
+                dS = obj["bt_p14"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b1_ch15" in ch:
+                dS = obj["bt_p15"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch0" in ch:
+                dS = obj["bt_p16"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch1" in ch:
+                dS = obj["bt_p17"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch2" in ch:
+                dS = obj["bt_p18"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch3" in ch:
+                dS = obj["bt_p19"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch4" in ch:
+                dS = obj["bt_p20"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch5" in ch:
+                dS = obj["bt_p21"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch6" in ch:
+                dS = obj["bt_p22"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch7" in ch:
+                dS = obj["bt_p23"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch8" in ch:
+                dS = obj["bt_p24"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch9" in ch:
+                dS = obj["bt_p25"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch10" in ch:
+                dS = obj["bt_p26"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch11" in ch:
+                dS = obj["bt_p27"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch12" in ch:
+                dS = obj["bt_p28"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch13" in ch:
+                dS = obj["bt_p29"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b2_ch14" in ch:
+                dS = obj["bt_p30"]//int(SAMPLE_TO_NS)
+                dS = int(dS)
+                a_corr=a[dS:1900+dS]
+            if "b3" in ch or "b4" in ch:
+                a_corr=a[0:1900]
+            self.amp_pe[ch] = a_corr
+
+
     def correct_daisy_chain_trg_delay(self):
         """
         Shift a channel's waveform based on which board it is. The 48 ns delay
