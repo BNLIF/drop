@@ -30,9 +30,11 @@ class RawDataFile:
             self.timeTagRollover[i+1]=0
         self.DAQ_Software = DAQ_Software
         self.trigger_counter=0
+        self.event_counter=0
         self.verbosity=1
         
-    def get_next_n_words(self, n_words=4):
+    '''
+    def get_next_n_words(self, n_words=4, skip_word=0xffffffff):
         """
         CAEN binary is 32-bit (4-byte) per word. Get next n words from binary file.
 
@@ -46,7 +48,43 @@ class RawDataFile:
             order_type='<u4'
         try:
             w = fromfile(self.file, dtype=order_type, count=n_words)
+            n_skip = sum(w==skip_word)
+            if n_skip>0:
+                w=w[w!=skip_word]
+                w = np.append(w, fromfile(self.file, dtype=order_type, count=n_skip))
             return w
+        except ValueError:
+            return None
+    '''
+    def get_next_n_words(self, n_words=4, byte_offset=0):
+        """
+        CAEN binary is 32-bit (4-byte) per word. Get next n words from binary file.
+
+        Args:
+            n_words: int
+            skip_word: skip this word during the read. Read next from file and append.
+        """
+        if self.DAQ_Software=='LabVIEW':
+            order_type='>u4'
+        else:
+            order_type='<u4'
+        try:
+            w = fromfile(self.file, dtype=order_type, count=n_words, offset=byte_offset)
+            #n_skip = sum(w==skip_word)
+            #if n_skip>0:
+            #    w=w[w!=skip_word]
+            #    w = np.append(w, fromfile(self.file, dtype=order_type, count=n_skip))
+            return w
+        except ValueError:
+            return None
+
+    def get_next_byte(self):
+        """
+        Read only the next byte in the file
+        """
+        try:
+            b = fromfile(self.file, dtype='<u1', count=1)
+            return b[0]
         except ValueError:
             return None
 
@@ -87,11 +125,12 @@ class RawDataFile:
         """
         # Instantize a RawTrigger object
         trigger = RawTrigger()
+        #print(self.event_counter)
         # Fill the file position
         trigger.filePos = self.file.tell()
         # Read the 4 long-words of the event header
         try:
-            i0, i1, i2, i3 = self.get_next_n_words(4)
+            i0, i1, i2, i3 = self.get_next_n_words(n_words=4)
         except ValueError:
             return None
 
@@ -104,18 +143,25 @@ class RawDataFile:
                 print('Info: Read did not pass sanity check')
                 print('Info: Last read headers:')
                 print(hex(i0), hex(i1), hex(i2), hex(i3))
-                print("Start skipping...4 bytes at a time...until the next good first 4-bytes...")
+                print("Start skipping...1 byte at a time...until the next good header...")
             while (True):
-                w = self.get_next_n_words(1)
-                if w is None:
+                b = self.get_next_byte()
+                #print(self.file.tell())
+                if b is None:
                     return None
-                if not w.tolist():
-                    print(w)
-                    return None
-                i0 = w[0]
-                if (i0 & 0xF0000000 == 0xa0000000):
-                    i1, i2, i3 = self.get_next_n_words(3)
-                    break
+                #print(hex(b))
+                if (b & 0xF0 == 0xa0):
+                    #print("Stop")
+                    #break
+                    #print(self.file.tell())
+                    i0, i1, i2, i3 = self.get_next_n_words(n_words=4, byte_offset=-4)
+                    #print(self.file.tell())
+                    eventCounterMask = 0x00ffffff
+                    event_count = i2 & eventCounterMask
+                    #print(event_count)
+                    if (event_count==self.event_counter or event_count==self.event_counter + 1):
+                        #print(self.file.tell())
+                        break
 
         # extract the event size from the first header long-word
         eventSize = i0 - 0xa0000000
@@ -123,6 +169,8 @@ class RawDataFile:
         # extract the board ID and channel map from the second header long-word
         boardId = (i1 & 0xf8000000) >> 27
         trigger.boardId = boardId #Xin
+        if boardId > 5:
+            print(trigger.filePos)
         if boardId == 5:
             trigger.brdtype = "V1740"
         else:
@@ -164,6 +212,7 @@ class RawDataFile:
         # Create an event counter mask and then extract the counter value from the third header long-word
         eventCounterMask = 0x00ffffff
         trigger.eventCounter = i2 & eventCounterMask
+        self.event_counter = trigger.eventCounter
 
         # The trigger time-tag (timestamp) is the 31-bit of 4th world
         pattern_bits = (i1 >> 8) & 0xffff
@@ -287,7 +336,7 @@ class RawDataFile:
                         # Loop over all samples in group
                         for j in range(self.recordLen//3):
                             # Read 9 words
-                            words = self.get_next_n_words(9)
+                            words = self.get_next_n_words(n_words=9)
 
                             # Decode 24 samples
                             samps = self.decode_V1740_data(words)
