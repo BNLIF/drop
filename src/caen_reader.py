@@ -134,18 +134,31 @@ class RawDataFile:
         except ValueError:
             return None
 
-        # Check to make sure the event starts with the key value (0xa0000000), otherwise it's ill-formed
-        if (i0 & 0xF0000000 == 0xa0000000):
+        # Check to make sure the event starts with the key value (0xa0000000) and event count is correct, otherwise it's ill-formed
+        eventCounterMask = 0x00ffffff
+        event_count = i2 & eventCounterMask
+        # If not the first file in a run, event counter will not start at 0
+        if self.event_counter==0:
+            self.event_counter = event_count
+
+        if ((i0 & 0xF0000000 == 0xa0000000) and (abs(event_count - self.event_counter) < 5)):
             trigger.sanity = 0 # normal
         else:
             trigger.sanity = 0 # not good, but let's keep going
+            start_pos = self.file.tell()
             if self.verbosity>=1:
                 print('Info: Read did not pass sanity check')
                 print('Info: Last read headers:')
                 print(hex(i0), hex(i1), hex(i2), hex(i3))
                 print("Start skipping...1 byte at a time...until the next good header...")
             while (True):
+                #print("skipping a byte")
                 b = self.get_next_byte()
+                current_pos = self.file.tell()
+                if current_pos - start_pos > 64016:
+                    print("Taking too long to find next event")
+                    print(start_pos)
+                    return None
                 #print(self.file.tell())
                 if b is None:
                     return None
@@ -159,8 +172,9 @@ class RawDataFile:
                     eventCounterMask = 0x00ffffff
                     event_count = i2 & eventCounterMask
                     #print(event_count)
-                    if (event_count==self.event_counter or event_count==self.event_counter + 1):
+                    if (abs(event_count - self.event_counter) < 5):
                         #print(self.file.tell())
+                        #print(event_count)
                         break
 
         # extract the event size from the first header long-word
@@ -170,6 +184,7 @@ class RawDataFile:
         boardId = (i1 & 0xf8000000) >> 27
         trigger.boardId = boardId #Xin
         if boardId > 5:
+            print("Board ID too high")
             print(trigger.filePos)
         if boardId == 5:
             trigger.brdtype = "V1740"
