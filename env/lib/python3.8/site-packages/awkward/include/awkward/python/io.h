@@ -1,0 +1,19 @@
+// BSD 3-Clause License; see https://github.com/scikit-hep/awkward-1.0/blob/main/LICENSE
+
+#ifndef AWKWARDPY_IO_H_
+#define AWKWARDPY_IO_H_
+
+#include <pybind11/pybind11.h>
+
+namespace py = pybind11;
+
+void
+make_fromjson(py::module& m, const std::string& name);
+
+void
+make_fromjsonfile(py::module& m, const std::string& name);
+
+void
+make_uproot_issue_90(py::module& m);
+
+#endif // AWKWARDPY_IO_H_

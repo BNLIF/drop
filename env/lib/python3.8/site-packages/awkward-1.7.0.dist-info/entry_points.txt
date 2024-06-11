@@ -1,0 +1,3 @@
+[numba_extensions]
+init = awkward._connect._numba:register
+
