@@ -17,7 +17,7 @@ import re
 src_path = os.environ['SOURCE_DIR']
 YAML_DIR = os.environ['YAML_DIR']
 sys.path.append(src_path)
-
+print("SRC",src_path)
 from utilities import generate_colormap
 from run_drop import RunDROP
 from pulse_finder import PulseFinder

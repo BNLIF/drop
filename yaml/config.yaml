@@ -3,31 +3,26 @@ batch_size: 1000 # int, how many events to process at a time
 post_trigger: 0.875 # float, between 0 and 1
 daisy_chain: True # bool
 dgtz_dynamic_range_mV: 2000 # Digitizer dynamic range in mV. 2000 or 500
-non_signal_channels: ['b1_ch0', 'b2_ch15','b4_ch12'] # some channels are used for paddles, exclude them for reconstructing variables
-bottom_pmt_channels: [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214]
-side_pmt_channels: [300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411]
-row1_pmt_channels: [300, 304, 308, 312]
-row2_pmt_channels: [301, 305, 309, 313]
-row3_pmt_channels: [302, 306, 310, 314]
-row4_pmt_channels: [303, 307, 311, 315]
-row5_pmt_channels: [400, 403, 406, 409]
-row6_pmt_channels: [401, 404, 407, 410]
-row7_pmt_channels: [402, 405, 408, 411]
-col1_pmt_channels: [300, 301, 302, 303]
-col2_pmt_channels: [304, 305, 306, 307]
-col3_pmt_channels: [308, 309, 310, 311]
-col4_pmt_channels: [312, 313, 314, 315]
-col5_pmt_channels: [400, 401, 402]
-col6_pmt_channels: [403, 404, 405]
-col7_pmt_channels: [406, 407, 408]
-col8_pmt_channels: [409, 410, 411]
+non_signal_channels: [] # some channels are used for paddles, exclude them for reconstructing variables
+bottom_pmt_channels: [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111] # 12 Bottom PMTs
+side_pmt_channels: [112, 113, 114, 115, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215] # 24 Side PMTs
+row1_pmt_channels: [208, 212, 300, 112, 200, 204]
+row2_pmt_channels: [209, 213, 301, 113, 201, 205]
+row3_pmt_channels: [210, 214, 302, 114, 202, 206]
+row4_pmt_channels: [211, 215, 303, 115, 203, 207]
+col1_pmt_channels: [208, 209, 210, 211] #column 1 is defined wirth phi=0 23,25,26,27 in sim
+col2_pmt_channels: [212, 213, 214, 215]
+col3_pmt_channels: [300, 301, 302, 303]
+col4_pmt_channels: [112, 113, 114, 115]
+col5_pmt_channels: [200, 201, 202, 203]
+col6_pmt_channels: [204, 205, 206, 207]
 user_pmt_channels: [102, 103, 104, 107, 108, 109, 110, 111, 114, 115, 200, 201, 202, 203, 207, 208, 209]
 skip_pmt_channels: []
 ch_saturated_threshold: 0 # threshold below which a channel is considered saturated. Unit: adc
 
 # absolute path to the PMT calibration file
-spe_fit_results_file: '/media/disk_a/CERNBOX/WbLS-DATA/db/spe/b/bnl1t_spe_fit_results_220819T1401.csv'
-interpolate_spe: True # bool
+spe_fit_results_file: '/home/wangbtc/drop/data/bnl1t_spe_fit_results_230529T0256.csv'
+interpolate_spe: False # bool
 
 # Noise filter
 apply_high_pass_filter: False
