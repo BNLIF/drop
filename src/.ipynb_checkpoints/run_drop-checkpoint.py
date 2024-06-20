@@ -68,9 +68,6 @@ class RunDROP():
         YYmmddTHHMM
         """
         match = re.search(r'\d{6}T\d{4}', s)
-        if match is None:
-            return None
-        print (match)
         try:
             dt = datetime.strptime(match.group(), '%y%m%dT%H%M')
             return dt
@@ -113,9 +110,7 @@ class RunDROP():
             df.set_index('ch_name', inplace=True)
             self.spe_fit_results  = df # to be saved in root
             ch_names = df.index
-            print (ch_names)
             for ch in ch_names:
-                print ("channel: ", ch)
                 self.spe_mean[ch] = float(df['spe_mean'][ch])
         except:
             sys.exit("your spe_fit_results_file cannot be loaded properly!")
@@ -194,11 +189,9 @@ class RunDROP():
         # create PulseFinder
         pf = PulseFinder(self.cfg, wfm)
 
-        #print ('batch ', batch,' length ',len(batch))
         # loop over events in this batch
         for i in range(len(batch)):
             event_id = batch[i].event_id
-            #print ('event_id ',event_id,' start_id ',self.start_id)
             event_ttt = batch[i].event_ttt
             if event_id<self.start_id or event_id>=self.end_id:
                 continue
@@ -221,8 +214,8 @@ class RunDROP():
             pf.reset()
             pf.wfm = wfm
             pf.find_pulses()
-            #pf.calc_pulse_ch_info()
-            #pf.calc_pulse_info()
+            pf.calc_pulse_ch_info()
+            pf.calc_pulse_info()
             # fill rq event structure
             if writer is None:
                 self.wfm_list.append(wfm)
@@ -313,21 +306,17 @@ def main(argv):
         'cfg_col8_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.col8_pmt_channels]],
         'cfg_user_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.user_pmt_channels]],
         'cfg_skip_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.skip_pmt_channels]],
-        'cfg_hodoscope_pmt_channels': [[run.ch_name_to_id_dict[ch] for ch in run.cfg.hodoscope_pmt_channels]],
         'cfg_spe_fit_results_file': [[ord(i) for i in run.cfg.spe_fit_results_file]],
         'cfg_interpolate_spe': [run.cfg.interpolate_spe],
         'cfg_daisy_chainr': [run.cfg.daisy_chain],
         'cfg_apply_high_pass_filter': [run.cfg.apply_high_pass_filter],
         'cfg_high_pass_cutoff_Hz': [run.cfg.high_pass_cutoff_Hz],
-        'cfg_use_hodoscope': [run.cfg.use_hodoscope],
         'cfg_moving_avg_length': [run.cfg.moving_avg_length],
         'cfg_sigma_above_baseline': [run.cfg.sigma_above_baseline],
         'cfg_pre_pulse': [run.cfg.pre_pulse],
         'cfg_post_pulse': [run.cfg.post_pulse],
         'cfg_roi_start_ns': [run.cfg.roi_start_ns],
         'cfg_roi_end_ns': [run.cfg.roi_end_ns],
-        'cfg_roi_start2_ns': [run.cfg.roi_start2_ns],
-        'cfg_roi_end2_ns': [run.cfg.roi_end2_ns],
         'cfg_pulse_finder_algo': [run.cfg.pulse_finder_algo],
         'cfg_scipy_pf_pars_distance': [run.cfg.scipy_pf_pars.distance],
         'cfg_scipy_pf_pars_threshold': [run.cfg.scipy_pf_pars.threshold],

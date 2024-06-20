@@ -1,0 +1,56 @@
+# General DAQ config setting on LabVIEW
+batch_size: 1000 # int, how many events to process at a time
+post_trigger: 0.875 # float, between 0 and 1
+daisy_chain: True # bool
+dgtz_dynamic_range_mV: 2000 # Digitizer dynamic range in mV. 2000 or 500
+non_signal_channels: [] # some channels are used for paddles, exclude them for reconstructing variables
+bottom_pmt_channels: [300,301,302,303,304,305,306,307,308,309,310,311]
+side_pmt_channels: [312,313,314,315,316,317,318,319,320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335]
+hodoscope_pmt_channels: []
+row1_pmt_channels: []
+row2_pmt_channels: []
+row3_pmt_channels: []
+row4_pmt_channels: []
+row5_pmt_channels: []
+row6_pmt_channels: []
+row7_pmt_channels: []
+col1_pmt_channels: []
+col2_pmt_channels: []
+col3_pmt_channels: []
+col4_pmt_channels: []
+col5_pmt_channels: []
+col6_pmt_channels: []
+col7_pmt_channels: []
+col8_pmt_channels: []
+user_pmt_channels: []
+skip_pmt_channels: []
+ch_saturated_threshold: 0 # threshold below which a channel is considered saturated. Unit: adc
+
+# absolute path to the PMT calibration file
+spe_fit_results_file: '/home/guang/work/bnl1t/drop/drop_jan26_24_pull/drop/yaml/bnl30t_240426T0000_dummy.csv'
+
+interpolate_spe: False # bool
+use_hodoscope: False
+debug: False
+
+# Noise filter
+apply_high_pass_filter: False
+high_pass_cutoff_Hz: 5e6
+# The following are reserved for rolling baseline subtraction (not yet implemented)
+moving_avg_length: 10
+sigma_above_baseline: 3.0
+pre_pulse: 1
+post_pulse: 5
+
+# ROI stands for Region of Interest. Ex. Several variables (ex. max height, integral) are computed within ROI.
+roi_start_ns: [0]
+roi_end_ns: [200]
+
+# PulseFinder: scipy peak finding
+pulse_finder_algo: 0
+scipy_peak_finder_parameters:
+  distance: 20
+  threshold: 0.3
+  height: 0.3 # None
+  prominence: 1.0 #
+spe_height_threshold: 0.125 # if a pulse-channel height is above this threshold, it's counted toward coincidence

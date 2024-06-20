@@ -106,7 +106,8 @@ class YamlReader():
         self.sigma_above_baseline = float(self.data['sigma_above_baseline'])
         self.pre_pulse = int(self.data['pre_pulse'])
         self.post_pulse = int(self.data['post_pulse'])
-
+        self.use_hodoscope = bool(self.data['use_hodoscope'])
+        self.debug = bool(self.data['debug'])
 
         self.roi_start_ns = array(self.data['roi_start_ns'], dtype=int)
         self.roi_end_ns = array(self.data['roi_end_ns'], dtype=int)

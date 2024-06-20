@@ -64,6 +64,7 @@ class Waveform():
         """
         self.raw_data = {}
         for ch in self.ch_names:
+            #print ('setting channel ', ch)
             self.raw_data[ch] = val[ch].to_numpy() # numpy is faster
         self.event_id = val.event_id
         self.event_ttt = val.event_ttt
@@ -76,6 +77,8 @@ class Waveform():
         - Flag a channel if it's saturated.
         - Flag a event if any of the signal channels are saturated.
         """
+        if self.cfg.debug:
+            print('find_saturation')
         thresh = self.cfg.ch_saturated_threshold #
         self.ch_saturated = {}
         self.event_saturated = False
@@ -96,6 +99,8 @@ class Waveform():
         the first trigger arrived at the master board. This is calculate based
         on DAQ length and post_trigger fraction.
         """
+        if self.cfg.debug:
+            print('define_trigger_position')
         if self.cfg.daisy_chain:
             for ch in self.ch_names:
                 if '_b1' in ch:
@@ -104,6 +109,11 @@ class Waveform():
                     self.trg_pos = int(n_samp*pre_trg_frac)
                     self.trg_time_ns = self.trg_pos*(SAMPLE_TO_NS)
                     return None
+                if '_b3' in ch:
+                    n_samp_b3 = len(self.amp_mV[ch])
+                    pre_trg_frac = 1.0-self.cfg.post_trigger
+                    self.trg_pos = int(n_samp_b3*pre_trg_frac)
+                    self.trg_time_ns = self.trg_pos*(SAMPLE_TO_NS)
         else:
             print('Sorry pal. Fan-out not yet implemented.')
 
@@ -117,6 +127,8 @@ class Waveform():
         Return:
             float, float
         """
+        if self.cfg.debug: 
+            print('get_flat_baseline')
         # qx = np.quantile(val, MY_QUANTILES)
         if summed_channel:
             qx = util_nb.quantile_f8(val, MY_QUANTILES)
@@ -130,12 +142,17 @@ class Waveform():
         are saved in class for later usage: flat_base_mV, flat_base_std_mV,
         amp_mV.
         """
+        if self.cfg.debug:
+            print('subtract_flat_baseline')
         if self.ch_names is None:
             sys.exit('ERROR: Waveform::ch_names is not specified.')
 
         adc_to_mV = self.cfg.dgtz_dynamic_range_mV/(2**14-1)
+        adc_to_mV_b3 = self.cfg.dgtz_dynamic_range_mV/(2**12-1)
         for ch in self.ch_names:
             val = self.raw_data[ch]
+            if 'adc_b3_ch0' in ch and self.cfg.debug:
+                print ('ch ', ch, ' size ',len(self.raw_data[ch]))
             med, std = self.get_flat_baseline(val)
             self.flat_base_mV[ch] = med # save a copy
             self.flat_base_std_mV[ch] = std # save a copy
@@ -143,7 +160,14 @@ class Waveform():
             if self.cfg.apply_high_pass_filter:
                 cutoff_Hz = self.cfg.high_pass_cutoff_Hz
                 amp = digitial_butter_highpass_filter(amp, cutoff_Hz)
-            self.amp_mV[ch] = amp*adc_to_mV
+            if 'b3' in ch:
+                self.amp_mV[ch] = amp*adc_to_mV_b3
+            else:
+                self.amp_mV[ch] = amp*adc_to_mV
+            if 'adc_b3_ch0' in ch and self.cfg.debug:
+                print ('test2 ch ', ch, ' size ',len(self.amp_mV[ch]))
+                print ('adc values ',amp)
+                print ('mv values  ',self.amp_mV[ch])
         return None
 
     def do_spe_normalization(self):
@@ -151,19 +175,29 @@ class Waveform():
         Do SPE normalization for all signal channels
         Muon paddle is considered non-signal channel, and hence not SPE normalized
         """
+        if self.cfg.debug:
+            print('do_spe_normalization')
         if self.spe_mean is None:
             sys.exit('ERROR: spe_mean not specified in Waveform. Unable to normalized.')
+        #for ch, val in self.amp_mV.items():
+            #print (ch)
 
+        #print (self.amp_mV.items())
         for ch, val in self.amp_mV.items():
             if ch in self.cfg.non_signal_channels:
                 continue
+            
             spe_mean = self.spe_mean[ch]
             self.amp_pe[ch] = val/50/spe_mean
             self.flat_base_pe[ch] = self.flat_base_mV[ch]/50/spe_mean
             self.flat_base_std_pe[ch] = self.flat_base_std_mV[ch]/50/spe_mean
+            if 'adc_b3_ch0' in ch and self.cfg.debug:
+                print ('test3 ch ', ch, ' size ',len(self.raw_data[ch]))
         return None
 
     def correct_chn_time_delay(self):
+        if self.cfg.debug:
+            print('correct_chn_time_delay')
         with open('%s/alpha_time_correction.json' % os.environ['YAML_DIR'], 'r') as myfile:
             data=myfile.read()
         obj = json.loads(data)
@@ -447,21 +481,27 @@ class Waveform():
         Notes:
             boardId is baked into ch_name.
         """
+        if self.cfg.debug:
+            print('correct_daisy_chain_trg_delay')
         dT_ns = 48 # externally calibrated parameter
         dS = dT_ns//int(SAMPLE_TO_NS)
         for ch, a in self.amp_pe.items():
             a_corr = a.copy()
-            if "_b1" in ch:
-                a_corr=a[dS*3:]
-            elif "_b2" in ch:
-                a_corr=a[dS*2:-dS]
-            elif ("_b3" in ch):
-                a_corr=a[dS:-dS*2]
-            elif ("_b4" in ch):
-                a_corr=a[0:-dS*3]
-            else:
-                print("ERROR in correct_trg_delay: invalid boardId")
-                return None
+            #if "_b3" in ch:
+            #    a_corr=a[:-88]
+            #if "_b1" in ch:
+            #    a_corr=a[dS*3:]
+            #elif "_b2" in ch:
+            #    a_corr=a[dS*2:-dS]
+            #elif ("_b3" in ch):
+            #    a_corr=a[dS:-dS*2]
+            #elif ("_b4" in ch):
+            #    a_corr=a[0:-dS*3]
+            #elif ("_b5" in ch):
+            #    a_corr=a[0:-dS*3]
+            #else:
+            #    print("ERROR in correct_trg_delay: invalid boardId")
+            #    return None
             self.amp_pe[ch] = a_corr
         self.trg_pos -= dS*2
         self.trg_time_ns -= dT_ns*2
@@ -475,6 +515,8 @@ class Waveform():
             - 'user' means a user-defined list.
             - all in skip are skipped.
         """
+        if self.cfg.debug:
+            print('sum_channels')
         tot_pe = 0
         bt_pe = 0
         ir_pe = 0
@@ -488,7 +530,7 @@ class Waveform():
             if 'adc_' in ch:
                 if ch in self.cfg.skip_pmt_channels:
                     continue
-                if 'b5' in ch:
+                if 'b3' in ch:
                     continue
     
                 #print (ch)
@@ -558,10 +600,22 @@ class Waveform():
         This is the time axis after daisy chain correction
         Not often use
         """
+        if self.cfg.debug:
+            print('define_time_axis')
         n_samp = len(self.amp_pe['sum'])
         t=np.linspace(0, (n_samp-1)*SAMPLE_TO_NS, n_samp)
         self.time_axis_ns = t
         self.n_samp = n_samp
+
+        n_samp_b3 = len(self.amp_mV['adc_b3_ch1'])
+        t3=np.linspace(0, (n_samp_b3-1)*SAMPLE_TO_NS, n_samp_b3)
+        self.time_axis_ns_b3 = t3
+        self.n_samp_b3 = n_samp_b3
+
+        #if self.cfg.use_hodoscope:
+        #    self.n_samp_b3 = len(self.amp_pe['adc_b3_ch1'])
+        #else:
+        #    self.n_samp_b3 = 0
 
     def integrate_waveform(self):
         """
@@ -572,6 +626,8 @@ class Waveform():
             self.amp_pe_int[ch] = cumsum(val)*(SAMPLE_TO_NS) # adc*ns
 
     def find_ma_baseline(self):
+        if self.cfg.debug:
+            print('find_ma_baseline')
         n = self.cfg.moving_avg_length
         win = np.ones(n)
         for ch in self.ch_names:
@@ -594,6 +650,8 @@ class Waveform():
         - low, in uint of PE/ns
         - std, in unit of PE/ns and mV
         """
+        if self.cfg.debug:
+            print('calc_roi_info')
         self.roi_area_pe=[]
         self.roi_height_pe=[]
         self.roi_low_pe=[]
@@ -604,8 +662,8 @@ class Waveform():
             end= self.trg_pos + (self.cfg.roi_end_ns[i]//int(SAMPLE_TO_NS))
             start=max(0, start)
             end = min(self.n_samp-1, end)
-            start2 = 0
-            end2 = 200
+            start2 = max(0, start)
+            end2 = min(self.n_samp_b3-1, end)
             height_pe={}
             area_pe = {}
             low_pe = {}
@@ -615,7 +673,7 @@ class Waveform():
                 if ch[0:4]!='adc_':
                     continue
                 #print ("roi ch. ", ch)
-                if 'b5' in ch:
+                if 'b3' in ch:
                     height_pe[ch] = util_nb.max(a[start2:end2])
                     low_pe[ch] = util_nb.min(a[start2:end2])
                     std_pe[ch] = util_nb.std(a[start2:end2])
@@ -641,6 +699,8 @@ class Waveform():
         Reconstruct simple variables for non-signal channels (auxiliary channel)
         For example, the paddles are non-signal channels that provides auxiliary info
         """
+        if self.cfg.debug:
+            print('calc_aux_ch_info')
         self.aux_ch_area_mV={}
         for ch in self.cfg.non_signal_channels:
             a=self.amp_mV[ch]

@@ -134,10 +134,7 @@ class PulseFinder():
                 continue
             if 'sum_row' in ch:
                 continue
-            if 'sum_' in ch:
-                continue
             a = self.wfm.amp_pe[ch]
-            #print ('ch, val, a ',ch,' ',val,'    value:    ',a)
             qx = util_nb.quantile_f8(a[0:150], MY_QUANTILES)
             std = abs(qx[2]-qx[0])
             med = qx[1]
@@ -174,7 +171,6 @@ class PulseFinder():
         self.start = zeros(self.n_pulses, dtype=uint32)
         self.end = zeros(self.n_pulses, dtype=uint32)
         a = self.wfm.amp_pe['sum']
-        #print ('npulse, start, end ',self.n_pulses, ' ', self.start, ' ', self.end)
         for i in range(self.n_pulses):
             self.id[i] = i
             pk = peaks[i]
@@ -207,31 +203,22 @@ class PulseFinder():
         # pulse area, height, coincidence
         for i in self.id:
             start = self.start[i] # start of pulse i in sample
-            #end = self.end[i] # end of pulse i in sample
-            end = 0
+            end = self.end[i] # end of pulse i in sample
             area_pe = {} # integral within start to end
             height_pe = {} # pulse height within start to end
-            start_b5 = 0
-            end_b5 = 0
-            #end_b5 = min(len(self.wfm.amp_pe['adc_b5_ch1']), end)
-            #print(self.wfm.amp_pe.keys())
-            #print('i, start, end, ', i,' ',start,' ',end)
+            start_b5 = 1
+            end_b5 = 160
             for ch in self.wfm.amp_pe.keys():
                 if 'b5' in ch:
                     area_pe[ch] = a_int[end_b5]-a_int[start_b5]
                     height_pe[ch] = util_nb.max(a[start_b5:end_b5])
                 else:
                     a = self.wfm.amp_pe[ch]
-                    #print ('a ', a)
                     a_int = self.wfm.amp_pe_int[ch]
-                    #print ('a_int ', a_int)
                     #print(i,' ',ch,' ',len(a_int),' ',end,' ',start)
                     area_pe[ch] = a_int[end]-a_int[start]
                     # height_pe[ch] = np.max(a[start:end])
-                    if end == 0:
-                        height_pe[ch] = 0.0
-                    else:
-                        height_pe[ch] = util_nb.max(a[start:end])
+                    height_pe[ch] = util_nb.max(a[start:end])
             self.height_ch_pe.append(height_pe)
             self.area_ch_pe.append(area_pe)
 
@@ -252,12 +239,7 @@ class PulseFinder():
         # calcualte pulse level variables (one per pulse)
         for i in self.id:
             start = self.start[i] # start of pulse i in sample
-            #end = self.end[i] # end of pulse i in sample
-            end = 0
-            start_b5 = 0
-            end_b5 = 0
-            #end_b5 = min(len(self.wfm.amp_pe['adc_b5_ch1']), end) 
-            #print ("test ", len(self.wfm.amp_pe['adc_b5_ch1']), ' ', end)
+            end = self.end[i] # end of pulse i in sample
             a_sum = self.wfm.amp_pe['sum']
             a_sum_int = self.wfm.amp_pe_int['sum']
             a_bot = self.wfm.amp_pe['sum_bot']
@@ -385,11 +367,7 @@ class PulseFinder():
                 if ch[0:4]=='adc_':
                     a = self.wfm.amp_pe[ch]
                     a_int = self.wfm.amp_pe_int[ch]
-                    if 'b5' in ch:
-                        #print ('len ', len(self.wfm.amp_pe['adc_b5_ch1']))
-                        area = a_int[end_b5-1]-a_int[start_b5]
-                    else:
-                        area = a_int[end]-a_int[start]
+                    area = a_int[end]-a_int[start]
                     if self.height_ch_pe[i][ch]>spe_thr:
                         coin += 1
                     if area>area_max_frac:
