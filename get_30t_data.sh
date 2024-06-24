@@ -13,13 +13,12 @@
 #======================================
 # GLOBAL PARAMETERS (you don't need to change it very often)
 #DAQ_DIR=/home/rootless/ToolApplication
-#DAQ_DIR=/data/0/BNLBOX/WbLS-DATA/phase_3
-DAQ_DIR=/data/1/WbLS-DATA/phase_3
+DAQ_DIR=/home/baldoni/BNLDAQ
 GECO_DIR=/home/rootless/GECO_Logging
 #MVD_DIR=/media/disk_a/BNLBOX/WbLS-DATA
-MVD_DIR=/media/disk_e/WbLS-DATA
-DAQ_USER=rootless
-DAQ_IP=130.199.33.252
+MVD_DIR=/media/disk_e/30t-DATA
+DAQ_USER=baldoni
+DAQ_IP=130.199.82.231
 #======================================
 
 echo "Enter a run type (muon, alpha, led, geco)"
@@ -60,12 +59,12 @@ echo "Start transfering data taken on $DATE"
 
 function transfer_data() {
     if [ $RUN_TYPE != "geco" ]; then
-		output_dir=${MVD_DIR}/raw_binary/${RUN_PHASE}/${MVD_SUB_FOLDER}
-		scp -o ControlPath=bgconn ${DAQ_USER}@${DAQ_IP}:${DAQ_DIR}/*${RUN_TYPE}_*${DATE}*.bin $output_dir
-		find ${output_dir}/*${RUN_TYPE}_*${DATE}*.bin -type f > tmp.list
+		output_dir=${MVD_DIR}/raw_binary/
+		scp -o ControlPath=bgconn ${DAQ_USER}@${DAQ_IP}:${DAQ_DIR}/all_pmt_test_*${DATE}*.bin $output_dir
+		find ${output_dir}/all_pmt_test_*${DATE}*.bin -type f > tmp.list
 		if  [ $TRANSFER_TEMP -eq 1 ]; then
-			output_dir=${MVD_DIR}/temp_data/${RUN_PHASE}
-			scp -o ControlPath=bgconn ${DAQ_USER}@${DAQ_IP}:${DAQ_DIR}/*${RUN_TYPE}_*${DATE}*_temp*.txt $output_dir
+			output_dir=${MVD_DIR}/temp_data/
+			scp -o ControlPath=bgconn ${DAQ_USER}@${DAQ_IP}:${DAQ_DIR}/all_pmt_test_*${DATE}*_temp*.txt $output_dir
 		fi
   else
 		output_dir=${MVD_DIR}/db/geco
@@ -77,12 +76,12 @@ function transfer_data() {
 
 function run_rooter() {
 
-	output_dir=${MVD_DIR}/raw_root/${RUN_PHASE}/${MVD_SUB_FOLDER}/
+	output_dir=${MVD_DIR}/raw_root/
 	while read fpath; do
 	    case "$fpath" in \#*) continue ;; esac
 	    echo " "
 	    echo "processing $fpath ..."
-	    python src/raw_data_rooter_v1740.py --if_path=${fpath} --output_dir=${output_dir}
+	    python src/raw_data_rooter_30t.py --if_path=${fpath} --output_dir=${output_dir}
 	done < tmp.list
 }
 

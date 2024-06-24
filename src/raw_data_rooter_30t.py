@@ -27,12 +27,12 @@ import re
 import awkward as ak
 from os.path import splitext
 import uproot
-from caen_reader_test import RawDataFile
+from caen_reader_30t import RawDataFile
 
 #-----------------------------------
 # Global Parameters are Captialized
 #-----------------------------------
-N_BOARDS = 5
+N_BOARDS = 3
 DAQ_SOFTWARE = "ToolDaq" # the other option is LabVIEW, but we don't use LabView anymore.
 MAX_N_TRIGGERS = 999999 # Arbitary large. Larger than n_triggers in raw binary file.
 DUMP_SIZE = 3000 # number of triggers to accumulate in queue before dump
@@ -135,7 +135,7 @@ class RawDataRooter():
             for ch, val in trg.traces.items():
                 self.ch_names.add( ch )
                 self.boardId.add( int(trg.boardId) )
-                if int(trg.boardId) == 5:
+                if int(trg.boardId) == 3:
                     n_samples_v1740.add( len(val) )
                 else:
                     n_samples_v1730.add( len(val) )
@@ -204,7 +204,7 @@ class RawDataRooter():
             vars_type = {}
             for ch in ch_names:
                 b_name = 'adc_' + ch # branch name
-                if "b5" in b_name:
+                if "b3" in b_name:
                     vars_type[b_name] = ak.Array(ch_var_v1740).type
                 else:
                     vars_type[b_name] = ak.Array(ch_var_v1730).type
@@ -291,7 +291,7 @@ class RawDataRooter():
         basket = {}
         for ch in self.ch_names:
             b_name = 'adc_' + ch
-            if "b5" in b_name:
+            if "b3" in b_name:
                 basket[b_name] = zeros([n_evts, self.n_samples_v1740])
             else:
                 basket[b_name] = zeros([n_evts, self.n_samples_v1730])
