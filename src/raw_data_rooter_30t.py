@@ -27,7 +27,7 @@ import re
 import awkward as ak
 from os.path import splitext
 import uproot
-from caen_reader_30t import RawDataFile
+from caen_reader_test import RawDataFile
 
 #-----------------------------------
 # Global Parameters are Captialized
@@ -209,7 +209,10 @@ class RawDataRooter():
                 else:
                     vars_type[b_name] = ak.Array(ch_var_v1730).type
             vars_type['event_id'] = uint32
-            vars_type['event_ttt'] = uint64
+            for val in self.boardId:
+                ev_key='event_ttt_'+str(val)
+                vars_type[ev_key] = uint64
+            #vars_type['event_ttt'] = uint64
             vars_type['event_sanity'] = uint16
 
             # make tree
@@ -230,7 +233,7 @@ class RawDataRooter():
     def fill_event_queue(self, trg):
         """
         Fill event queue, one trigger at a time.
-        Add TTT to the queue as well. If N_BOARDS>1, use board 1 as event ttt.
+        Add TTT to the queue as well. Add a TTT for each board.
         event_sanity is added to flag bad events saved to binary file.
         event_sanity = 10^(boardId-1) + trigger_sanity.
 
@@ -259,8 +262,10 @@ class RawDataRooter():
 
         # add ttt to the queue
         ttt = trg.triggerTimeTag
-        if boardId == min(self.boardId):
-            self.event_queue[trg_id]['ttt']=ttt
+        #if boardId == min(self.boardId):
+            #self.event_queue[trg_id]['ttt']=ttt
+        ttt_key = 'ttt_' + str(boardId)
+        self.event_queue[trg_id][ttt_key]=ttt
         return RunStatus.NORMAL
 
 
@@ -269,7 +274,10 @@ class RawDataRooter():
         Return a set of event_id in queue that have all info filled
         """
         all_keys = self.ch_names.copy()
-        all_keys.add('ttt')
+        #all_keys.add('ttt')
+        for val in self.boardId:
+            ttt_key = 'ttt_'+str(val)
+            all_keys.add(ttt_key)
         all_keys.add('sanity')
         full_event_id = set()
         for i, ev in self.event_queue.items():
@@ -296,14 +304,21 @@ class RawDataRooter():
             else:
                 basket[b_name] = zeros([n_evts, self.n_samples_v1730])
         basket['event_id'] = zeros(n_evts, dtype=uint32)
-        basket['event_ttt'] = zeros(n_evts, dtype=uint64)
+        for val in self.boardId:
+            ev_key='event_ttt_'+str(val)
+            basket[ev_key] = zeros(n_evts, dtype=uint64)
+        #basket['event_ttt'] = zeros(n_evts, dtype=uint64)
         basket['event_sanity'] = zeros(n_evts, dtype=uint16)
 
         # fill basket
         for i, ID in enumerate(id_set):
             ev = self.event_queue[ID]
             basket['event_id'][i]=ID
-            basket['event_ttt'][i]=ev['ttt']
+            for val in self.boardId:
+                ttt_key = 'ttt_'+str(val)
+                ev_key = 'event_ttt_'+str(val)
+                basket[ev_key][i]=ev[ttt_key]
+            #basket['event_ttt'][i]=ev['ttt']
             basket['event_sanity'][i]=ev['sanity']
             for ch in self.ch_names:
                 b_name = 'adc_' + ch
