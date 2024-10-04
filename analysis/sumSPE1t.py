@@ -47,7 +47,7 @@ speHistograms={}
 speHistogramsUnused={} #misnomer. we don't use them for fitting
 groupSumHistograms={}
 
-skip=['adc_b3_ch7']
+skip=[]
 
 channels=[channel for channel in dataChannelNamesSorted if not channel in skip]
 
