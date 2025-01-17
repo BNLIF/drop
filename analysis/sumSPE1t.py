@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 import os
 
-directory='/media/disk_d/WbLS-DATA/raw_root/phase3/muon/'
+directory='/media/disk_a/WbLS-DATA/raw_root/phase3/muon/'
 date=sys.argv[1]
 dateString=datetime.strptime(date,'%y%m%d').strftime('%d %b %Y')
 allRootFiles=os.listdir(directory)
@@ -320,6 +320,6 @@ for n,group in enumerate(['all','upper','lower','middle','bottom']):
 
 df.to_csv(csvOutputFile)
 plt.tight_layout()
-plt.savefig('ly_diagnostics/'+date+'LYplot.png',format='png')
+plt.savefig(output_directory+date+'LYplot.png',format='png')
 print('done with {}'.format(dateString))
 exit(1)
