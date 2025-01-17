@@ -5,14 +5,14 @@ import sys
 from datetime import datetime
 import os
 
-directory='/media/disk_g/WbLS-DATA/raw_root/phase3/muon/'
+directory='/media/disk_d/WbLS-DATA/raw_root/phase3/muon/'
 date=sys.argv[1]
 dateString=datetime.strptime(date,'%y%m%d').strftime('%d %b %Y')
 allRootFiles=os.listdir(directory)
 inFiles=list(filter(lambda file: date in file,allRootFiles))
 
 if not inFiles:
-    directory='/media/disk_f/WbLS-DATA/raw_root/phase3/muon/'
+    directory='/media/disk_b/WbLS-DATA/raw_root/phase3/muon/'
     allRootFiles=os.listdir(directory)
     inFiles=list(filter(lambda file: date in file,allRootFiles))
     if not inFiles:
