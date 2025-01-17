@@ -228,7 +228,9 @@ for n,channel in enumerate(channels):
     plt.yscale('log')
     
 plt.tight_layout()
-plt.savefig('diagnostics/1t/'+date+'diagnosticplot.png')
+output_directory = '/home/darik/plots/'
+os.makedirs(output_directory, exist_ok=True)
+plt.savefig(output_directory +date+'diagnosticplot.png')
 
 import pandas as pd
 
