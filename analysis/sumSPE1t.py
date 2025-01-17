@@ -5,14 +5,14 @@ import sys
 from datetime import datetime
 import os
 
-directory='/media/disk_a/WbLS-DATA/raw_root/phase3/muon/'
+directory='/media/disk_c/WbLS-DATA/raw_root/phase3/muon/'
 date=sys.argv[1]
 dateString=datetime.strptime(date,'%y%m%d').strftime('%d %b %Y')
 allRootFiles=os.listdir(directory)
 inFiles=list(filter(lambda file: date in file,allRootFiles))
 
 if not inFiles:
-    directory='/media/disk_b/WbLS-DATA/raw_root/phase3/muon/'
+    directory='/media/disk_d/WbLS-DATA/raw_root/phase3/muon/'
     allRootFiles=os.listdir(directory)
     inFiles=list(filter(lambda file: date in file,allRootFiles))
     if not inFiles:
@@ -230,7 +230,7 @@ for n,channel in enumerate(channels):
 plt.tight_layout()
 output_directory = '/home/darik/plots/'
 os.makedirs(output_directory, exist_ok=True)
-plt.savefig(output_directory +date+'diagnosticplot.png')
+plt.savefig(output_directory + date+'diagnosticplot.png')
 
 import pandas as pd
 
