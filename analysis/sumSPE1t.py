@@ -234,11 +234,11 @@ plt.savefig(output_directory + date+'diagnosticplot.png')
 
 import pandas as pd
 
-pd.DataFrame(results).transpose().to_csv('/media/disk_e/WbLS-DATA/csv/phase3/bnl1t_spe_fit_results_'+date+'.csv',index=False)
+pd.DataFrame(results).transpose().to_csv('/media/disk_i/WbLS-DATA/csv/phase7/bnl1t_spe_fit_results_'+date+'.csv',index=False)
 
 #file to output group histogram fit data
 
-csvOutputFile='sumSPE_phase3.csv'
+csvOutputFile='sumSPE_phase7.csv'
 try:
     df=pd.read_csv(csvOutputFile,header=[0,1],index_col=0)
 except FileNotFoundError:
