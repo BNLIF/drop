@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 import os
 
-directory='/media/disk_i/WbLS-DATA/raw_root/phase7/muon'
+directory='/media/disk_i/WbLS-DATA/raw_root/phase7/muon/'
 date=sys.argv[1]
 dateString=datetime.strptime(date,'%y%m%d').strftime('%d %b %Y')
 allRootFiles=os.listdir(directory)
