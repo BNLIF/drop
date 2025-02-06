@@ -234,7 +234,7 @@ plt.savefig(output_directory + date+'diagnosticplot.png')
 
 import pandas as pd
 
-pd.DataFrame(results).transpose().to_csv('/media/disk_c/WbLS-DATA/csv/phase6/bnl1t_spe_fit_results_'+date+'.csv',index=False)
+pd.DataFrame(results).transpose().to_csv('/media/disk_a/WbLS-DATA/csv/phase6/bnl1t_spe_fit_results_'+date+'.csv',index=False)
 
 #file to output group histogram fit data
 
