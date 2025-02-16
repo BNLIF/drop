@@ -308,9 +308,9 @@ for n,group in enumerate(['all','upper','lower','middle','bottom']):
 
     #hist995=np.sort(total)[math.floor(0.995*len(total))]
     #hist990=np.sort(total)[math.floor(0.99*len(total))]
-    df.at[date,(group,'mean')]=popt[0]
-    df.at[date,(group,'max')]=hist999
-    df.at[date,(group,'meanErr')]=meanErr
+    df.loc[date,(group,'mean')]=popt[0]
+    df.loc[date,(group,'max')]=hist999
+    df.loc[date,(group,'meanErr')]=meanErr
 
     #plot fitted data
     a=np.linspace(poptInit[0]-(histRange/8),poptInit[0]+(histRange/8),350)
