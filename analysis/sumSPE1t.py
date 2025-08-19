@@ -5,14 +5,14 @@ import sys
 from datetime import datetime
 import os
 
-directory='/media/disk_e/WbLS-DATA/raw_root/phase3/muon/'
+directory='/media/disk_a/WbLS-DATA/raw_root/phase6/muon/'
 date=sys.argv[1]
 dateString=datetime.strptime(date,'%y%m%d').strftime('%d %b %Y')
 allRootFiles=os.listdir(directory)
 inFiles=list(filter(lambda file: date in file,allRootFiles))
 
 if not inFiles:
-    directory='/media/disk_c/WbLS-DATA/raw_root/phase3/muon/'
+    directory='/media/disk_a/WbLS-DATA/raw_root/phase7/muon/'
     allRootFiles=os.listdir(directory)
     inFiles=list(filter(lambda file: date in file,allRootFiles))
     if not inFiles:
@@ -228,15 +228,17 @@ for n,channel in enumerate(channels):
     plt.yscale('log')
     
 plt.tight_layout()
-plt.savefig('diagnostics/1t/'+date+'diagnosticplot.png')
+output_directory = '/home/darik/plots/'
+os.makedirs(output_directory, exist_ok=True)
+plt.savefig(output_directory + date+'diagnosticplot.png')
 
 import pandas as pd
 
-pd.DataFrame(results).transpose().to_csv('/media/disk_e/WbLS-DATA/csv/phase3/bnl1t_spe_fit_results_'+date+'.csv',index=False)
+pd.DataFrame(results).transpose().to_csv('/media/disk_a/WbLS-DATA/csv/phase6/bnl1t_spe_fit_results_'+date+'.csv',index=False)
 
 #file to output group histogram fit data
 
-csvOutputFile='sumSPE_phase3.csv'
+csvOutputFile='sumSPE_phase6.csv'
 try:
     df=pd.read_csv(csvOutputFile,header=[0,1],index_col=0)
 except FileNotFoundError:
@@ -306,9 +308,9 @@ for n,group in enumerate(['all','upper','lower','middle','bottom']):
 
     #hist995=np.sort(total)[math.floor(0.995*len(total))]
     #hist990=np.sort(total)[math.floor(0.99*len(total))]
-    df.at[date,(group,'mean')]=popt[0]
-    df.at[date,(group,'max')]=hist999
-    df.at[date,(group,'meanErr')]=meanErr
+    df.loc[date,(group,'mean')]=popt[0]
+    df.loc[date,(group,'max')]=hist999
+    df.loc[date,(group,'meanErr')]=meanErr
 
     #plot fitted data
     a=np.linspace(poptInit[0]-(histRange/8),poptInit[0]+(histRange/8),350)
@@ -318,6 +320,6 @@ for n,group in enumerate(['all','upper','lower','middle','bottom']):
 
 df.to_csv(csvOutputFile)
 plt.tight_layout()
-plt.savefig('ly_diagnostics/'+date+'LYplot.png',format='png')
+plt.savefig(output_directory+date+'LYplot.png',format='png')
 print('done with {}'.format(dateString))
 exit(1)
